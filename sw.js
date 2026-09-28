@@ -1,8 +1,11 @@
-const CACHE_NAME = "jpverbs-cache-v2";
+const CACHE_NAME = "jpverbs-cache-v5";
 const APP_SHELL = [
   "./verbos-jp-atualizado.html",
   "./manifest.json",
-  "./icon.svg"
+  "./verbs-data.js",
+  "./icons/japan.png",
+  "./fonts/GoogleSans-Regular.ttf",
+  "./fonts/GoogleSans-Bold.ttf"
 ];
 
 self.addEventListener("install", (event) => {

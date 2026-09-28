@@ -5,11 +5,10 @@
   "start_url": "./verbos-jp-atualizado.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f7f5f2",
-  "theme_color": "#c0392b",
+  "background_color": "#f8f7fb",
+  "theme_color": "#6b47ea",
   "lang": "pt-BR",
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    { "src": "icons/japan.png", "sizes": "128x128", "type": "image/png", "purpose": "any" }
   ]
 }
