@@ -1,9 +1,10 @@
-const CACHE_NAME = "jpadj-cache-v3";
+const CACHE_NAME = "jpadj-cache-v4";
 const APP_SHELL = [
   "./adjetivos.html",
   "./manifest.json",
   "./data.js",
   "../icons/japan.png",
+  "../icons/japan-192.png",
   "../fonts/GoogleSans-Regular.ttf",
   "../fonts/GoogleSans-Bold.ttf"
 ];

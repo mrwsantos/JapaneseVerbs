@@ -1,9 +1,10 @@
-const CACHE_NAME = "jpverbs-cache-v7";
+const CACHE_NAME = "jpverbs-cache-v8";
 const APP_SHELL = [
   "./verbos-jp-atualizado.html",
   "./manifest.json",
   "./verbs-data.js",
   "./icons/japan.png",
+  "./icons/japan-192.png",
   "./fonts/GoogleSans-Regular.ttf",
   "./fonts/GoogleSans-Bold.ttf"
 ];
