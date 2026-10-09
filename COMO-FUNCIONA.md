@@ -45,10 +45,11 @@ Praticando (acerta hoje → nível 1, volta amanhã → acerta → nível 2).
 A rodada do dia é: **revisões vencidas** + **palavras novas até o limite diário**.
 
 - **Sabia** → sobe um nível e a palavra só volta depois do intervalo.
-- **Praticar mais** → volta ao nível 0 e **reaparece 3 cards depois, na mesma
-  rodada**, até você acertar.
-- **✓ Já sei essa** (só em palavras novas) → vai direto para **Aprendido** e só
-  volta na revisão de 14 dias. Se errar nessa revisão, recomeça do zero. Não
+- **Praticar mais** → volta ao nível 0 e **volta no fim da rodada** (depois das
+  outras palavras do dia), até você acertar.
+- **✓ Já sei essa** (em qualquer palavra ainda em Novo, mesmo depois de errar)
+  → vai direto para **Aprendido** e só volta na revisão de 14 dias. Se errar
+  nessa revisão, recomeça do zero. Se a palavra nunca tinha sido respondida, não
   gasta o limite do dia: outra palavra nova entra no lugar.
 - **Novas por dia**: 10, 20 (padrão), 30, 50 ou sem limite. O limite vale para
   verbos e adjetivos, mas cada um conta as suas novas separadamente.

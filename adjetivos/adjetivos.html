@@ -411,18 +411,24 @@ function answer(correct){
   e.due = state.testMode ? today() : today() + INTERVALS[e.level];
   saveProgress(progress); state.idx++; state.revealed = false;
   if(state.testMode) state.queue.push(v);
-  // Errou: volta alguns cards depois, na mesma rodada, até acertar.
-  else if(!correct) state.queue.splice(Math.min(state.idx+3, state.queue.length), 0, v);
+  // Errou: volta para o fim da rodada, depois das outras palavras, até acertar.
+  // (Inserir logo adiante fazia os mesmos poucos cards girarem e as novas não chegarem.)
+  else if(!correct) state.queue.push(v);
   render();
 }
-// "Já sei": palavra nova que já domino vai direto para Aprendido e só volta na
-// revisão de 14 dias. Não gasta o limite de novas; outra nova entra no lugar.
+// "Já sei": palavra ainda em Novo que já domino vai direto para Aprendido e só
+// volta na revisão de 14 dias. Se nunca tinha sido respondida, não gasta o
+// limite de novas: outra nova entra no lugar.
 function knowIt(){
   const v = state.queue[state.idx]; const e = getEntry(v.id);
+  const wasUnseen = e.due===0;
   e.level = 4; e.due = today() + INTERVALS[4];
   saveProgress(progress); state.idx++; state.revealed = false;
-  const next = cardPool().find(w=> isNew(w) && !state.queue.includes(w));
-  if(next) state.queue.push(next);
+  state.queue = state.queue.filter((w,i)=> i < state.idx || w.id!==v.id);
+  if(wasUnseen){
+    const next = cardPool().find(w=> isNew(w) && !state.queue.includes(w));
+    if(next) state.queue.push(next);
+  }
   render();
 }
 function toggleTestMode(){ state.testMode = !state.testMode; render(); }
@@ -504,7 +510,7 @@ function render(){
           <div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div>
           ${state.revealed ? `<div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>` : `<div class="hint">Toque para ver a resposta</div>`}
         </${cardTag}>
-        ${isNew(v) ? `<button type="button" class="know-btn" onclick="knowIt()">✓ Já sei essa — marcar como aprendida</button>` : ''}
+        ${getStatus(v)==='novo' ? `<button type="button" class="know-btn" onclick="knowIt()">✓ Já sei essa — marcar como aprendida</button>` : ''}
         ${state.revealed ? `<div class="actions"><button class="btn no" onclick="answer(false)">Praticar mais</button><button class="btn yes" onclick="answer(true)">Sabia</button></div>` : ``}`;
       if(!state.revealed) document.getElementById("card").onclick = ()=>{ state.revealed=true; render(); };
 
