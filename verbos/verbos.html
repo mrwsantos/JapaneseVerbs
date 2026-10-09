@@ -126,6 +126,10 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .result-ok{color:#1f5c38;font-weight:700;display:inline-block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
 .result-no{color:#8a2c20;font-weight:700;display:inline-block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
 .empty{text-align:center;color:var(--sub);padding:40px 10px}
+.newlimit{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--sub);margin:-6px 0 10px}
+.newlimit select{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:3px 6px}
+.know-btn{display:block;margin:12px auto 0;padding:8px 14px;border-radius:20px;border:1px solid var(--border);color:var(--sub);font-size:13px;font-weight:600}
+.know-btn:hover{background:var(--chip);color:var(--text)}
 .list-item{display:block;width:100%;text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);font-size:14px;animation:fadeIn .3s ease both}
 .group-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s cubic-bezier(.4,0,.2,1)}
 .group-body.collapsed{grid-template-rows:0fr}
@@ -399,11 +403,32 @@ function toggleFilter(kind){
   render();
 }
 
+// ===== Palavras novas por dia =====
+// Limite compartilhado entre verbos e adjetivos; o contador de novas vistas
+// hoje é de cada app. "Nova" = nunca respondida (due 0).
+const NEW_LIMIT_KEY = "jp-new-limit";
+const NEW_LIMIT_OPTIONS = [10,20,30,50,0]; // 0 = sem limite
+const NEW_TODAY_KEY = "jpverbs-new-today";
+function loadNewLimit(){ try{ const n = parseInt(localStorage.getItem(NEW_LIMIT_KEY),10); return NEW_LIMIT_OPTIONS.includes(n) ? n : 20; }catch(e){ return 20; } }
+let newLimit = loadNewLimit();
+function setNewLimit(n){ newLimit = n; try{ localStorage.setItem(NEW_LIMIT_KEY, String(n)); }catch(e){} buildQueue(); render(); }
+function loadNewToday(){ try{ const d = JSON.parse(localStorage.getItem(NEW_TODAY_KEY)); if(d && d.day===today()) return d; }catch(e){} return {day:today(), count:0, extra:0}; }
+let newToday = loadNewToday();
+function touchNewToday(){ if(newToday.day!==today()) newToday = {day:today(), count:0, extra:0}; return newToday; }
+function saveNewToday(){ try{ localStorage.setItem(NEW_TODAY_KEY, JSON.stringify(newToday)); }catch(e){} }
+function isNew(v){ const e = progress[v.id]; return !e || e.due===0; }
+function newSlotsLeft(){ const d = touchNewToday(); return newLimit===0 ? Infinity : Math.max(0, newLimit + d.extra - d.count); }
+function moreNew(){ touchNewToday().extra += 10; saveNewToday(); buildQueue(); render(); }
+function cardPool(){ return state.cardGroupFilter==='all' ? VERBS : VERBS.filter(v=>v.group===state.cardGroupFilter); }
+
 function buildQueue(){
   const t = today();
   if(state.mode==="cards"){
-    const pool = state.cardGroupFilter==='all' ? VERBS : VERBS.filter(v=>v.group===state.cardGroupFilter);
-    state.queue = pool.filter(v=> getEntry(v.id).due <= t).sort((a,b)=> getEntry(a.id).due - getEntry(b.id).due);
+    // Revisões vencidas primeiro, depois as novas até o limite do dia.
+    const pool = cardPool();
+    const reviews = pool.filter(v=> !isNew(v) && getEntry(v.id).due <= t).sort((a,b)=> getEntry(a.id).due - getEntry(b.id).due);
+    const news = pool.filter(isNew).slice(0, newSlotsLeft());
+    state.queue = reviews.concat(news);
   } else {
     state.queue = VERBS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }).sort(()=>Math.random()-0.5);
   }
@@ -413,10 +438,23 @@ function setCardGroupFilter(g){ state.cardGroupFilter = g; buildQueue(); render(
 
 function answer(correct){
   const v = state.queue[state.idx]; const e = getEntry(v.id);
+  if(e.due===0){ touchNewToday().count++; saveNewToday(); }
   e.level = correct ? Math.min(e.level+1, INTERVALS.length-1) : 0;
   e.due = state.testMode ? today() : today() + INTERVALS[e.level];
   saveProgress(progress); state.idx++; state.revealed = false;
   if(state.testMode) state.queue.push(v);
+  // Errou: volta alguns cards depois, na mesma rodada, até acertar.
+  else if(!correct) state.queue.splice(Math.min(state.idx+3, state.queue.length), 0, v);
+  render();
+}
+// "Já sei": palavra nova que já domino vai direto para Aprendido e só volta na
+// revisão de 14 dias. Não gasta o limite de novas; outra nova entra no lugar.
+function knowIt(){
+  const v = state.queue[state.idx]; const e = getEntry(v.id);
+  e.level = 4; e.due = today() + INTERVALS[4]; e.fraseHits = 2;
+  saveProgress(progress); state.idx++; state.revealed = false;
+  const next = cardPool().find(w=> isNew(w) && !state.queue.includes(w));
+  if(next) state.queue.push(next);
   render();
 }
 function toggleTestMode(){ state.testMode = !state.testMode; render(); }
@@ -487,16 +525,26 @@ function render(){
         <button type="button" class="pill ${state.cardGroupFilter===2?'active':''}" aria-pressed="${state.cardGroupFilter===2}" onclick="setCardGroupFilter(2)">Grupo 2</button>
         <button type="button" class="pill ${state.cardGroupFilter===3?'active':''}" aria-pressed="${state.cardGroupFilter===3}" onclick="setCardGroupFilter(3)">Grupo 3</button>
       </div>`;
-      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + testToggleHtml + groupFilterHtml + `<div class="empty">🎉 Nada pendente agora.<br>Volte mais tarde ou revise as listas.</div>`; return; }
+      const nt = touchNewToday();
+      const newLimitHtml = `<div class="newlimit">Novas hoje: ${nt.count}${newLimit ? '/' + (newLimit + nt.extra) : ''} · por dia:
+        <select aria-label="Palavras novas por dia" onchange="setNewLimit(+this.value)">${NEW_LIMIT_OPTIONS.map(n=>`<option value="${n}" ${n===newLimit?'selected':''}>${n||'sem limite'}</option>`).join('')}</select></div>`;
+      if(state.idx >= state.queue.length){
+        const newLeft = cardPool().filter(isNew).length;
+        const doneHtml = newLeft>0 && newSlotsLeft()===0
+          ? `<div class="empty">🎉 Rodada de hoje concluída!<br>Ainda faltam ${newLeft} verbos novos — quer mais?</div><button type="button" class="know-btn" onclick="moreNew()">+10 novas</button>`
+          : `<div class="empty">🎉 Nada pendente agora.<br>Volte mais tarde ou revise as listas.</div>`;
+        main.innerHTML = statsHtml + newLimitHtml + testToggleHtml + groupFilterHtml + doneHtml; return;
+      }
       const v = state.queue[state.idx];
       const cardTag = state.revealed ? 'div' : 'button';
       const cardAttrs = state.revealed ? 'class="card nohand" id="card"' : 'type="button" class="card" id="card"';
-      main.innerHTML = statsHtml + testToggleHtml + groupFilterHtml + `
+      main.innerHTML = statsHtml + newLimitHtml + testToggleHtml + groupFilterHtml + `
         <${cardTag} ${cardAttrs}>
           <div class="tag-row"><span class="group-tag">${GROUP_NAME[v.group]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>
           <div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div>
           ${state.revealed ? `<div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>` : `<div class="hint">Toque para ver a resposta</div>`}
         </${cardTag}>
+        ${isNew(v) ? `<button type="button" class="know-btn" onclick="knowIt()">✓ Já sei essa — marcar como aprendida</button>` : ''}
         ${state.revealed ? `<div class="actions"><button class="btn no" onclick="answer(false)">Praticar mais</button><button class="btn yes" onclick="answer(true)">Sabia</button></div>` : ``}`;
       if(!state.revealed) document.getElementById("card").onclick = ()=>{ state.revealed=true; render(); };
 
