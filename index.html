@@ -15,7 +15,7 @@
 <script>
 // Abre direto o último modo usado, a não ser que a tela inicial tenha sido
 // pedida explicitamente (botão ⌂ → index.html?home).
-const APPS = { verbos: "verbos-jp-atualizado.html", adjetivos: "adjetivos/adjetivos.html" };
+const APPS = { verbos: "verbos/verbos.html", adjetivos: "adjetivos/adjetivos.html" };
 (function(){
   if(new URLSearchParams(location.search).has("home")) return;
   let last = null;
@@ -68,7 +68,7 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
     <h1>Japonês SRS</h1>
     <p>O que você quer estudar?</p>
   </div>
-  <a class="choice verbos" href="verbos-jp-atualizado.html">
+  <a class="choice verbos" href="verbos/verbos.html">
     <img src="icons/verbos-192.png" alt="">
     <div><b>動詞 · Verbos</b><span>Conjugação, frases e escrita</span></div>
     <div class="arrow">›</div>

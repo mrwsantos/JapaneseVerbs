@@ -1,12 +1,12 @@
-const CACHE_NAME = "jp-srs-cache-v1";
+const CACHE_NAME = "jp-srs-cache-v2";
 // Caches deste app (inclui os nomes antigos de quando verbos e adjetivos eram
 // apps separados), para limpar versões velhas sem tocar em caches de terceiros.
 const OWN_CACHE_PREFIXES = ["jp-srs-", "jpverbs-", "jpadj-"];
 const APP_SHELL = [
   "./index.html",
   "./manifest.json",
-  "./verbos-jp-atualizado.html",
-  "./verbs-data.js",
+  "./verbos/verbos.html",
+  "./verbos/data.js",
   "./adjetivos/adjetivos.html",
   "./adjetivos/data.js",
   "./icons/japan.png",
