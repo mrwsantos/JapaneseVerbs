@@ -18,7 +18,9 @@ icons/, fonts/
 - O app lembra o último modo aberto e o tema (claro/escuro/automático).
 - Todo o progresso fica salvo **no navegador do aparelho** (`localStorage`).
   Desinstalar o app ou limpar os dados do site apaga o progresso — use
-  **⬇ Exportar progresso** (aba "Todos os verbos") para ter um backup.
+  **⬇ Exportar progresso** para ter um backup. Fica no fim das abas "Todos os
+  verbos" e "Todos os Adjetivos" — um arquivo por modo, e o app não deixa
+  importar o backup de um modo no outro.
 
 ## Níveis e intervalos
 

@@ -765,7 +765,8 @@ function resetProgress(){ if(confirm("Zerar todo o progresso salvo?")){ progress
 
 function exportProgress(){
   try{
-    const data = JSON.stringify(progress, null, 2);
+    // Marca o app no arquivo para não importar o backup de um app no outro.
+    const data = JSON.stringify({app:"verbos", progress}, null, 2);
     const blob = new Blob([data], {type:'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -781,7 +782,12 @@ function importProgress(file){
     try{
       const data = JSON.parse(reader.result);
       if(typeof data !== 'object' || data===null || Array.isArray(data)) throw new Error('formato inválido');
-      progress = data;
+      if(data.app && data.app !== "verbos"){ alert('Esse arquivo é o progresso de '+data.app+'. Importe ele no modo '+data.app+'.'); return; }
+      // Backups antigos eram só o objeto de progresso, sem o campo "app".
+      const imported = data.app ? data.progress : data;
+      if(typeof imported !== 'object' || imported===null || Array.isArray(imported)) throw new Error('formato inválido');
+      if(!confirm('Substituir o progresso atual de verbos pelo do arquivo?')) return;
+      progress = imported;
       saveProgress(progress);
       buildQueue();
       render();
