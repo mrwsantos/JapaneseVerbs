@@ -63,7 +63,7 @@ h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.01em;display:flex;ali
 .modes{display:flex;gap:6px;padding:0 16px 10px;max-width:480px;margin:0 auto;width:100%}
 .mode{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;text-align:center;padding:8px 4px;border-radius:20px;border:1px solid var(--border);color:var(--sub);font-size:12px;font-weight:600}
 .mode.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
-main{flex:1;padding:8px 16px 24px;max-width:480px;margin:0 auto;width:100%}
+main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-width:480px;margin:0 auto;width:100%}
 .stats{display:flex;justify-content:space-around;margin:6px 0 16px;font-size:12px;color:var(--sub)}
 .stats b{color:var(--text);font-size:16px;display:block}
 .card{background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:20px;padding:32px 20px;text-align:center;min-height:180px;display:flex;flex-direction:column;justify-content:center;gap:8px;cursor:pointer;width:100%;animation:fadeInUp .3s cubic-bezier(.16,1,.3,1)}
@@ -78,8 +78,8 @@ main{flex:1;padding:8px 16px 24px;max-width:480px;margin:0 auto;width:100%}
 .romaji{font-size:15px;color:var(--sub)}
 .meaning{font-size:19px;font-weight:600;margin-top:4px}
 .hint{font-size:12px;color:var(--sub);margin-top:14px}
-.actions{display:flex;gap:10px;margin-top:16px}
-.btn{flex:1;padding:14px 0;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
+.actions{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;max-width:480px;margin:0 auto;padding:0 16px;box-sizing:border-box;z-index:10}
+.btn{flex:1;padding:14px 0;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
 .btn.no{background:#f5d6d2;color:#8a2c20}
 .btn.yes{background:#d3ecdc;color:#1f5c38}
 .btn.next{background:var(--chip);color:var(--text)}
@@ -176,7 +176,7 @@ main{flex:1;padding:8px 16px 24px;max-width:480px;margin:0 auto;width:100%}
 </header>
 <div class="tabs" role="tablist">
   <button type="button" class="tab active" role="tab" aria-selected="true" data-tab="study">Estudar</button>
-  <button type="button" class="tab" role="tab" aria-selected="false" data-tab="all">Verbos</button>
+  <button type="button" class="tab" role="tab" aria-selected="false" data-tab="all">Todos os verbos</button>
   <button type="button" class="tab" role="tab" aria-selected="false" data-tab="learning">Praticando</button>
   <button type="button" class="tab" role="tab" aria-selected="false" data-tab="learned">Aprendidos</button>
 </div>
@@ -329,6 +329,35 @@ function kanaToRomaji(str){
 
 function normRomaji(s){ return s.toLowerCase().trim().replace(/\s+/g,""); }
 
+// Aceitar respostas em hiragana, katakana ou kanji além de romaji.
+function katakanaToHiragana(s){ return s.replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60)); }
+function kanjiOkuriganaLen(v){
+  let n = 0;
+  for(let i=v.kanji.length-1; i>=0; i--){
+    const code = v.kanji.charCodeAt(i);
+    if(code>=0x3041 && code<=0x3096) n++; else break;
+  }
+  return n;
+}
+function kanjiFormFor(v, kanaForm){
+  if(v.kana==="くる") return "来"+kanaForm.slice(1);
+  if(v.kanji===v.kana) return kanaForm;
+  const n = kanjiOkuriganaLen(v);
+  const kanaRoot = v.kana.slice(0, v.kana.length-n);
+  const kanjiRoot = v.kanji.slice(0, v.kanji.length-n);
+  if(kanaForm.startsWith(kanaRoot)) return kanjiRoot + kanaForm.slice(kanaRoot.length);
+  return kanaForm;
+}
+function matchesWrittenAnswer(rawInput, targetKana, targetRomaji, targetKanji){
+  const input = rawInput.trim();
+  if(!input) return false;
+  if(normRomaji(input) === normRomaji(targetRomaji)) return true;
+  const inputAsHiragana = katakanaToHiragana(input);
+  if(inputAsHiragana === targetKana) return true;
+  if(input === targetKanji) return true;
+  return false;
+}
+
 let state = {tab:"study", mode:"cards", queue:[], idx:0, revealed:false, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
   search:'', groupExpanded:{1:false,2:false,3:false}, showGroupInfo:false,
@@ -415,9 +444,11 @@ function checkWrite(){
   const key = targetKey(eff);
   const targetKana = conjugate(v)[key];
   const targetRomaji = kanaToRomaji(targetKana);
-  state.writeOk = normRomaji(input) === normRomaji(targetRomaji);
+  const targetKanji = kanjiFormFor(v, targetKana);
+  state.writeOk = matchesWrittenAnswer(input, targetKana, targetRomaji, targetKanji);
   state.writeTargetKana = targetKana;
   state.writeTargetRomaji = targetRomaji;
+  state.writeTargetKanji = targetKanji;
   state.writeChecked = true; render();
 }
 function writeNext(correct){
@@ -495,7 +526,7 @@ function render(){
 
     } else { // escrita
       if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
-      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + `<div class="empty">🎉 Fim da rodada de escrita.</div><div class="actions" style="margin-top:12px"><button class="btn yes" onclick="buildQueue();render();">🔁 Praticar de novo</button></div>`; return; }
+      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + `<div class="empty">🎉 Fim da rodada de escrita.</div><div class="actions"><button class="btn yes" onclick="buildQueue();render();">🔁 Praticar de novo</button></div>`; return; }
       const v = state.queue[state.idx];
       const f = state.writeFilter;
       const pillsHtml = `<div class="pillrow">
@@ -521,7 +552,7 @@ function render(){
             <div class="meaning-big">${ptPhrase}</div>
             <div class="subtle">(${v.meaning})</div>
             ${tagsHtml}
-            <input class="write-input" id="writeInput" placeholder="escreva em romaji" autocapitalize="off" autocomplete="off">
+            <input class="write-input" id="writeInput" placeholder="romaji, hiragana, katakana ou kanji" autocapitalize="off" autocomplete="off">
           </div>
           <div class="actions"><button class="btn yes" onclick="checkWrite()">Conferir</button></div>`;
         const inp = document.getElementById("writeInput");
@@ -536,7 +567,7 @@ function render(){
             ${tagsHtml}
             <div class="answer">
               <div class="${state.writeOk?'result-ok':'result-no'}">${state.writeOk? '✓ Certo!' : '✗ Não foi dessa vez'}</div>
-              <div class="kana" style="margin-top:8px;font-size:20px">${state.writeTargetKana}</div>
+              <div class="kana" style="margin-top:8px;font-size:20px">${state.writeTargetKanji!==state.writeTargetKana ? state.writeTargetKanji+' · ' : ''}${state.writeTargetKana}</div>
               <div class="romaji">${state.writeTargetRomaji}</div>
               <div class="tags" style="margin-top:6px">dicionário: ${v.kanji} (${v.kana})</div>
             </div>

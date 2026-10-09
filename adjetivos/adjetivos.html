@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>形容詞 SRS — Adjetivos Japoneses</title>
+<meta name="theme-color" content="#ea6b47">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="形容詞 SRS">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="../icons/japan.png" type="image/png">
+<link rel="apple-touch-icon" href="../icons/japan.png">
+<style>
+:root{
+  --bg:#f8f7fb; --card:#ffffff; --text:#1c1a24; --sub:#6c6879;
+  --accent:#ea6b47; --accent2:#f2935a; --border:#e4e1ec; --chip:#efedf7;
+  --shadow:0 1px 2px rgba(30,20,60,.04), 0 8px 24px rgba(30,20,60,.06);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#ff9472; --accent2:#ffb37a; --border:#37334a; --chip:#2a2736; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); } }
+:root[data-theme="dark"]{ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#ff9472; --accent2:#ffb37a; --border:#37334a; --chip:#2a2736; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+@font-face{font-family:"Google Sans";src:url('../fonts/GoogleSans-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:"Google Sans";src:url('../fonts/GoogleSans-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+body{background:var(--bg);color:var(--text);font-family:"Google Sans",-apple-system,"Hiragino Sans",sans-serif;display:flex;flex-direction:column;min-height:100%;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+button,.pill,.tab,.mode{transition:background-color .15s ease,color .15s ease,border-color .15s ease,transform .18s cubic-bezier(.34,1.56,.64,1)}
+button:active,.pill:active,.tab:active,.mode:active{transform:scale(.96);transition-duration:.08s}
+body,.card,.list-item,.modal,header,.write-input,.search-input,.badge{transition:background-color .25s ease,color .25s ease,border-color .25s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.88)}65%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+}
+header{position:relative;padding:16px 16px calc(12px + env(safe-area-inset-top,0px));text-align:center;border-bottom:1px solid var(--border)}
+h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:7px}
+.logo-icon{width:20px;height:20px;border-radius:5px;vertical-align:-5px}
+:root[data-theme="dark"] .logo-icon{filter:invert(1) hue-rotate(180deg)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .logo-icon{filter:invert(1) hue-rotate(180deg)}}
+.theme-btn{position:absolute;right:14px;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px}
+.theme-btn:hover{background:var(--chip)}
+.tabs{display:flex;gap:6px;padding:12px 12px;overflow-x:auto; min-height: 60px;}
+.tab{flex:1;text-align:center;padding:9px 6px;border-radius:10px;background:var(--chip);color:var(--sub);font-size:13px;font-weight:600;white-space:nowrap}
+.tab.active{background:var(--accent);color:#fff}
+.modes{display:flex;gap:6px;padding:0 16px 10px;max-width:480px;margin:0 auto;width:100%}
+.mode{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;text-align:center;padding:8px 4px;border-radius:20px;border:1px solid var(--border);color:var(--sub);font-size:12px;font-weight:600}
+.mode.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-width:480px;margin:0 auto;width:100%}
+.stats{display:flex;justify-content:space-around;margin:6px 0 16px;font-size:12px;color:var(--sub)}
+.stats b{color:var(--text);font-size:16px;display:block}
+.card{background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:20px;padding:32px 20px;text-align:center;min-height:180px;display:flex;flex-direction:column;justify-content:center;gap:8px;cursor:pointer;width:100%;animation:fadeInUp .3s cubic-bezier(.16,1,.3,1)}
+.card.nohand{cursor:default}
+.group-tag{display:inline-block;font-size:11px;color:var(--sub);background:var(--chip);padding:2px 8px;border-radius:20px}
+.tag-row{display:flex;justify-content:center;align-items:center;gap:6px;margin:0 auto 6px}
+.kanji{font-size:34px;font-weight:600}
+.kana{font-size:16px;color:var(--sub)}
+.meaning-big{font-size:24px;font-weight:600}
+.answer{margin-top:14px;padding-top:14px;border-top:1px dashed var(--border);animation:fadeIn .35s ease}
+.romaji{font-size:15px;color:var(--sub)}
+.meaning{font-size:19px;font-weight:600;margin-top:4px}
+.hint{font-size:12px;color:var(--sub);margin-top:14px}
+.actions{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;max-width:480px;margin:0 auto;padding:0 16px;box-sizing:border-box;z-index:10}
+.btn{flex:1;padding:14px 0;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
+.btn.no{background:#f5d6d2;color:#8a2c20}
+.btn.yes{background:#d3ecdc;color:#1f5c38}
+.btn.next{background:var(--chip);color:var(--text)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.no{background:#4a2621;color:#f5b8ae} :root:not([data-theme="light"]) .btn.yes{background:#20402c;color:#9fe0b8}}
+:root[data-theme="dark"] .btn.no{background:#4a2621;color:#f5b8ae}
+:root[data-theme="dark"] .btn.yes{background:#20402c;color:#9fe0b8}
+.write-input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:16px;margin-top:14px;text-align:center}
+.write-input:focus,.search-input:focus{outline:none;border-color:var(--accent)}
+.search-row{display:flex;gap:8px;align-items:center;margin:4px 0 14px}
+.search-box{position:relative;flex:1}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:14px}
+.search-input{width:100%;padding:12px 14px 12px 36px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:15px;text-align:left}
+.info-btn{flex-shrink:0;width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:18px}
+.info-btn:hover{background:var(--chip);color:var(--text)}
+.group-header{display:flex;justify-content:space-between;align-items:center;width:100%;font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;margin:18px 4px 6px;text-align:left}
+.group-header:first-of-type{margin-top:4px}
+.group-header .chevron{font-size:10px;color:var(--sub);transition:transform .2s ease}
+.group-header .chevron.collapsed{transform:rotate(180deg)}
+.modal-backdrop{position:fixed;inset:0;background:rgba(20,15,35,.5);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;animation:fadeIn .18s ease}
+.modal{background:var(--card);border-radius:20px;padding:20px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto;text-align:left;box-shadow:var(--shadow);animation:modalIn .25s cubic-bezier(.16,1,.3,1)}
+.modal h2{margin:0 0 14px;font-size:16px}
+.modal h2:not(:first-child){margin-top:22px}
+.modal h3{margin:16px 0 4px;font-size:14px;display:flex;align-items:center;gap:7px}
+.modal h3:first-of-type{margin-top:0}
+.modal p{margin:2px 0;font-size:13px;color:var(--sub);line-height:1.6}
+.modal-divider{border:none;border-top:1px solid var(--border);margin:20px 0 0}
+.modal-close{display:block;width:100%;margin-top:18px;padding:12px;border-radius:12px;background:var(--accent);color:#fff;font-weight:600;font-size:14px}
+.pillrow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:10px}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--chip);color:var(--sub);font-size:12px;cursor:pointer}
+.pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tags{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.tagbadge{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--chip);color:var(--sub);transition:.15s}
+.tagbadge.formal{background:#e7def7;color:#6b3aa8}
+.tagbadge.informal{background:#dceee4;color:#28724a}
+.tagbadge.time{background:#dceaf7;color:#2f6094}
+.tagbadge.neg{background:#f6dfd9;color:#a04432}
+.tagbadge.shuffle{background:#eee0b8;color:#80620b}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .tagbadge.formal{background:#342647;color:#d0a9f0}
+  :root:not([data-theme="light"]) .tagbadge.informal{background:#203c2c;color:#9fdfb8}
+  :root:not([data-theme="light"]) .tagbadge.time{background:#213449;color:#9fc4e8}
+  :root:not([data-theme="light"]) .tagbadge.neg{background:#432923;color:#efaaa0}
+  :root:not([data-theme="light"]) .tagbadge.shuffle{background:#40371f;color:#e8cf7e}
+}
+:root[data-theme="dark"] .tagbadge.formal{background:#342647;color:#d0a9f0}
+:root[data-theme="dark"] .tagbadge.informal{background:#203c2c;color:#9fdfb8}
+:root[data-theme="dark"] .tagbadge.time{background:#213449;color:#9fc4e8}
+:root[data-theme="dark"] .tagbadge.neg{background:#432923;color:#efaaa0}
+:root[data-theme="dark"] .tagbadge.shuffle{background:#40371f;color:#e8cf7e}
+.subtle{font-size:11px;color:var(--sub);margin-top:2px;margin-bottom:6px}
+.result-ok{color:#1f5c38;font-weight:700;display:inline-block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.result-no{color:#8a2c20;font-weight:700;display:inline-block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.empty{text-align:center;color:var(--sub);padding:40px 10px}
+.list-item{display:block;width:100%;text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);font-size:14px;animation:fadeIn .3s ease both}
+.group-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s cubic-bezier(.4,0,.2,1)}
+.group-body.collapsed{grid-template-rows:0fr}
+.group-body-inner{overflow:hidden;min-height:0}
+.list-item .row{display:flex;justify-content:space-between;align-items:center}
+.list-item .l-kanji{font-size:17px}
+.list-item .l-meaning{color:var(--sub);font-size:12px}
+.badges{display:flex;gap:6px;align-items:center}
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.badge.type-i{background:#e4ecf7;color:#2a5599}
+.badge.type-na{background:#f7e9e4;color:#a05a2a}
+.badge.nivel-N5{background:#daf3e4;color:#1f7a4c}
+.badge.nivel-N4{background:#dbe7fb;color:#2a5599}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .badge.type-i{background:#1f2c40;color:#9ab8ea} :root:not([data-theme="light"]) .badge.type-na{background:#3a2a20;color:#e8b48c}
+  :root:not([data-theme="light"]) .badge.nivel-N5{background:#1f3a2c;color:#9fe0b8} :root:not([data-theme="light"]) .badge.nivel-N4{background:#1f2c40;color:#9ab8ea}}
+:root[data-theme="dark"] .badge.type-i{background:#1f2c40;color:#9ab8ea}
+:root[data-theme="dark"] .badge.type-na{background:#3a2a20;color:#e8b48c}
+:root[data-theme="dark"] .badge.nivel-N5{background:#1f3a2c;color:#9fe0b8}
+:root[data-theme="dark"] .badge.nivel-N4{background:#1f2c40;color:#9ab8ea}
+.badge.new{background:var(--chip);color:var(--sub)}
+.badge.learning{background:#fdf0d5;color:#a06b0a}
+.badge.learned{background:#d3ecdc;color:#1f5c38}
+.conj{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:13px}
+.conj-row{display:flex;justify-content:space-between;padding:4px 0}
+.conj-row .lbl{color:var(--sub)}
+.reset{display:block;margin:20px auto 0;font-size:12px;color:var(--sub);background:none;border:none;text-decoration:underline;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <button type="button" class="theme-btn" id="themeBtn" aria-label="Alternar tema"></button>
+  <h1><img class="logo-icon" src="../icons/japan.png" alt=""> 形容詞 · Adjetivos</h1>
+</header>
+<div class="tabs" role="tablist">
+  <button type="button" class="tab active" role="tab" aria-selected="true" data-tab="study">Estudar</button>
+  <button type="button" class="tab" role="tab" aria-selected="false" data-tab="all">Todos os Adjetivos</button>
+  <button type="button" class="tab" role="tab" aria-selected="false" data-tab="learning">Praticando</button>
+  <button type="button" class="tab" role="tab" aria-selected="false" data-tab="learned">Aprendidos</button>
+</div>
+<div class="modes" id="modes" style="display:none" role="tablist">
+  <button type="button" class="mode active" role="tab" aria-selected="true" data-mode="cards">🗂️ Cards</button>
+  <button type="button" class="mode" role="tab" aria-selected="false" data-mode="escrita">✏️ Escrita</button>
+</div>
+<script src="data.js"></script>
+<main id="main"></main>
+
+<script>
+const ADJS = ADJ_RAW.map((v,i)=>({id:i,...v}));
+
+const TYPE_NAME = {i:"-i", na:"-na"};
+const INTERVALS = [0,1,3,7,14,30,60];
+const KEY = "jpadj-progress-v1";
+
+function loadProgress(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+function saveProgress(p){ try{ localStorage.setItem(KEY, JSON.stringify(p)); }catch(e){} }
+let progress = loadProgress();
+
+const THEME_KEY = "jpadj-theme";
+function loadTheme(){ try{ return localStorage.getItem(THEME_KEY) || 'auto'; }catch(e){ return 'auto'; } }
+function applyTheme(mode){
+  if(mode==='light') document.documentElement.setAttribute('data-theme','light');
+  else if(mode==='dark') document.documentElement.setAttribute('data-theme','dark');
+  else document.documentElement.removeAttribute('data-theme');
+  const btn = document.getElementById('themeBtn');
+  if(btn){
+    btn.textContent = mode==='light' ? '☀️' : mode==='dark' ? '🌙' : '🔄';
+    btn.title = 'Tema: ' + (mode==='light'?'claro':mode==='dark'?'escuro':'automático');
+  }
+}
+let themeMode = loadTheme();
+applyTheme(themeMode);
+function toggleTheme(){
+  themeMode = themeMode==='auto' ? 'light' : themeMode==='light' ? 'dark' : 'auto';
+  try{ localStorage.setItem(THEME_KEY, themeMode); }catch(e){}
+  applyTheme(themeMode);
+}
+
+function getEntry(id){ if(!progress[id]) progress[id] = {level:0, due:0}; return progress[id]; }
+function today(){ return Math.floor(Date.now()/86400000); }
+function getStatus(v){
+  const e = progress[v.id];
+  if(!e || e.level<2) return 'novo';
+  if(e.level<4) return 'praticando';
+  return 'aprendido';
+}
+
+function applyDefaultSeed(){
+  const APRENDIDO_ROMAJI = ["ookii","chiisai","samui","atsui"];
+  ADJS.forEach(v=>{
+    if(APRENDIDO_ROMAJI.includes(v.romaji)){
+      progress[v.id] = {level:4, due: today()+14};
+    }
+  });
+  saveProgress(progress);
+}
+const SEED_FLAG = "jpadj-seeded-v1";
+if(!localStorage.getItem(SEED_FLAG)){
+  applyDefaultSeed();
+  localStorage.setItem(SEED_FLAG, "1");
+}
+
+// ---- Conjugação de adjetivos (apenas formas em kana; o kanji é derivado abaixo) ----
+function adjConjugate(v){
+  if(v.type==='i'){
+    const stem = v.irregular ? 'よ' : v.kana.slice(0,-1);
+    return {
+      dict: v.kana,
+      masu: v.kana+'です',
+      nai: stem+'くない',
+      masen: stem+'くないです',
+      ta: stem+'かった',
+      mashita: stem+'かったです',
+      nakatta: stem+'くなかった',
+      masendeshita: stem+'くなかったです'
+    };
+  }
+  const base = v.kana;
+  return {
+    dict: base+'だ',
+    masu: base+'です',
+    nai: base+'じゃない',
+    masen: base+'じゃないです',
+    ta: base+'だった',
+    mashita: base+'でした',
+    nakatta: base+'じゃなかった',
+    masendeshita: base+'じゃなかったです'
+  };
+}
+
+const H = {'あ':'a','い':'i','う':'u','え':'e','お':'o','か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
+'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go','さ':'sa','し':'shi','す':'su','せ':'se','そ':'so',
+'ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo','た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to',
+'だ':'da','ぢ':'ji','づ':'zu','で':'de','ど':'do','な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no',
+'は':'ha','ひ':'hi','ふ':'fu','へ':'he','ほ':'ho','ば':'ba','び':'bi','ぶ':'bu','べ':'be','ぼ':'bo',
+'ぱ':'pa','ぴ':'pi','ぷ':'pu','ぺ':'pe','ぽ':'po','ま':'ma','み':'mi','む':'mu','め':'me','も':'mo',
+'や':'ya','ゆ':'yu','よ':'yo','ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro','わ':'wa','を':'wo','ん':'n'};
+const YOON = {'きゃ':'kya','きゅ':'kyu','きょ':'kyo','しゃ':'sha','しゅ':'shu','しょ':'sho','ちゃ':'cha','ちゅ':'chu','ちょ':'cho',
+'にゃ':'nya','にゅ':'nyu','にょ':'nyo','ひゃ':'hya','ひゅ':'hyu','ひょ':'hyo','みゃ':'mya','みゅ':'myu','みょ':'myo',
+'りゃ':'rya','りゅ':'ryu','りょ':'ryo','ぎゃ':'gya','ぎゅ':'gyu','ぎょ':'gyo','じゃ':'ja','じゅ':'ju','じょ':'jo',
+'びゃ':'bya','びゅ':'byu','びょ':'byo','ぴゃ':'pya','ぴゅ':'pyu','ぴょ':'pyo'};
+function kanaToRomaji(str){
+  let out='', i=0;
+  while(i<str.length){
+    const c=str[i], next=str[i+1], combo=c+(next||'');
+    if(c==='っ'){
+      const nextCombo = next+(str[i+2]||'');
+      const nr = YOON[nextCombo] || H[next] || '';
+      if(nr) out += nr[0];
+      i++; continue;
+    }
+    if(YOON[combo]){ out+=YOON[combo]; i+=2; continue; }
+    out += H[c] || c; i++;
+  }
+  return out;
+}
+
+function normRomaji(s){ return s.toLowerCase().trim().replace(/\s+/g,""); }
+
+// Aceitar respostas em hiragana, katakana ou kanji além de romaji.
+function katakanaToHiragana(s){ return s.replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60)); }
+function kanjiOkuriganaLen(v){
+  let n = 0;
+  for(let i=v.kanji.length-1; i>=0; i--){
+    const code = v.kanji.charCodeAt(i);
+    if(code>=0x3041 && code<=0x3096) n++; else break;
+  }
+  return n;
+}
+function kanjiFormFor(v, kanaForm){
+  if(v.kanji===v.kana) return kanaForm;
+  const n = kanjiOkuriganaLen(v);
+  const kanaRoot = v.kana.slice(0, v.kana.length-n);
+  const kanjiRoot = v.kanji.slice(0, v.kanji.length-n);
+  if(kanaForm.startsWith(kanaRoot)) return kanjiRoot + kanaForm.slice(kanaRoot.length);
+  return kanaForm;
+}
+function matchesWrittenAnswer(rawInput, targetKana, targetRomaji, targetKanji){
+  const input = rawInput.trim();
+  if(!input) return false;
+  if(normRomaji(input) === normRomaji(targetRomaji)) return true;
+  const inputAsHiragana = katakanaToHiragana(input);
+  if(inputAsHiragana === targetKana) return true;
+  if(input === targetKanji) return true;
+  return false;
+}
+// Variações aceitas (じゃ/では, くないです/くありません etc.) — comuns no japonês real.
+const ALT_RULES = [
+  ['じゃないです', ['ではないです','じゃありません','ではありません']],
+  ['じゃなかったです', ['ではなかったです','じゃありませんでした','ではありませんでした']],
+  ['じゃない', ['ではない']],
+  ['じゃなかった', ['ではなかった']],
+  ['くないです', ['くありません']],
+  ['くなかったです', ['くありませんでした']]
+];
+function altKanaForms(kanaForm){
+  const alts = new Set([kanaForm]);
+  ALT_RULES.forEach(([pattern, reps])=>{
+    if(kanaForm.includes(pattern)) reps.forEach(r=> alts.add(kanaForm.replace(pattern, r)));
+  });
+  return Array.from(alts);
+}
+
+let state = {tab:"study", mode:"cards", queue:[], idx:0, revealed:false, expanded:null, writeChecked:false, writeOk:false, testMode:false,
+  writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
+  search:'', groupExpanded:{i:false,na:false}, groupCollapsed:{i:false,na:false}, showInfo:false,
+  cardTypeFilter:'all', listTypeFilter:'all', nivelFilter:'all'};
+
+function targetKey(f){
+  if(f.polite==='informal'){
+    if(!f.past && !f.neg) return 'dict';
+    if(!f.past && f.neg) return 'nai';
+    if(f.past && !f.neg) return 'ta';
+    return 'nakatta';
+  }
+  if(!f.past && !f.neg) return 'masu';
+  if(!f.past && f.neg) return 'masen';
+  if(f.past && !f.neg) return 'mashita';
+  return 'masendeshita';
+}
+function randomFilter(){
+  return { polite: Math.random()<0.5?'informal':'formal', past: Math.random()<0.5, neg: Math.random()<0.5 };
+}
+function toggleFilter(kind){
+  const f = state.writeFilter;
+  if(kind==='formal'){ f.polite = 'formal'; f.shuffle = false; state.shuffledFilter = null; }
+  else if(kind==='informal'){ f.polite = 'informal'; f.shuffle = false; state.shuffledFilter = null; }
+  else if(kind==='past'){ f.past = !f.past; f.shuffle = false; state.shuffledFilter = null; }
+  else if(kind==='neg'){ f.neg = !f.neg; f.shuffle = false; state.shuffledFilter = null; }
+  else if(kind==='shuffle'){ f.shuffle = !f.shuffle; state.shuffledFilter = f.shuffle ? randomFilter() : null; }
+  render();
+}
+
+function buildQueue(){
+  const t = today();
+  if(state.mode==="cards"){
+    const pool = state.cardTypeFilter==='all' ? ADJS : ADJS.filter(v=>v.type===state.cardTypeFilter);
+    state.queue = pool.filter(v=> getEntry(v.id).due <= t).sort((a,b)=> getEntry(a.id).due - getEntry(b.id).due);
+  } else {
+    state.queue = ADJS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }).sort(()=>Math.random()-0.5);
+  }
+  state.idx = 0; state.revealed = false; state.writeChecked=false;
+}
+function setCardTypeFilter(t){ state.cardTypeFilter = t; buildQueue(); render(); }
+
+function answer(correct){
+  const v = state.queue[state.idx]; const e = getEntry(v.id);
+  e.level = correct ? Math.min(e.level+1, INTERVALS.length-1) : 0;
+  e.due = state.testMode ? today() : today() + INTERVALS[e.level];
+  saveProgress(progress); state.idx++; state.revealed = false;
+  if(state.testMode) state.queue.push(v);
+  render();
+}
+function toggleTestMode(){ state.testMode = !state.testMode; render(); }
+
+function checkWrite(){
+  const v = state.queue[state.idx];
+  const input = document.getElementById("writeInput").value;
+  const eff = state.writeFilter.shuffle ? state.shuffledFilter : state.writeFilter;
+  const key = targetKey(eff);
+  const targetKana = adjConjugate(v)[key];
+  const candidates = altKanaForms(targetKana);
+  let ok = false;
+  for(const cand of candidates){
+    const romaji = kanaToRomaji(cand);
+    const kanjiForm = kanjiFormFor(v, cand);
+    if(matchesWrittenAnswer(input, cand, romaji, kanjiForm)){ ok = true; break; }
+  }
+  state.writeOk = ok;
+  state.writeTargetKana = targetKana;
+  state.writeTargetRomaji = kanaToRomaji(targetKana);
+  state.writeTargetKanji = kanjiFormFor(v, targetKana);
+  state.writeChecked = true; render();
+}
+function writeNext(correct){
+  const v = state.queue[state.idx]; const e = getEntry(v.id);
+  if(correct){
+    e.level = Math.min(e.level+1, INTERVALS.length-1);
+    e.due = today() + INTERVALS[e.level];
+  } else {
+    e.level = Math.max(e.level-1, 2);
+  }
+  saveProgress(progress);
+  state.idx++;
+  state.writeChecked=false;
+  state.shuffledFilter = state.writeFilter.shuffle ? randomFilter() : null;
+  render();
+}
+
+function counts(){
+  let novo=0, praticando=0, aprendido=0;
+  ADJS.forEach(v=>{ const s = getStatus(v); if(s==='novo') novo++; else if(s==='praticando') praticando++; else aprendido++; });
+  return {novo, praticando, aprendido};
+}
+
+function render(){
+  const main = document.getElementById("main");
+  document.onkeydown = null;
+  document.querySelectorAll(".tab").forEach(t=>{ const active = t.dataset.tab===state.tab; t.classList.toggle("active", active); t.setAttribute("aria-selected", active); });
+  document.querySelectorAll(".mode").forEach(m=>{ const active = m.dataset.mode===state.mode; m.classList.toggle("active", active); m.setAttribute("aria-selected", active); });
+  document.getElementById("modes").style.display = state.tab==="study" ? "flex" : "none";
+  const c = counts();
+
+  if(state.tab==="study"){
+    const statsHtml = `<div class="stats"><div><b>${c.novo}</b>Novos</div><div><b>${c.praticando}</b>Praticando</div><div><b>${c.aprendido}</b>Aprendidos</div><div><b>${state.queue.length-state.idx}</b>Na fila</div></div>`;
+    const testToggleHtml = state.mode==="cards" ? `<button class="reset" style="margin:0 0 10px" onclick="toggleTestMode()">${state.testMode?'🧪 Modo teste: ON (toque pra desligar)':'Ativar modo teste (intervalos = 0)'}</button>` : '';
+
+    if(state.mode==="cards"){
+      const typeFilterHtml = `<div class="pillrow">
+        <button type="button" class="pill ${state.cardTypeFilter==='all'?'active':''}" aria-pressed="${state.cardTypeFilter==='all'}" onclick="setCardTypeFilter('all')">Todos</button>
+        <button type="button" class="pill ${state.cardTypeFilter==='i'?'active':''}" aria-pressed="${state.cardTypeFilter==='i'}" onclick="setCardTypeFilter('i')">-i</button>
+        <button type="button" class="pill ${state.cardTypeFilter==='na'?'active':''}" aria-pressed="${state.cardTypeFilter==='na'}" onclick="setCardTypeFilter('na')">-na</button>
+      </div>`;
+      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + testToggleHtml + typeFilterHtml + `<div class="empty">🎉 Nada pendente agora.<br>Volte mais tarde ou revise as listas.</div>`; return; }
+      const v = state.queue[state.idx];
+      const cardTag = state.revealed ? 'div' : 'button';
+      const cardAttrs = state.revealed ? 'class="card nohand" id="card"' : 'type="button" class="card" id="card"';
+      main.innerHTML = statsHtml + testToggleHtml + typeFilterHtml + `
+        <${cardTag} ${cardAttrs}>
+          <div class="tag-row"><span class="group-tag">${TYPE_NAME[v.type]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>
+          <div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div>
+          ${state.revealed ? `<div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>` : `<div class="hint">Toque para ver a resposta</div>`}
+        </${cardTag}>
+        ${state.revealed ? `<div class="actions"><button class="btn no" onclick="answer(false)">Praticar mais</button><button class="btn yes" onclick="answer(true)">Sabia</button></div>` : ``}`;
+      if(!state.revealed) document.getElementById("card").onclick = ()=>{ state.revealed=true; render(); };
+
+    } else { // escrita
+      if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum adjetivo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
+      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + `<div class="empty">🎉 Fim da rodada de escrita.</div><div class="actions"><button class="btn yes" onclick="buildQueue();render();">🔁 Praticar de novo</button></div>`; return; }
+      const v = state.queue[state.idx];
+      const f = state.writeFilter;
+      const pillsHtml = `<div class="pillrow">
+        <button type="button" class="pill ${f.polite==='informal'&&!f.shuffle?'active':''}" aria-pressed="${f.polite==='informal'&&!f.shuffle}" onclick="toggleFilter('informal')">Informal</button>
+        <button type="button" class="pill ${f.polite==='formal'&&!f.shuffle?'active':''}" aria-pressed="${f.polite==='formal'&&!f.shuffle}" onclick="toggleFilter('formal')">Formal</button>
+        <button type="button" class="pill ${f.past&&!f.shuffle?'active':''}" aria-pressed="${f.past&&!f.shuffle}" onclick="toggleFilter('past')">Passado</button>
+        <button type="button" class="pill ${f.neg&&!f.shuffle?'active':''}" aria-pressed="${f.neg&&!f.shuffle}" onclick="toggleFilter('neg')">Negativo</button>
+        <button type="button" class="pill ${f.shuffle?'active':''}" aria-pressed="${!!f.shuffle}" onclick="toggleFilter('shuffle')">🎲 Embaralhado</button>
+      </div>`;
+      if(f.shuffle && !state.shuffledFilter) state.shuffledFilter = randomFilter();
+      const eff = f.shuffle ? state.shuffledFilter : f;
+      const tagsHtml = `<div class="tags">
+        <span class="tagbadge ${eff.polite==='formal'?'formal':'informal'}">${eff.polite==='formal'?'Formal':'Informal'}</span>
+        <span class="tagbadge time">${eff.past?'Passado':'Presente'}</span>
+        <span class="tagbadge neg">${eff.neg?'Negativo':'Afirmativo'}</span>
+        ${f.shuffle?'<span class="tagbadge shuffle">🎲 aleatório</span>':''}
+      </div>`;
+      if(!state.writeChecked){
+        main.innerHTML = statsHtml + pillsHtml + `
+          <div class="card nohand">
+            <div class="tag-row"><span class="group-tag">${TYPE_NAME[v.type]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>
+            <div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div>
+            <div class="subtle">(${v.meaning})</div>
+            ${tagsHtml}
+            <input class="write-input" id="writeInput" placeholder="romaji, hiragana, katakana ou kanji" autocapitalize="off" autocomplete="off">
+          </div>
+          <div class="actions"><button class="btn yes" onclick="checkWrite()">Conferir</button></div>`;
+        const inp = document.getElementById("writeInput");
+        inp.focus();
+        inp.onkeydown = (ev)=>{ if(ev.key==="Enter"){ ev.stopPropagation(); checkWrite(); } };
+      } else {
+        main.innerHTML = statsHtml + pillsHtml + `
+          <div class="card nohand">
+            <div class="tag-row"><span class="group-tag">${TYPE_NAME[v.type]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>
+            <div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div>
+            <div class="tags" style="margin-bottom:6px">(${v.meaning})</div>
+            ${tagsHtml}
+            <div class="answer">
+              <div class="${state.writeOk?'result-ok':'result-no'}">${state.writeOk? '✓ Certo!' : '✗ Não foi dessa vez'}</div>
+              <div class="kana" style="margin-top:8px;font-size:20px">${state.writeTargetKanji!==state.writeTargetKana ? state.writeTargetKanji+' · ' : ''}${state.writeTargetKana}</div>
+              <div class="romaji">${state.writeTargetRomaji}</div>
+            </div>
+          </div>
+          <div class="actions"><button class="btn next" onclick="writeNext(${state.writeOk})">Próxima →</button></div>`;
+        document.onkeydown = (ev)=>{ if(ev.key==="Enter"){ ev.preventDefault(); writeNext(state.writeOk); } };
+      }
+    }
+    return;
+  }
+
+  const footerHtml = `<div class="pillrow" style="margin-top:16px">
+    <button type="button" class="reset" onclick="exportProgress()">⬇ Exportar progresso</button>
+    <button type="button" class="reset" onclick="document.getElementById('importFile').click()">⬆ Importar progresso</button>
+  </div>
+  <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importProgress(this.files[0])">
+  <button type="button" class="reset" onclick="applyDefaultSeed();render();">Restaurar adjetivos padrão (ookii, chiisai, samui, atsui = aprendido)</button>
+  <button type="button" class="reset" onclick="resetProgress()">Zerar todo o progresso</button>`;
+
+  if(state.tab==="all"){
+    const query = (state.search||'').trim();
+    const needle = query.toLowerCase();
+    const searched = query ? ADJS.filter(v=>
+      v.kanji.includes(query) || v.kana.includes(query) ||
+      v.romaji.toLowerCase().includes(needle) || v.meaning.toLowerCase().includes(needle) ||
+      v.nivel.toLowerCase().includes(needle)
+    ) : ADJS;
+    const typeFiltered = state.listTypeFilter==='all' ? searched : searched.filter(v=>v.type===state.listTypeFilter);
+    const filtered = state.nivelFilter==='all' ? typeFiltered : typeFiltered.filter(v=>v.nivel===state.nivelFilter);
+
+    const searchHtml = `<div class="search-row">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar por kanji, kana, romaji, nível ou significado" value="${escapeAttr(query)}">
+      </div>
+      <button type="button" class="info-btn" aria-label="Como modificar os adjetivos" onclick="toggleInfo()">ℹ️</button>
+    </div>
+    <div class="pillrow">
+      <button type="button" class="pill ${state.listTypeFilter==='all'?'active':''}" aria-pressed="${state.listTypeFilter==='all'}" onclick="setListTypeFilter('all')">Todos</button>
+      <button type="button" class="pill ${state.listTypeFilter==='i'?'active':''}" aria-pressed="${state.listTypeFilter==='i'}" onclick="setListTypeFilter('i')">-i</button>
+      <button type="button" class="pill ${state.listTypeFilter==='na'?'active':''}" aria-pressed="${state.listTypeFilter==='na'}" onclick="setListTypeFilter('na')">-na</button>
+    </div>
+    <div class="pillrow">
+      <button type="button" class="pill ${state.nivelFilter==='all'?'active':''}" aria-pressed="${state.nivelFilter==='all'}" onclick="setNivelFilter('all')">Todos os níveis</button>
+      <button type="button" class="pill ${state.nivelFilter==='N5'?'active':''}" aria-pressed="${state.nivelFilter==='N5'}" onclick="setNivelFilter('N5')">N5</button>
+      <button type="button" class="pill ${state.nivelFilter==='N4'?'active':''}" aria-pressed="${state.nivelFilter==='N4'}" onclick="setNivelFilter('N4')">N4</button>
+    </div>`;
+
+    let listHtml = "";
+    [['i','-i adjetivos'],['na','-na adjetivos']].forEach(([t,label])=>{
+      const groupVerbs = filtered.filter(v=>v.type===t).sort(compareAdjForDisplay);
+      if(groupVerbs.length===0) return;
+      const collapsed = !!state.groupCollapsed[t];
+      const expanded = !!query || state.nivelFilter!=='all' || state.listTypeFilter!=='all' || state.groupExpanded[t];
+      const shown = expanded ? groupVerbs : groupVerbs.slice(0,12);
+      listHtml += `<button type="button" class="group-header" onclick="toggleGroupCollapse('${t}')" aria-expanded="${!collapsed}">
+        <span>${label} <span class="subtle">(${groupVerbs.length})</span></span>
+        <span class="chevron ${collapsed?'collapsed':''}">▲</span>
+      </button>
+      <div class="group-body ${collapsed?'collapsed':''}"><div class="group-body-inner">`;
+      listHtml += shown.map(renderListItem).join("");
+      if(!expanded && groupVerbs.length>12){
+        listHtml += `<button type="button" class="reset" onclick="expandGroup('${t}')">Ver mais (+${groupVerbs.length-12})</button>`;
+      }
+      listHtml += `</div></div>`;
+    });
+    if(filtered.length===0) listHtml = `<div class="empty">Nenhum adjetivo encontrado.</div>`;
+
+    main.innerHTML = searchHtml + listHtml + footerHtml + infoModal();
+
+    const searchInp = document.getElementById("searchInput");
+    searchInp.oninput = function(){
+      const pos = this.selectionStart;
+      state.search = this.value;
+      render();
+      const inp = document.getElementById("searchInput");
+      if(inp){ inp.focus(); try{ inp.setSelectionRange(pos,pos); }catch(e){} }
+    };
+    return;
+  }
+
+  const list = (state.tab==="learning" ? ADJS.filter(v=>getStatus(v)==='praticando') : ADJS.filter(v=>getStatus(v)==='aprendido')).sort(compareAdjForDisplay);
+  if(list.length===0){ main.innerHTML = `<div class="empty">Nada aqui ainda.</div>`; return; }
+  main.innerHTML = list.map(renderListItem).join("") + footerHtml;
+}
+
+function escapeAttr(s){ return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+
+function renderListItem(v, idx){
+  const delay = Math.min(idx||0, 8) * 18;
+  const s = getStatus(v);
+  const badge = s==='aprendido'?'learned':(s==='praticando'?'learning':'new');
+  const label = s==='aprendido'?'Aprendido':(s==='praticando'?'Praticando':'Novo');
+  let conjHtml = "";
+  if(state.expanded===v.id){
+    const c = adjConjugate(v);
+    conjHtml = `<div class="conj">
+      <div class="conj-row"><span class="lbl">Informal (dic.)</span><span>${c.dict}</span></div>
+      <div class="conj-row"><span class="lbl">Formal</span><span>${c.masu}</span></div>
+      <div class="conj-row"><span class="lbl">Negativo informal</span><span>${c.nai}</span></div>
+      <div class="conj-row"><span class="lbl">Negativo formal</span><span>${c.masen}</span></div>
+      <div class="conj-row"><span class="lbl">Passado informal</span><span>${c.ta}</span></div>
+      <div class="conj-row"><span class="lbl">Passado formal</span><span>${c.mashita}</span></div>
+      <div class="conj-row"><span class="lbl">Passado neg. informal</span><span>${c.nakatta}</span></div>
+      <div class="conj-row"><span class="lbl">Passado neg. formal</span><span>${c.masendeshita}</span></div>
+    </div>`;
+  }
+  return `<button type="button" class="list-item" style="animation-delay:${delay}ms" aria-expanded="${state.expanded===v.id}" onclick="toggleExpand(${v.id})">
+    <div class="row"><div><div class="l-kanji">${v.kanji} <span style="color:var(--sub);font-size:12px">${v.kana}</span></div><div class="l-meaning">${v.meaning}</div></div>
+    <div class="badges"><span class="badge nivel-${v.nivel}">${v.nivel}</span><span class="badge type-${v.type}">${TYPE_NAME[v.type]}</span><span class="badge ${badge}">${label}</span></div></div>
+    ${conjHtml}
+  </button>`;
+}
+
+function expandGroup(t){ state.groupExpanded[t] = true; render(); }
+function setListTypeFilter(t){ state.listTypeFilter = t; render(); }
+function setNivelFilter(n){ state.nivelFilter = n; render(); }
+function toggleGroupCollapse(t){ state.groupCollapsed[t] = !state.groupCollapsed[t]; render(); }
+
+const NIVEL_RANK = {N5:0,N4:1};
+const STATUS_RANK = {aprendido:0,praticando:1,novo:2};
+function compareAdjForDisplay(a,b){
+  const nd = NIVEL_RANK[a.nivel]-NIVEL_RANK[b.nivel];
+  if(nd!==0) return nd;
+  return STATUS_RANK[getStatus(a)]-STATUS_RANK[getStatus(b)];
+}
+
+function toggleInfo(){ state.showInfo = !state.showInfo; render(); }
+function infoModal(){
+  if(!state.showInfo) return "";
+  return `<div class="modal-backdrop" onclick="if(event.target===this) toggleInfo()">
+    <div class="modal">
+      <h2>Como modificar os adjetivos</h2>
+      <h3>-i adjetivos (ex: 高い takai, "alto/caro")</h3>
+      <p>Terminam em い e esse い muda de acordo com a forma. Tira-se o い para formar a raiz (高<b>い</b> → 高) e aplica-se a terminação:</p>
+      <div class="conj">
+        <div class="conj-row"><span class="lbl">Afirmativo informal</span><span>高い (takai)</span></div>
+        <div class="conj-row"><span class="lbl">Afirmativo formal</span><span>高いです (takai desu)</span></div>
+        <div class="conj-row"><span class="lbl">Negativo informal</span><span>高くない (takakunai)</span></div>
+        <div class="conj-row"><span class="lbl">Negativo formal</span><span>高くないです (takakunai desu)</span></div>
+        <div class="conj-row"><span class="lbl">Passado informal</span><span>高かった (takakatta)</span></div>
+        <div class="conj-row"><span class="lbl">Passado formal</span><span>高かったです (takakatta desu)</span></div>
+        <div class="conj-row"><span class="lbl">Passado neg. informal</span><span>高くなかった (takakunakatta)</span></div>
+        <div class="conj-row"><span class="lbl">Passado neg. formal</span><span>高くなかったです (takakunakatta desu)</span></div>
+      </div>
+      <p class="subtle" style="margin-top:8px">Atenção: いい ("bom") é irregular — usa a raiz よ nas formas negativa e passada (よくない, よかった), nunca いくない/いかった.</p>
+      <p class="subtle">Formal alternativo (mais formal/escrito): troque くないです por くありません (高くありません).</p>
+      <hr class="modal-divider">
+      <h3>-na adjetivos (ex: 元気 genki, "bem/saudável")</h3>
+      <p>Funcionam como substantivos: não mudam a própria palavra, só o verbo だ/です que vem depois. O な só aparece antes de um substantivo (元気<b>な</b>人, "pessoa saudável"), nunca no final da frase.</p>
+      <div class="conj">
+        <div class="conj-row"><span class="lbl">Afirmativo informal</span><span>元気だ (genki da)</span></div>
+        <div class="conj-row"><span class="lbl">Afirmativo formal</span><span>元気です (genki desu)</span></div>
+        <div class="conj-row"><span class="lbl">Negativo informal</span><span>元気じゃない (genki janai)</span></div>
+        <div class="conj-row"><span class="lbl">Negativo formal</span><span>元気じゃないです (genki janai desu)</span></div>
+        <div class="conj-row"><span class="lbl">Passado informal</span><span>元気だった (genki datta)</span></div>
+        <div class="conj-row"><span class="lbl">Passado formal</span><span>元気でした (genki deshita)</span></div>
+        <div class="conj-row"><span class="lbl">Passado neg. informal</span><span>元気じゃなかった (genki janakatta)</span></div>
+        <div class="conj-row"><span class="lbl">Passado neg. formal</span><span>元気じゃなかったです (genki janakatta desu)</span></div>
+      </div>
+      <p class="subtle" style="margin-top:8px">じゃ é a forma falada/casual de では — ambas corretas (元気ではない = 元気じゃない). Na escrita formal, costuma-se usar じゃありません/ではありません no lugar de じゃないです.</p>
+      <p class="subtle">同じ ("igual/mesmo") é um caso especial: mesmo sendo -na, não usa な antes do substantivo (同じ人, não 同じな人).</p>
+      <button type="button" class="modal-close" onclick="toggleInfo()">Entendi</button>
+    </div>
+  </div>`;
+}
+
+function toggleExpand(id){ state.expanded = (state.expanded===id) ? null : id; render(); }
+function resetProgress(){ if(confirm("Zerar todo o progresso salvo?")){ progress = {}; saveProgress(progress); buildQueue(); render(); } }
+
+function exportProgress(){
+  try{
+    const data = JSON.stringify(progress, null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'jpadj-progresso.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }catch(e){ alert('Não foi possível exportar o progresso.'); }
+}
+function importProgress(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(typeof data !== 'object' || data===null || Array.isArray(data)) throw new Error('formato inválido');
+      progress = data;
+      saveProgress(progress);
+      buildQueue();
+      render();
+      alert('Progresso importado com sucesso!');
+    }catch(e){ alert('Arquivo inválido.'); }
+  };
+  reader.readAsText(file);
+}
+
+document.getElementById("themeBtn").onclick = toggleTheme;
+document.querySelectorAll(".tab").forEach(t=>{ t.onclick = ()=>{ state.tab = t.dataset.tab; state.expanded=null; if(state.tab==="study") buildQueue(); render(); }; });
+document.querySelectorAll(".mode").forEach(m=>{ m.onclick = ()=>{ state.mode = m.dataset.mode; buildQueue(); render(); }; });
+
+buildQueue();
+render();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); });
+}
+</script>
+</body>
+</html>

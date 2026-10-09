@@ -1,0 +1,14 @@
+{
+  "name": "形容詞 SRS — Adjetivos Japoneses",
+  "short_name": "形容詞 SRS",
+  "description": "SRS de adjetivos japoneses (i e na), com conjugação e prática de escrita.",
+  "start_url": "./adjetivos.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f7fb",
+  "theme_color": "#ea6b47",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "../icons/japan.png", "sizes": "128x128", "type": "image/png", "purpose": "any" }
+  ]
+}

@@ -1,11 +1,11 @@
-const CACHE_NAME = "jpverbs-cache-v6";
+const CACHE_NAME = "jpadj-cache-v2";
 const APP_SHELL = [
-  "./verbos-jp-atualizado.html",
+  "./adjetivos.html",
   "./manifest.json",
-  "./verbs-data.js",
-  "./icons/japan.png",
-  "./fonts/GoogleSans-Regular.ttf",
-  "./fonts/GoogleSans-Bold.ttf"
+  "./data.js",
+  "../icons/japan.png",
+  "../fonts/GoogleSans-Regular.ttf",
+  "../fonts/GoogleSans-Bold.ttf"
 ];
 
 self.addEventListener("install", (event) => {
@@ -26,9 +26,8 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  // Network-first: sempre busca a versão mais nova quando online (evita mostrar
-  // uma versão desatualizada do app depois de um deploy); só usa o cache como
-  // fallback quando offline.
+  // Network-first: sempre busca a versão mais nova quando online; só usa o
+  // cache como fallback quando offline.
   event.respondWith(
     fetch(event.request)
       .then((response) => {
