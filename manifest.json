@@ -1,6 +1,6 @@
 {
-  "name": "動詞 SRS — Verbos Japoneses",
-  "short_name": "動詞 SRS",
+  "name": "Verbos Japoneses — 動詞",
+  "short_name": "Verbos JP",
   "description": "SRS de verbos japoneses com conjugação, frases e prática de escrita.",
   "id": "./verbos-jp-atualizado.html",
   "start_url": "./verbos-jp-atualizado.html",
@@ -10,7 +10,7 @@
   "theme_color": "#6b47ea",
   "lang": "pt-BR",
   "icons": [
-    { "src": "icons/japan-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/japan-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "icons/verbos-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/verbos-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
