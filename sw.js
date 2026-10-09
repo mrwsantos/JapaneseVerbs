@@ -1,4 +1,4 @@
-const CACHE_NAME = "jpverbs-cache-v6";
+const CACHE_NAME = "jpverbs-cache-v7";
 const APP_SHELL = [
   "./verbos-jp-atualizado.html",
   "./manifest.json",
@@ -18,7 +18,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+      Promise.all(names.filter((n) => n.startsWith("jpverbs-") && n !== CACHE_NAME).map((n) => caches.delete(n)))
     )
   );
   self.clients.claim();

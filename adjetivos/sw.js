@@ -1,4 +1,4 @@
-const CACHE_NAME = "jpadj-cache-v2";
+const CACHE_NAME = "jpadj-cache-v3";
 const APP_SHELL = [
   "./adjetivos.html",
   "./manifest.json",
@@ -18,7 +18,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+      Promise.all(names.filter((n) => n.startsWith("jpadj-") && n !== CACHE_NAME).map((n) => caches.delete(n)))
     )
   );
   self.clients.claim();
