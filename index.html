@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Japonês SRS — 日本語</title>
+<meta name="theme-color" content="#6b47ea">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Japonês SRS">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/app-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/app-192.png">
+<script>
+// Abre direto o último modo usado, a não ser que a tela inicial tenha sido
+// pedida explicitamente (botão ⌂ → index.html?home).
+const APPS = { verbos: "verbos-jp-atualizado.html", adjetivos: "adjetivos/adjetivos.html" };
+(function(){
+  if(new URLSearchParams(location.search).has("home")) return;
+  let last = null;
+  try{ last = localStorage.getItem("jp-last-app"); }catch(e){}
+  if(APPS[last]) location.replace(APPS[last]);
+})();
+(function(){
+  let mode = 'auto';
+  try{ mode = localStorage.getItem("jp-theme") || 'auto'; }catch(e){}
+  if(mode !== 'auto') document.documentElement.setAttribute('data-theme', mode);
+})();
+</script>
+<style>
+:root{
+  --bg:#f8f7fb; --card:#ffffff; --text:#1c1a24; --sub:#6c6879; --border:#e4e1ec; --chip:#efedf7;
+  --shadow:0 1px 2px rgba(30,20,60,.04), 0 8px 24px rgba(30,20,60,.06);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --border:#37334a; --chip:#2a2736; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); } }
+:root[data-theme="dark"]{ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --border:#37334a; --chip:#2a2736; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+@font-face{font-family:"Google Sans";src:url('fonts/GoogleSans-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:"Google Sans";src:url('fonts/GoogleSans-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+body{background:var(--bg);color:var(--text);font-family:"Google Sans",-apple-system,"Hiragino Sans",sans-serif;display:flex;flex-direction:column;min-height:100%;-webkit-font-smoothing:antialiased}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important;transition-duration:.001ms !important} }
+main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;display:flex;flex-direction:column;gap:14px}
+.hero{text-align:center;margin-bottom:18px}
+.hero img{width:64px;height:64px;border-radius:16px;box-shadow:var(--shadow)}
+.hero h1{font-size:22px;margin:14px 0 4px}
+.hero p{margin:0;color:var(--sub);font-size:14px}
+.choice{display:flex;align-items:center;gap:16px;padding:18px;border-radius:20px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);color:inherit;text-decoration:none;animation:fadeInUp .3s cubic-bezier(.16,1,.3,1) both;transition:transform .18s cubic-bezier(.34,1.56,.64,1),border-color .15s ease}
+.choice:nth-of-type(2){animation-delay:.05s}
+.choice:hover{border-color:var(--accent)}
+.choice:active{transform:scale(.97)}
+.choice img{width:56px;height:56px;border-radius:14px;flex:none}
+.choice b{display:block;font-size:17px}
+.choice span{display:block;color:var(--sub);font-size:13px;margin-top:2px}
+.choice .arrow{margin-left:auto;color:var(--sub);font-size:20px}
+.verbos{--accent:#6b47ea}
+.adjetivos{--accent:#ea6b47}
+.hint{text-align:center;color:var(--sub);font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<main>
+  <div class="hero">
+    <img src="icons/app-192.png" alt="">
+    <h1>Japonês SRS</h1>
+    <p>O que você quer estudar?</p>
+  </div>
+  <a class="choice verbos" href="verbos-jp-atualizado.html">
+    <img src="icons/verbos-192.png" alt="">
+    <div><b>動詞 · Verbos</b><span>Conjugação, frases e escrita</span></div>
+    <div class="arrow">›</div>
+  </a>
+  <a class="choice adjetivos" href="adjetivos/adjetivos.html">
+    <img src="icons/adjetivos-192.png" alt="">
+    <div><b>形容詞 · Adjetivos</b><span>Adjetivos い e な, conjugação e escrita</span></div>
+    <div class="arrow">›</div>
+  </a>
+  <p class="hint">Dá pra trocar de modo a qualquer hora pelo topo do app.</p>
+</main>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); });
+}
+</script>
+</body>
+</html>
