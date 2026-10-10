@@ -2,11 +2,12 @@
 // e não pesa no PWA). Dois grupos com liga/desliga próprio, salvos no aparelho:
 //   "jogo"  — Jogo de Pares (ligado por padrão)
 //   "cards" — Cards, Frases e Escrita (ligado por padrão)
+//   "desenho" — página Desenhar (ligado por padrão)
 // Navegadores só tocam som depois de um toque na página; no iPhone o modo
 // silencioso também corta os sons.
 const Sons = (()=>{
-  const KEYS = {jogo:"jp-sound-game", cards:"jp-sound-cards"};
-  const DEFAULTS = {jogo:true, cards:true};
+  const KEYS = {jogo:"jp-sound-game", cards:"jp-sound-cards", desenho:"jp-sound-draw"};
+  const DEFAULTS = {jogo:true, cards:true, desenho:true};
   let ctx = null;
 
   function audio(){
@@ -81,7 +82,7 @@ const Sons = (()=>{
   }
   // Libera o áudio no primeiro toque, se algum grupo estiver ligado.
   document.addEventListener("pointerdown", ()=>{
-    if(enabled("jogo") || enabled("cards")) audio();
+    if(enabled("jogo") || enabled("cards") || enabled("desenho")) audio();
   }, {once:true, capture:true});
 
   return {play, enabled, setEnabled};

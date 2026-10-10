@@ -12,8 +12,9 @@ manifest.json, sw.js    PWA: instalação e funcionamento offline
 verbos/verbos.html      app de verbos      (dados em verbos/data.js)
 adjetivos/adjetivos.html app de adjetivos  (dados em adjetivos/data.js)
 jogo/jogo.html          jogo de pares (usa os dados dos dois apps)
+desenho/desenho.html    treino de escrita à mão (não mexe no progresso)
 sons.js                 sons gerados no navegador (sem arquivos de áudio)
-desenho.js              área de desenho do modo Desenhar
+desenho.js              área de desenho + reconhecimento usados pela página Desenhar
 lib/kanjicanvas/        reconhecimento de escrita (KanjiCanvas, MIT) + padrões
 tools/gerar-padroes.mjs gera lib/kanjicanvas/padroes.js a partir dos dados
 icons/, fonts/
@@ -103,9 +104,12 @@ Prática extra com as palavras em **Praticando** ou **Aprendido**, embaralhadas.
 - Acertou → sobe um nível. Errou → desce um nível, mas **nunca abaixo de
   Praticando** (escrita é treino extra, não te faz "desaprender").
 
-## Modo ✍️ Desenhar
+## ✍️ Desenhar
 
-Treino de escrita à mão com as palavras em **Praticando** ou **Aprendido**:
+Página própria (botão na tela inicial), separada dos apps de verbos e
+adjetivos: é **treino livre** e **não mexe no progresso** do SRS. Você escolhe
+verbos, adjetivos ou os dois, e o nível (N5, N4, N3 ou todos); o placar
+(acertos e sequência) vale só para a sessão.
 
 - Aparece o significado em português e você **desenha a palavra em japonês,
   uma letra por vez**, na área quadriculada. Vale kanji (話す) ou só kana (はなす).
@@ -115,9 +119,8 @@ Treino de escrita à mão com as palavras em **Praticando** ou **Aprendido**:
 - ↶ desfaz o último traço, 🗑 limpa o desenho, ⌫ apaga a última letra.
 - Completou a palavra certa → acerto automático. **Conferir** encerra com o que
   foi escrito; **Não sei** mostra a resposta.
-- Se o reconhecimento errar, toque em **✓ Eu escrevi certo** (conta como acerto).
-- Pontuação igual à Escrita: acerto sobe um nível, erro desce (sem sair de
-  Praticando).
+- Se o reconhecimento errar, toque em **✓ Eu escrevi certo** (conta como acerto
+  no placar da sessão).
 - Funciona offline. Reconhece mesmo com ordem de traços diferente, mas não
   distingue letra pequena (ゃ) de grande (や) — as duas valem.
 - Kanji sem padrão de reconhecimento (嬉 眩 綺 賑): escreva essas palavras em kana.

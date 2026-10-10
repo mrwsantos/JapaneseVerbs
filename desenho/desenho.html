@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Desenhar — 日本語</title>
+<meta name="theme-color" content="#6b47ea">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Japonês SRS">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/app-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../icons/app-192.png">
+<style>
+:root{
+  --bg:#f8f7fb; --card:#ffffff; --text:#1c1a24; --sub:#6c6879;
+  --accent:#6b47ea; --accent2:#ea6b47; --border:#e4e1ec; --chip:#efedf7;
+  --ok:#2f8f57; --ok-bg:#d3ecdc; --no:#c0503f; --no-bg:#f5d6d2;
+  --shadow:0 1px 2px rgba(30,20,60,.04), 0 8px 24px rgba(30,20,60,.06);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#9a7bff; --accent2:#ff9472; --border:#37334a; --chip:#2a2736; --ok:#9fe0b8; --ok-bg:#20402c; --no:#f5b8ae; --no-bg:#4a2621; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); } }
+:root[data-theme="dark"]{ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#9a7bff; --accent2:#ff9472; --border:#37334a; --chip:#2a2736; --ok:#9fe0b8; --ok-bg:#20402c; --no:#f5b8ae; --no-bg:#4a2621; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+@font-face{font-family:"Roboto Mono";src:url('../fonts/RobotoMono-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:"Roboto Mono";src:url('../fonts/RobotoMono-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+body{background:var(--bg);color:var(--text);font-family:"Roboto Mono",ui-monospace,-apple-system,"Hiragino Sans",sans-serif;display:flex;flex-direction:column;min-height:100%;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes popIn{0%{opacity:0;transform:scale(.85)}65%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes floatUp{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-34px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important} }
+header{position:relative;padding:16px 16px calc(12px + env(safe-area-inset-top,0px));text-align:center;border-bottom:1px solid var(--border)}
+h1{font-size:16px;margin:0;font-weight:700}
+.theme-btn{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px;color:inherit;text-decoration:none;line-height:1.2}
+.theme-btn{right:14px}
+.home-btn{position:absolute;left:14px;top:calc(15px + env(safe-area-inset-top,0px));width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:var(--chip);color:var(--sub);text-decoration:none;transition:background-color .15s ease,color .15s ease,transform .18s cubic-bezier(.34,1.56,.64,1)}
+.home-btn:hover{background:var(--accent);color:#fff}
+.home-btn:active{transform:scale(.92)}
+header .home-btn{top:calc(9px + env(safe-area-inset-top,0px))} /* cabeçalho mais baixo (só título) */
+.sound-btn{position:absolute;right:52px;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px;line-height:1.2}
+.sound-btn:hover{background:var(--chip)}
+.theme-btn:hover{background:var(--chip)}
+main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:12px 16px 24px;display:flex;flex-direction:column}
+
+/* Filtros (palavras usadas no treino) */
+.filters{display:grid;gap:8px;margin-bottom:12px}
+.seg{display:flex;gap:4px;padding:4px;background:var(--chip);border-radius:12px}
+.seg button{flex:1;padding:7px 2px;border-radius:9px;font-size:12px;font-weight:600;color:var(--sub);white-space:nowrap}
+.seg button.active{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.score-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--sub);margin:0 2px 10px}
+.score-row b{color:var(--text)}
+
+/* Card da palavra e resultado */
+.card{background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:20px;padding:12px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;animation:fadeInUp .3s cubic-bezier(.16,1,.3,1)}
+.card.result{padding:22px 16px}
+.prompt-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.meaning-big{font-size:21px;font-weight:700}
+.face-sub{font-size:12px;color:var(--sub)}
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;white-space:nowrap;background:var(--chip);color:var(--sub)}
+.kanji{font-size:34px;font-weight:600}
+.kana{font-size:16px;color:var(--sub)}
+.romaji{font-size:15px;color:var(--sub)}
+.answer{width:100%;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+.result-ok{color:var(--ok);font-weight:700;display:inline-block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.result-no{color:var(--no);font-weight:700;display:inline-block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.btn{flex:1;padding:14px 0;border-radius:12px;font-size:15px;font-weight:600;box-shadow:var(--shadow)}
+.btn.next{background:var(--chip);color:var(--text)}
+.btn.yes{background:var(--ok-bg);color:var(--ok)}
+.know-btn{display:block;margin:12px auto 0;padding:8px 14px;border-radius:20px;border:1px solid var(--border);color:var(--sub);font-size:13px;font-weight:600}
+.next-row{display:flex;margin-top:12px}
+.empty{text-align:center;color:var(--sub);padding:40px 10px}
+</style>
+</head>
+<body>
+<header>
+  <a class="home-btn" href="../index.html?home" aria-label="Início" title="Início"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M10 20.5V15h4v5.5"/></svg></a>
+  <h1>✍️ Desenhar</h1>
+  <button type="button" class="sound-btn" id="soundBtn"></button>
+  <button type="button" class="theme-btn" id="themeBtn" aria-label="Alternar tema"></button>
+</header>
+<main id="main"></main>
+
+<script src="../sons.js"></script>
+<script src="../desenho.js"></script>
+<script src="../verbos/data.js"></script>
+<script src="../adjetivos/data.js"></script>
+<script>
+// Treino livre de escrita à mão. Fica fora dos apps de verbos e adjetivos de
+// propósito: só LÊ o vocabulário e NUNCA mexe no progresso do SRS.
+// O único dado salvo aqui é o filtro escolhido (jp-draw-settings).
+const SETTINGS_KEY = "jp-draw-settings";
+const SOURCES = [["ambos","Verbos + adjetivos"],["verbos","Verbos"],["adjetivos","Adjetivos"]];
+const LEVELS = [["N5","N5"],["N4","N4"],["N3","N3"],["todos","Todos"]];
+
+const THEME_KEY = "jp-theme";
+let themeMode = 'auto';
+try{ themeMode = localStorage.getItem(THEME_KEY) || 'auto'; }catch(e){}
+function applyTheme(mode){
+  if(mode==='light' || mode==='dark') document.documentElement.setAttribute('data-theme', mode);
+  else document.documentElement.removeAttribute('data-theme');
+  const btn = document.getElementById('themeBtn');
+  btn.textContent = mode==='light' ? '☀️' : mode==='dark' ? '🌙' : '🔄';
+  btn.title = 'Tema: ' + (mode==='light'?'claro':mode==='dark'?'escuro':'automático');
+}
+applyTheme(themeMode);
+document.getElementById('themeBtn').onclick = ()=>{
+  themeMode = themeMode==='auto' ? 'light' : themeMode==='light' ? 'dark' : 'auto';
+  try{ localStorage.setItem(THEME_KEY, themeMode); }catch(e){}
+  applyTheme(themeMode);
+};
+function showSound(){
+  const on = Sons.enabled('desenho'), btn = document.getElementById('soundBtn');
+  btn.textContent = on ? '🔊' : '🔇';
+  btn.setAttribute('aria-label', on ? 'Desligar som' : 'Ligar som');
+}
+showSound();
+document.getElementById('soundBtn').onclick = ()=>{
+  const on = !Sons.enabled('desenho'); Sons.setEnabled('desenho', on); showSound();
+  if(on) Sons.play('desenho', 'acerto');
+};
+
+function loadSettings(){
+  try{ const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)); if(s && s.source && s.level) return s; }catch(e){}
+  return {source:'ambos', level:'N5'};
+}
+let settings = loadSettings();
+function saveSettings(){ try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){} }
+
+const WORDS = [
+  ...VERBS_RAW.map((w)=>({...w, src:'verbos', tag:'verbo'})),
+  ...ADJ_RAW.map((w)=>({...w, src:'adjetivos', tag: w.type==='na' ? 'adjetivo -na' : 'adjetivo -i'})),
+];
+function pool(){
+  return WORDS.filter((w)=> (settings.source==='ambos' || w.src===settings.source) && (settings.level==='todos' || w.nivel===settings.level));
+}
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+const state = {queue: [], idx: 0, checked: false, ok: false, written: '', hits: 0, total: 0, streak: 0};
+let drawCtl = null;
+
+function newRound(){ state.queue = shuffle(pool()); state.idx = 0; state.checked = false; }
+function setSource(v){ settings.source = v; saveSettings(); newRound(); render(); }
+function setLevel(v){ settings.level = v; saveSettings(); newRound(); render(); }
+
+function segHtml(opts, cur, fn){
+  return `<div class="seg">${opts.map(([val,label])=>`<button type="button" class="${val===cur?'active':''}" aria-pressed="${val===cur}" onclick="${fn}('${val}')">${label}</button>`).join('')}</div>`;
+}
+function headerHtml(){
+  return `<div class="filters">${segHtml(SOURCES, settings.source, 'setSource')}${segHtml(LEVELS, settings.level, 'setLevel')}</div>
+    <div class="score-row"><span>Acertos: <b>${state.hits}</b> de <b>${state.total}</b>${state.streak>1 ? ` · 🔥 ${state.streak} seguidos` : ''}</span><span>${state.queue.length ? `${state.queue.length - state.idx} ${state.queue.length - state.idx === 1 ? 'palavra' : 'palavras'}` : ''}</span></div>`;
+}
+
+function done(ok, written){
+  if(drawCtl){ drawCtl.destroy(); drawCtl = null; }
+  state.checked = true; state.ok = ok; state.written = written;
+  state.total++; if(ok){ state.hits++; state.streak++; } else state.streak = 0;
+  Sons.play('desenho', ok ? 'acerto' : 'erro');
+  render();
+}
+// O reconhecimento errou: conta como acerto só no placar desta sessão.
+function fixToCorrect(){ state.hits++; state.streak++; state.ok = true; Sons.play('desenho', 'acerto'); next(); }
+function next(){ state.idx++; state.checked = false; if(state.idx >= state.queue.length) newRound(); render(); }
+
+function render(){
+  if(drawCtl){ drawCtl.destroy(); drawCtl = null; }
+  const main = document.getElementById('main');
+  document.onkeydown = null;
+  if(!state.queue.length){
+    main.innerHTML = headerHtml() + `<div class="empty">Nenhuma palavra com esse filtro.</div>`;
+    return;
+  }
+  const v = state.queue[state.idx];
+  if(!state.checked){
+    main.innerHTML = headerHtml() + `
+      <div class="card"><div class="prompt-row"><span class="meaning-big">${v.meaning}</span><span class="badge">${v.tag} · ${v.nivel}</span></div>
+        <div class="face-sub">Escreva em japonês${v.kanji!==v.kana ? ' (kanji ou kana)' : ''}</div></div>
+      <div id="drawArea"><div class="empty">Carregando reconhecimento…</div></div>`;
+    const idx = state.idx;
+    Desenho.load('../').then(()=>{
+      if(state.checked || state.idx!==idx || !document.getElementById('drawArea')) return;
+      drawCtl = Desenho.mount(document.getElementById('drawArea'), {answers: [v.kanji, v.kana], onDone: done});
+    }).catch(()=>{
+      const el = document.getElementById('drawArea');
+      if(el) el.innerHTML = `<div class="empty">Não consegui carregar o reconhecimento de escrita.<br>Confira a conexão e tente de novo.</div>`;
+    });
+  } else {
+    main.innerHTML = headerHtml() + `
+      <div class="card result">
+        <div class="prompt-row"><span class="meaning-big">${v.meaning}</span><span class="badge">${v.tag} · ${v.nivel}</span></div>
+        <div class="answer">
+          <div class="${state.ok?'result-ok':'result-no'}">${state.ok ? '✓ Certo!' : '✗ Não foi dessa vez'}</div>
+          ${state.written ? `<div class="face-sub" style="margin-top:10px">você escreveu</div><div class="kana" style="font-size:24px;color:var(--text)">${state.written}</div>` : ''}
+          <div class="face-sub" style="margin-top:10px">resposta</div>
+          <div class="kanji">${v.kanji}</div>${v.kana!==v.kanji ? `<div class="kana">${v.kana}</div>` : ''}
+          <div class="romaji">${v.romaji}</div>
+        </div>
+      </div>
+      ${!state.ok && state.written ? `<button type="button" class="know-btn" onclick="fixToCorrect()">✓ Eu escrevi certo — o reconhecimento errou</button>` : ''}
+      <div class="next-row"><button type="button" class="btn next" onclick="next()">Próxima →</button></div>`;
+    document.onkeydown = (ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); next(); } };
+  }
+}
+
+newRound();
+render();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("../sw.js").catch(()=>{}); });
+}
+</script>
+</body>
+</html>
