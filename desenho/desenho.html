@@ -48,11 +48,14 @@ header .home-btn{top:calc(9px + env(safe-area-inset-top,0px))} /* cabeçalho mai
 .theme-btn:hover{background:var(--chip)}
 main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:12px 16px 24px;display:flex;flex-direction:column}
 
-/* Filtros (palavras usadas no treino) */
-.filters{display:grid;gap:8px;margin-bottom:12px}
-.seg{display:flex;gap:4px;padding:4px;background:var(--chip);border-radius:12px}
-.seg button{flex:1;padding:7px 2px;border-radius:9px;font-size:12px;font-weight:600;color:var(--sub);white-space:nowrap}
-.seg button.active{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+/* Tela de bloqueio (mesmo visual do jogo) */
+.panel{text-align:center;padding:24px 4px;animation:fadeInUp .35s cubic-bezier(.16,1,.3,1)}
+.big-emoji{font-size:52px;line-height:1}
+.panel h2{font-size:22px;margin:12px 0 6px}
+.panel p{color:var(--sub);font-size:14px;line-height:1.55;margin:6px 0}
+.pool{font-size:13px;color:var(--sub)}
+.pool b{color:var(--text)}
+.cta{display:block;width:100%;padding:15px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:16px;font-weight:700;box-shadow:var(--shadow)}
 .score-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--sub);margin:0 2px 10px}
 .score-row b{color:var(--text)}
 
@@ -87,16 +90,14 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:12px 16px 24px;disp
 <main id="main"></main>
 
 <script src="../sons.js"></script>
+<script src="../estudadas.js"></script>
 <script src="../desenho.js"></script>
 <script src="../verbos/data.js"></script>
 <script src="../adjetivos/data.js"></script>
 <script>
-// Treino livre de escrita à mão. Fica fora dos apps de verbos e adjetivos de
-// propósito: só LÊ o vocabulário e NUNCA mexe no progresso do SRS.
-// O único dado salvo aqui é o filtro escolhido (jp-draw-settings).
-const SETTINGS_KEY = "jp-draw-settings";
-const SOURCES = [["ambos","Verbos + adjetivos"],["verbos","Verbos"],["adjetivos","Adjetivos"]];
-const LEVELS = [["N5","N5"],["N4","N4"],["N3","N3"],["todos","Todos"]];
+// Treino de escrita à mão com as palavras em Praticando/Aprendido. Fica fora
+// dos apps de verbos e adjetivos de propósito: só LÊ o progresso e NUNCA o
+// altera. Bloqueado até existirem Estudadas.MIN palavras.
 
 const THEME_KEY = "jp-theme";
 let themeMode = 'auto';
@@ -125,35 +126,16 @@ document.getElementById('soundBtn').onclick = ()=>{
   if(on) Sons.play('desenho', 'acerto');
 };
 
-function loadSettings(){
-  try{ const s = JSON.parse(localStorage.getItem(SETTINGS_KEY)); if(s && s.source && s.level) return s; }catch(e){}
-  return {source:'ambos', level:'N5'};
-}
-let settings = loadSettings();
-function saveSettings(){ try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){} }
-
-const WORDS = [
-  ...VERBS_RAW.map((w)=>({...w, src:'verbos', tag:'verbo'})),
-  ...ADJ_RAW.map((w)=>({...w, src:'adjetivos', tag: w.type==='na' ? 'adjetivo -na' : 'adjetivo -i'})),
-];
-function pool(){
-  return WORDS.filter((w)=> (settings.source==='ambos' || w.src===settings.source) && (settings.level==='todos' || w.nivel===settings.level));
-}
+const WORDS = Estudadas.words().map((w)=> ({...w, tag: w.src==='verbos' ? 'verbo' : w.type==='na' ? 'adjetivo -na' : 'adjetivo -i'}));
 function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
 
 const state = {queue: [], idx: 0, checked: false, ok: false, written: '', hits: 0, total: 0, streak: 0};
 let drawCtl = null;
 
-function newRound(){ state.queue = shuffle(pool()); state.idx = 0; state.checked = false; }
-function setSource(v){ settings.source = v; saveSettings(); newRound(); render(); }
-function setLevel(v){ settings.level = v; saveSettings(); newRound(); render(); }
+function newRound(){ state.queue = shuffle(WORDS.slice()); state.idx = 0; state.checked = false; }
 
-function segHtml(opts, cur, fn){
-  return `<div class="seg">${opts.map(([val,label])=>`<button type="button" class="${val===cur?'active':''}" aria-pressed="${val===cur}" onclick="${fn}('${val}')">${label}</button>`).join('')}</div>`;
-}
 function headerHtml(){
-  return `<div class="filters">${segHtml(SOURCES, settings.source, 'setSource')}${segHtml(LEVELS, settings.level, 'setLevel')}</div>
-    <div class="score-row"><span>Acertos: <b>${state.hits}</b> de <b>${state.total}</b>${state.streak>1 ? ` · 🔥 ${state.streak} seguidos` : ''}</span><span>${state.queue.length ? `${state.queue.length - state.idx} ${state.queue.length - state.idx === 1 ? 'palavra' : 'palavras'}` : ''}</span></div>`;
+  return `<div class="score-row"><span>Acertos: <b>${state.hits}</b> de <b>${state.total}</b>${state.streak>1 ? ` · 🔥 ${state.streak} seguidos` : ''}</span><span>${state.queue.length ? `${state.queue.length - state.idx} ${state.queue.length - state.idx === 1 ? 'palavra' : 'palavras'}` : ''}</span></div>`;
 }
 
 function done(ok, written){
@@ -171,8 +153,8 @@ function render(){
   if(drawCtl){ drawCtl.destroy(); drawCtl = null; }
   const main = document.getElementById('main');
   document.onkeydown = null;
-  if(!state.queue.length){
-    main.innerHTML = headerHtml() + `<div class="empty">Nenhuma palavra com esse filtro.</div>`;
+  if(WORDS.length < Estudadas.MIN){
+    main.innerHTML = Estudadas.lockedHtml('✍️', 'Desenhar', WORDS.length);
     return;
   }
   const v = state.queue[state.idx];

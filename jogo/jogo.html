@@ -116,6 +116,7 @@ body.hard .tile .kana{opacity:0;max-height:0;margin:0}
 <main id="main"></main>
 
 <script src="../sons.js"></script>
+<script src="../estudadas.js"></script>
 <script src="../verbos/data.js"></script>
 <script src="../adjetivos/data.js"></script>
 <script>
@@ -124,7 +125,7 @@ body.hard .tile .kana{opacity:0;max-height:0;margin:0}
 // O vocabulário vem dos verbos e adjetivos em "Praticando" ou "Aprendido".
 const START_SECONDS = 10;
 const BONUS_SECONDS = 2;
-const PAIRS = 5;
+const PAIRS = 5; // pares na tela (menos, se o vocabulário for pequeno)
 const BEST_KEY = "jp-game-best";
 const HARD_STREAK = 10; // acertos seguidos para entrar no modo HARD
 const HARD_BONUS_SECONDS = 4; // tempo extra ao entrar no modo HARD (além dos +2s do par)
@@ -157,17 +158,13 @@ document.getElementById('soundBtn').onclick = ()=>{
   if(on) Sons.play('jogo', 'acerto');
 };
 
-function loadJSON(key){ try{ return JSON.parse(localStorage.getItem(key)) || {}; }catch(e){ return {}; } }
 function loadBest(){ try{ return parseInt(localStorage.getItem(BEST_KEY),10) || 0; }catch(e){ return 0; } }
 function saveBest(n){ try{ localStorage.setItem(BEST_KEY, String(n)); }catch(e){} }
 
-// Mesmos ids e chaves de progresso dos apps de verbos e adjetivos.
-function buildPool(onlyStudied){
-  const pv = loadJSON("jpverbs-progress-v2"), pa = loadJSON("jpadj-progress-v1");
-  const studied = (prog, i)=> prog[i] && prog[i].level >= 2;
-  const verbs = VERBS_RAW.map((w,i)=>({...w, key:'v'+i})).filter((w,i)=> onlyStudied ? studied(pv,i) : w.nivel==='N5');
-  const adjs = ADJ_RAW.map((w,i)=>({...w, key:'a'+i})).filter((w,i)=> onlyStudied ? studied(pa,i) : w.nivel==='N5');
-  return {verbs: verbs.length, adjs: adjs.length, words: verbs.concat(adjs).map(w=>({...w, senses: sensesOf(w.meaning)}))};
+// Só palavras em Praticando/Aprendido (estudadas.js).
+function buildPool(){
+  const words = Estudadas.words().map(w=>({...w, senses: sensesOf(w.meaning)}));
+  return {verbs: words.filter(w=>w.src==='verbos').length, adjs: words.filter(w=>w.src==='adjetivos').length, words};
 }
 // "frio / gelado (objeto)" -> ["frio","gelado"]: duas palavras que dividem um
 // sentido nunca aparecem juntas, senão o par ficaria ambíguo.
@@ -198,13 +195,14 @@ function drawWord(){
   return game.pool.find(ok) || game.pool[0];
 }
 
-function startGame(onlyStudied){
-  const {words} = buildPool(onlyStudied);
+function startGame(){
+  const {words} = buildPool();
+  const pairs = Math.max(2, Math.min(PAIRS, distinctSenseCount(words)));
   game = {pool: words, deck: shuffle(words.slice()), skipped: [], used: [], lastKey: null,
-          left: Array(PAIRS).fill(null), right: Array(PAIRS).fill(null),
-          sel: null, score: 0, endAt: 0, over: false, busy: false, onlyStudied, nextTick: 3, tickTac: false, streak: 0, bestStreak: 0, hard: false};
+          pairs, left: Array(pairs).fill(null), right: Array(pairs).fill(null),
+          sel: null, score: 0, endAt: 0, over: false, busy: false, nextTick: 3, tickTac: false, streak: 0, bestStreak: 0, hard: false};
   setHard(false);
-  for(let i=0;i<PAIRS;i++){ game.left[i] = drawWord(); }
+  for(let i=0;i<pairs;i++){ game.left[i] = drawWord(); }
   game.right = shuffle(game.left.slice());
   renderBoard(true);
   game.endAt = performance.now() + START_SECONDS*1000;
@@ -300,7 +298,7 @@ function matched(li, ri, L, R){
     game.left[li] = w;
     // A palavra nova não entra sempre na mesma linha dos dois lados (senão o
     // par ficaria óbvio): no japonês ela pode trocar de lugar com outra casa.
-    const k = Math.floor(Math.random()*PAIRS);
+    const k = Math.floor(Math.random()*game.pairs);
     if(k===ri){ game.right[ri] = w; }
     else { game.right[ri] = game.right[k]; game.right[k] = w; replaceTile('right', k); }
     replaceTile('left', li); replaceTile('right', ri);
@@ -357,15 +355,18 @@ function endGame(){
       <p>${game.score===1 ? 'par certo' : 'pares certos'} · maior sequência <b>${game.bestStreak}</b></p>
       ${record ? `<span class="record">🏆 Novo recorde!</span>` : `<p>Recorde: <b>${best}</b></p>`}
       <div style="height:22px"></div>
-      <button type="button" class="cta" onclick="startGame(${game.onlyStudied})">Jogar de novo</button>
+      <button type="button" class="cta" onclick="startGame()">Jogar de novo</button>
       <button type="button" class="ghost" onclick="showStart()">Voltar</button>
     </div>`;
 }
 
 function showStart(){
   game = null;
-  const {verbs, adjs, words} = buildPool(true);
-  const enough = distinctSenseCount(words) >= PAIRS + 1;
+  const {verbs, adjs, words} = buildPool();
+  if(words.length < Estudadas.MIN){
+    document.getElementById('main').innerHTML = Estudadas.lockedHtml('🎮', 'Jogo de Pares', words.length);
+    return;
+  }
   const best = loadBest();
   document.getElementById('main').innerHTML = `
     <div class="panel">
@@ -379,12 +380,7 @@ function showStart(){
         <div class="rule"><b>📚</b><span>Só entram palavras que você já está <strong>praticando</strong> ou <strong>aprendeu</strong>.</span></div>
       </div>
       <p class="pool">Seu vocabulário: <b>${verbs}</b> verbos + <b>${adjs}</b> adjetivos${best ? ` · recorde <b>${best}</b>` : ''}</p>
-      ${enough
-        ? `<button type="button" class="cta" onclick="startGame(true)">Começar</button>`
-        : `<p>Você ainda precisa de pelo menos ${PAIRS + 1} palavras em Praticando ou Aprendido. Estude mais um pouco nos Cards!</p>
-           <div style="height:10px"></div>
-           <button type="button" class="cta" onclick="startGame(false)">Jogar com as palavras N5</button>
-           <a class="ghost" style="text-decoration:none" href="../index.html?home">Ir estudar</a>`}
+      <button type="button" class="cta" onclick="startGame()">Começar</button>
     </div>`;
 }
 

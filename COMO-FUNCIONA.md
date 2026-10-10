@@ -15,6 +15,7 @@ jogo/jogo.html          jogo de pares (usa os dados dos dois apps)
 desenho/desenho.html    treino de escrita à mão (não mexe no progresso)
 sons.js                 sons gerados no navegador (sem arquivos de áudio)
 desenho.js              área de desenho + reconhecimento usados pela página Desenhar
+estudadas.js            palavras em Praticando/Aprendido (libera Jogo e Desenhar)
 lib/kanjicanvas/        reconhecimento de escrita (KanjiCanvas, MIT) + padrões
 tools/gerar-padroes.mjs gera lib/kanjicanvas/padroes.js a partir dos dados
 icons/, fonts/
@@ -104,11 +105,18 @@ Prática extra com as palavras em **Praticando** ou **Aprendido**, embaralhadas.
 - Acertou → sobe um nível. Errou → desce um nível, mas **nunca abaixo de
   Praticando** (escrita é treino extra, não te faz "desaprender").
 
+## 🔒 Jogo e Desenhar liberam com 3 palavras
+
+O Jogo de Pares e o Desenhar ficam **bloqueados até você ter pelo menos 3
+palavras em Praticando ou Aprendido** (verbos e adjetivos somados). Na tela
+inicial os botões mostram 🔒 e quantas faltam (ex.: 1/3). A regra fica em
+`estudadas.js` (`MIN`).
+
 ## ✍️ Desenhar
 
 Página própria (botão na tela inicial), separada dos apps de verbos e
-adjetivos: é **treino livre** e **não mexe no progresso** do SRS. Você escolhe
-verbos, adjetivos ou os dois, e o nível (N5, N4, N3 ou todos); o placar
+adjetivos: usa as palavras (verbos e adjetivos) que você já está **praticando**
+ou **aprendeu**, em ordem aleatória, e **não mexe no progresso** do SRS. O placar
 (acertos e sequência) vale só para a sessão.
 
 - Aparece o significado em português e você **desenha a palavra em japonês,
@@ -142,7 +150,7 @@ outro, 5 pares por vez:
 - Começa com **10 segundos**; cada par certo dá **+2s** e as casas usadas
   recebem palavras novas.
 - Só entram verbos e adjetivos que você já está **praticando** ou **aprendeu**
-  (precisa de pelo menos 6; se não tiver, dá para jogar com as palavras N5).
+  (com poucas palavras, aparecem menos pares na tela).
 - Palavras com o mesmo sentido (ex.: 危ない e 危険, "perigoso") nunca aparecem
   juntas, para o par nunca ficar ambíguo.
 - Errar não tira tempo, mas o relógio continua correndo. O recorde fica salvo.

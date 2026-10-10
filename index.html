@@ -60,6 +60,8 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
 .adjetivos{--accent:#ea6b47}
 .jogo{--accent:#c25ab0}
 .desenho{--accent:#2f8f8a}
+.choice.locked{opacity:.62}
+.choice.locked .game-icon{filter:grayscale(.7)}
 .choice .game-icon{width:56px;height:56px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(135deg,#6b47ea,#ea6b47)}
 .hint{text-align:center;color:var(--sub);font-size:12px;margin-top:10px}
 .guide{margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);font-size:14px;line-height:1.55}
@@ -97,12 +99,12 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
     <div><b>形容詞 · Adjetivos</b><span>Adjetivos い e な, conjugação e escrita</span></div>
     <div class="arrow">›</div>
   </a>
-  <a class="choice jogo" href="jogo/jogo.html">
+  <a class="choice jogo needs-words" href="jogo/jogo.html">
     <div class="game-icon" aria-hidden="true">🎮</div>
     <div><b>Jogo de Pares</b><span>Ligue português e japonês contra o relógio</span></div>
     <div class="arrow">›</div>
   </a>
-  <a class="choice desenho" href="desenho/desenho.html">
+  <a class="choice desenho needs-words" href="desenho/desenho.html">
     <div class="game-icon" aria-hidden="true" style="background:linear-gradient(135deg,#2f8f8a,#6b47ea)">✍️</div>
     <div><b>Desenhar</b><span>Escreva à mão; não mexe no seu progresso</span></div>
     <div class="arrow">›</div>
@@ -151,7 +153,7 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
       <p>Treino extra com as palavras em Praticando ou Aprendido. Aparece a frase <b>em português</b> já conjugada (ex.: "não comeu", "não era grande") e você escreve em japonês — vale romaji, hiragana, katakana ou kanji. Acertou: sobe um nível. Errou: desce um, mas nunca abaixo de Praticando.</p>
 
       <h3>✍️ Desenhar</h3>
-      <p>Página própria (botão na tela inicial). Aparece o português e você <b>desenha a palavra em japonês</b> com o dedo, uma letra por vez (kanji ou kana). O app reconhece cada letra e completa sozinho; se ele errar, toque em <b>Eu escrevi certo</b>. É treino livre: escolha verbos/adjetivos e o nível, e <b>não mexe no seu progresso</b> dos Cards. Funciona offline.</p>
+      <p>Página própria (botão na tela inicial). Aparece o português e você <b>desenha a palavra em japonês</b> com o dedo, uma letra por vez (kanji ou kana). O app reconhece cada letra e completa sozinho; se ele errar, toque em <b>Eu escrevi certo</b>. Usa as palavras que você está praticando ou já aprendeu e <b>não mexe no seu progresso</b> dos Cards. Funciona offline.</p>
 
       <h3>💬 Frases (só verbos)</h3>
       <p>Frases de exemplo para lembrar o verbo em contexto. São necessários <b>2 acertos</b> aqui para um verbo ficar Aprendido.</p>
@@ -159,12 +161,25 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
       <h3>🎮 Jogo de Pares</h3>
       <p>Português de um lado, japonês do outro. Começa com <b>10 segundos</b> e cada par certo dá <b>+2s</b> e traz palavras novas. Usa só os verbos e adjetivos que você está praticando ou já aprendeu, e não mexe no seu progresso. Tem som de acerto, erro e tic-tac nos últimos 3 segundos (🔊/🔇 no topo). Com <b>10 acertos seguidos</b> entra o <b>🔥 modo HARD</b> e você ganha <b>+4s</b> extras: some o kana e fica só o kanji; errou, volta ao normal.</p>
 
+      <h3>🔒 Jogo e Desenhar</h3>
+      <p>Liberam quando você tiver pelo menos <b>3 palavras</b> em Praticando ou Aprendido (verbos e adjetivos somados).</p>
+
       <h3>💾 Seu progresso</h3>
       <p>Fica salvo <b>no navegador deste aparelho</b>. Desinstalar o app ou limpar os dados do site apaga tudo — use <b>⬇ Exportar progresso</b> (no fim das abas "Todos os verbos" e "Todos os Adjetivos", um arquivo por modo) para ter um backup.</p>
     </div>
   </details>
 </main>
+<script src="estudadas.js"></script>
 <script>
+// Jogo e Desenhar só liberam com Estudadas.MIN palavras em Praticando/Aprendido.
+(function(){
+  const have = Estudadas.count();
+  if(have >= Estudadas.MIN) return;
+  document.querySelectorAll('.needs-words').forEach((a)=>{
+    a.classList.add('locked');
+    a.querySelector('span').textContent = `🔒 Libera com ${Estudadas.MIN} palavras estudadas (${have}/${Estudadas.MIN})`;
+  });
+})();
 if("serviceWorker" in navigator){
   window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); });
 }
