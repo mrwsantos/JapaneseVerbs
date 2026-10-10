@@ -62,6 +62,9 @@ const Sons = (()=>{
     sabia:    ()=>{ tone(988, 0, .1, {gain:.08}); tone(1318, .05, .12, {gain:.06}); },
     praticar: ()=>{ tone(392, 0, .14, {gain:.07, to:330}); },
     virar:    ()=>{ swoosh(.16); },
+    // Jogo: entrar e sair do modo HARD.
+    hard:     ()=>{ tone(110, 0, .45, {type:"sawtooth", gain:.07, to:440}); [440, 554, 659, 880].forEach((f,i)=> tone(f, .18 + i*.07, .16, {type:"square", gain:.05})); },
+    normal:   ()=>{ tone(440, 0, .35, {type:"triangle", gain:.08, to:196}); },
   };
 
   function enabled(group){
