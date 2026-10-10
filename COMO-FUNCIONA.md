@@ -12,6 +12,7 @@ manifest.json, sw.js    PWA: instalação e funcionamento offline
 verbos/verbos.html      app de verbos      (dados em verbos/data.js)
 adjetivos/adjetivos.html app de adjetivos  (dados em adjetivos/data.js)
 jogo/jogo.html          jogo de pares (usa os dados dos dois apps)
+sons.js                 sons gerados no navegador (sem arquivos de áudio)
 icons/, fonts/
 ```
 
@@ -63,6 +64,7 @@ O botão no canto (ex.: "日本語 → PT ⚙️") abre os ajustes do modo atual
   adjetivo) e modo teste.
 - **Frases**: frases em kanji ou só em hiragana.
 - **Escrita**: quais formas praticar.
+- **🔊 Sons** (todos os modos): sons discretos ao responder. Começa desligado.
 
 ## Modo Cards (o principal)
 
@@ -117,6 +119,8 @@ outro, 5 pares por vez:
 - Palavras com o mesmo sentido (ex.: 危ない e 危険, "perigoso") nunca aparecem
   juntas, para o par nunca ficar ambíguo.
 - Errar não tira tempo, mas o relógio continua correndo. O recorde fica salvo.
+- Sons de acerto, erro, fim e recorde, e tic-tac nos últimos 3 segundos
+  (cada vez mais rápido). O botão 🔊/🔇 no topo liga e desliga.
 - O jogo não mexe no seu progresso do SRS.
 
 ## Listas

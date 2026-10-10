@@ -39,6 +39,8 @@ header{position:relative;padding:16px 16px calc(12px + env(safe-area-inset-top,0
 h1{font-size:16px;margin:0;font-weight:700}
 .home-btn,.theme-btn{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px;color:inherit;text-decoration:none;line-height:1.2}
 .home-btn{left:14px}.theme-btn{right:14px}
+.sound-btn{position:absolute;right:52px;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px;line-height:1.2}
+.sound-btn:hover{background:var(--chip)}
 .home-btn:hover,.theme-btn:hover{background:var(--chip)}
 main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:16px 16px 24px;display:flex;flex-direction:column}
 
@@ -86,10 +88,12 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:16px 16px 24px;disp
 <header>
   <a class="home-btn" href="../index.html?home" aria-label="Início">⌂</a>
   <h1>🎮 Jogo de Pares</h1>
+  <button type="button" class="sound-btn" id="soundBtn"></button>
   <button type="button" class="theme-btn" id="themeBtn" aria-label="Alternar tema"></button>
 </header>
 <main id="main"></main>
 
+<script src="../sons.js"></script>
 <script src="../verbos/data.js"></script>
 <script src="../adjetivos/data.js"></script>
 <script>
@@ -116,6 +120,17 @@ document.getElementById('themeBtn').onclick = ()=>{
   themeMode = themeMode==='auto' ? 'light' : themeMode==='light' ? 'dark' : 'auto';
   try{ localStorage.setItem(THEME_KEY, themeMode); }catch(e){}
   applyTheme(themeMode);
+};
+
+function showSound(){
+  const on = Sons.enabled('jogo'), btn = document.getElementById('soundBtn');
+  btn.textContent = on ? '🔊' : '🔇';
+  btn.setAttribute('aria-label', on ? 'Desligar som' : 'Ligar som');
+}
+showSound();
+document.getElementById('soundBtn').onclick = ()=>{
+  const on = !Sons.enabled('jogo'); Sons.setEnabled('jogo', on); showSound();
+  if(on) Sons.play('jogo', 'acerto');
 };
 
 function loadJSON(key){ try{ return JSON.parse(localStorage.getItem(key)) || {}; }catch(e){ return {}; } }
@@ -163,7 +178,7 @@ function startGame(onlyStudied){
   const {words} = buildPool(onlyStudied);
   game = {pool: words, deck: shuffle(words.slice()), skipped: [], used: [], lastKey: null,
           left: Array(PAIRS).fill(null), right: Array(PAIRS).fill(null),
-          sel: null, score: 0, endAt: 0, over: false, busy: false, onlyStudied};
+          sel: null, score: 0, endAt: 0, over: false, busy: false, onlyStudied, nextTick: 3, tickTac: false};
   for(let i=0;i<PAIRS;i++){ game.left[i] = drawWord(); }
   game.right = shuffle(game.left.slice());
   renderBoard(true);
@@ -183,6 +198,12 @@ function tick(now){
     bar.firstElementChild.style.transform = `scaleX(${Math.min(1, secs/START_SECONDS)})`;
   }
   if(left <= 0){ endGame(); return; }
+  // Tic-tac só nos últimos 3s, cada vez mais rápido (mais tempo ganho rearma).
+  if(secs > 3) game.nextTick = 3;
+  else if(secs <= game.nextTick){
+    Sons.play('jogo', game.tickTac ? 'tac' : 'tic'); game.tickTac = !game.tickTac;
+    game.nextTick = secs - (secs > 2 ? 0.5 : secs > 1 ? 0.33 : 0.2);
+  }
   requestAnimationFrame(tick);
 }
 
@@ -231,7 +252,7 @@ function pick(side, i){
 
 function matched(li, ri, L, R){
   game.score++; game.endAt += BONUS_SECONDS*1000; game.busy = true;
-  vibrate(15);
+  vibrate(15); Sons.play('jogo', 'acerto');
   L.classList.add('ok'); R.classList.add('ok');
   document.getElementById('score').textContent = game.score;
   const plus = document.createElement('span'); plus.className = 'bonus'; plus.textContent = `+${BONUS_SECONDS}s`;
@@ -254,7 +275,7 @@ function matched(li, ri, L, R){
   }, 260);
 }
 function missed(L, R){
-  vibrate([30,40,30]);
+  vibrate([30,40,30]); Sons.play('jogo', 'erro');
   L.classList.add('no'); R.classList.add('no');
   setTimeout(()=>{ L.classList.remove('no'); R.classList.remove('no'); }, 380);
 }
@@ -264,7 +285,7 @@ function endGame(){
   const best = loadBest();
   const record = game.score > best;
   if(record) saveBest(game.score);
-  vibrate(80);
+  vibrate(80); Sons.play('jogo', record ? 'recorde' : 'fim');
   document.getElementById('main').innerHTML = `
     <div class="panel">
       <div class="big-emoji">⏰</div>

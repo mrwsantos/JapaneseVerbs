@@ -223,6 +223,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
   <button type="button" class="mode active" role="tab" aria-selected="true" data-mode="cards">🗂️ Cards</button>
   <button type="button" class="mode" role="tab" aria-selected="false" data-mode="escrita">✏️ Escrita</button>
 </div>
+<script src="../sons.js"></script>
 <script src="data.js"></script>
 <main id="main"></main>
 
@@ -500,7 +501,7 @@ function checkWrite(){
   state.writeTargetKana = targetKana;
   state.writeTargetRomaji = kanaToRomaji(targetKana);
   state.writeTargetKanji = kanjiFormFor(v, targetKana);
-  state.writeChecked = true; render();
+  state.writeChecked = true; Sons.play('cards', state.writeOk ? 'acerto' : 'erro'); render();
 }
 function writeNext(correct){
   const v = state.queue[state.idx]; const e = getEntry(v.id);
@@ -534,6 +535,7 @@ function setCardFilter(v){ setCardTypeFilter(v); }
 function cardFilterValue(){ return state.cardTypeFilter; }
 function cardTag(v){ return `<div class="tag-row"><span class="group-tag">${TYPE_NAME[v.type]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>`; }
 
+function toggleCardSound(){ const on = !Sons.enabled('cards'); Sons.setEnabled('cards', on); if(on) Sons.play('cards', 'sabia'); render(); }
 function openSheet(){ state.sheet = true; state.sheetAnim = true; render(); }
 function closeSheet(){ state.sheet = false; render(); }
 window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && state.sheet) closeSheet(); });
@@ -606,6 +608,7 @@ function sheetHtml(){
   return `<div class="sheet-backdrop ${state.sheetAnim?'anim':''}" onclick="closeSheet()">
     <div class="sheet" role="dialog" aria-modal="true" aria-label="${title}" onclick="event.stopPropagation()">
       <div class="sheet-handle"></div><h2>${title}</h2>${body}
+      <div class="setting"><button type="button" class="switch-row" onclick="toggleCardSound()" aria-pressed="${Sons.enabled('cards')}"><span>🔊 Sons<br><span class="setting-note">Sons discretos ao responder. O jogo tem o próprio botão de som.</span></span><span class="switch ${Sons.enabled('cards')?'on':''}"></span></button></div>
       <button type="button" class="modal-close" onclick="closeSheet()">Pronto</button>
     </div></div>`;
 }
@@ -645,6 +648,7 @@ function answerAnimated(correct){
   const fn = currentAnswer;
   wrap.classList.remove('dragging'); wrap.classList.add('leaving');
   wrap.style.transform = `translateX(${correct?120:-120}%) rotate(${correct?14:-14}deg)`;
+  Sons.play('cards', correct ? 'sabia' : 'praticar');
   setTimeout(()=>{ animating = false; fn(correct); }, 230);
 }
 // Toque vira o card; depois de virado, arrastar para a direita = Sabia,
