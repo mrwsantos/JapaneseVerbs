@@ -45,8 +45,9 @@ h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.01em;display:flex;ali
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .logo-icon{filter:invert(1) hue-rotate(180deg)}}
 .theme-btn{position:absolute;right:14px;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px}
 .theme-btn:hover{background:var(--chip)}
-.home-btn{position:absolute;left:14px;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px;color:inherit;text-decoration:none;line-height:1.2}
-.home-btn:hover{background:var(--chip)}
+.home-btn{position:absolute;left:14px;top:calc(15px + env(safe-area-inset-top,0px));width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:var(--chip);color:var(--sub);text-decoration:none;transition:background-color .15s ease,color .15s ease,transform .18s cubic-bezier(.34,1.56,.64,1)}
+.home-btn:hover{background:var(--accent);color:#fff}
+.home-btn:active{transform:scale(.92)}
 .app-switch{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:var(--chip)}
 .app-switch a{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;color:var(--sub);text-decoration:none;transition:background-color .15s ease,color .15s ease}
 .app-switch a .jp{font-weight:600;opacity:.85}
@@ -220,7 +221,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 <body>
 <header>
   <button type="button" class="theme-btn" id="themeBtn" aria-label="Alternar tema"></button>
-  <a class="home-btn" href="../index.html?home" aria-label="Início">⌂</a>
+  <a class="home-btn" href="../index.html?home" aria-label="Início" title="Início"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M10 20.5V15h4v5.5"/></svg></a>
   <h1><nav class="app-switch" aria-label="Modo"><a href="verbos.html" class="active" aria-current="page"><span class="jp">動詞</span>Verbos</a><a href="../adjetivos/adjetivos.html"><span class="jp">形容詞</span>Adjetivos</a></nav></h1>
 </header>
 <div class="tabs" role="tablist">

@@ -16,7 +16,7 @@ sons.js                 sons gerados no navegador (sem arquivos de áudio)
 icons/, fonts/
 ```
 
-- **⌂** no topo volta para a tela inicial; **動詞 Verbos | 形容詞 Adjetivos** troca de modo.
+- O botão de **casinha 🏠** no topo volta para a tela inicial; **動詞 Verbos | 形容詞 Adjetivos** troca de modo.
 - O app lembra o último modo aberto e o tema (claro/escuro/automático).
 - Todo o progresso fica salvo **no navegador do aparelho** (`localStorage`).
   Desinstalar o app ou limpar os dados do site apaga o progresso — use
