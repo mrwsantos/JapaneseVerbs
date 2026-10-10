@@ -13,6 +13,9 @@ verbos/verbos.html      app de verbos      (dados em verbos/data.js)
 adjetivos/adjetivos.html app de adjetivos  (dados em adjetivos/data.js)
 jogo/jogo.html          jogo de pares (usa os dados dos dois apps)
 sons.js                 sons gerados no navegador (sem arquivos de áudio)
+desenho.js              área de desenho do modo Desenhar
+lib/kanjicanvas/        reconhecimento de escrita (KanjiCanvas, MIT) + padrões
+tools/gerar-padroes.mjs gera lib/kanjicanvas/padroes.js a partir dos dados
 icons/, fonts/
 ```
 
@@ -100,6 +103,27 @@ Prática extra com as palavras em **Praticando** ou **Aprendido**, embaralhadas.
 - Acertou → sobe um nível. Errou → desce um nível, mas **nunca abaixo de
   Praticando** (escrita é treino extra, não te faz "desaprender").
 
+## Modo ✍️ Desenhar
+
+Treino de escrita à mão com as palavras em **Praticando** ou **Aprendido**:
+
+- Aparece o significado em português e você **desenha a palavra em japonês,
+  uma letra por vez**, na área quadriculada. Vale kanji (話す) ou só kana (はなす).
+- A cada traço o app mostra as letras mais parecidas. Quando reconhece a letra
+  esperada e você para de desenhar, ela **entra sozinha**; também dá para tocar
+  numa das sugestões.
+- ↶ desfaz o último traço, 🗑 limpa o desenho, ⌫ apaga a última letra.
+- Completou a palavra certa → acerto automático. **Conferir** encerra com o que
+  foi escrito; **Não sei** mostra a resposta.
+- Se o reconhecimento errar, toque em **✓ Eu escrevi certo** (conta como acerto).
+- Pontuação igual à Escrita: acerto sobe um nível, erro desce (sem sair de
+  Praticando).
+- Funciona offline. Reconhece mesmo com ordem de traços diferente, mas não
+  distingue letra pequena (ゃ) de grande (や) — as duas valem.
+- Kanji sem padrão de reconhecimento (嬉 眩 綺 賑): escreva essas palavras em kana.
+- Ao adicionar palavras com kanji novos, rode `tools/gerar-padroes.mjs` (instruções
+  no próprio arquivo).
+
 ## Modo Frases (só verbos)
 
 Frases de exemplo com o verbo, para lembrar o significado em contexto
@@ -130,3 +154,8 @@ outro, 5 pares por vez:
 
 As abas **Todos**, **Praticando** e **Aprendidos** mostram as palavras com
 busca, filtro por nível JLPT (N5–N1) e os detalhes de cada palavra.
+
+## Créditos
+
+- Reconhecimento de escrita: [KanjiCanvas](https://github.com/asdfjkl/kanjicanvas)
+  © Dominik Klein, licença MIT (`lib/kanjicanvas/LICENSE.TXT`).

@@ -216,6 +216,12 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s ease}
 .switch.on{background:var(--accent)}
 .switch.on::after{transform:translateX(18px)}
+.draw-prompt{min-height:0;padding:12px 16px;gap:2px}
+.draw-prompt-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.draw-prompt .meaning-big{font-size:21px}
+.modes{scrollbar-width:none}.modes::-webkit-scrollbar,.tabs::-webkit-scrollbar{display:none}
+.tabs{scrollbar-width:none}
+.mode{white-space:nowrap;padding:8px 6px}
 </style>
 </head>
 <body>
@@ -233,9 +239,11 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 <div class="modes" id="modes" style="display:none" role="tablist">
   <button type="button" class="mode active" role="tab" aria-selected="true" data-mode="cards">🗂️ Cards</button>
   <button type="button" class="mode" role="tab" aria-selected="false" data-mode="escrita">✏️ Escrita</button>
+  <button type="button" class="mode" role="tab" aria-selected="false" data-mode="desenho">✍️ Desenhar</button>
   <button type="button" class="mode" role="tab" aria-selected="false" data-mode="frases">💬 Frases</button>
 </div>
 <script src="../sons.js"></script>
+<script src="../desenho.js"></script>
 <script src="data.js"></script>
 <main id="main"></main>
 
@@ -583,7 +591,8 @@ window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && state.sheet) cl
 
 function settingsSummary(){
   const parts = [];
-  if(state.mode!=='escrita') parts.push(DIR_LABEL[direction]);
+  if(state.mode!=='escrita' && state.mode!=='desenho') parts.push(DIR_LABEL[direction]);
+  if(state.mode==='desenho') parts.push('✍️ kana ou kanji');
   if(state.mode==='cards'){
     const f = CARD_FILTERS.find(([val])=> val===cardFilterValue());
     if(f && f[0]!=='all') parts.push(f[1]);
@@ -627,9 +636,12 @@ function writePillsHtml(){
 }
 function setKanji(v){ if(state.showKanji!==v) toggleKanji(); }
 function sheetHtml(){
-  const title = {cards:'Ajustes · Cards', frases:'Ajustes · Frases', escrita:'Ajustes · Escrita'}[state.mode];
+  const title = {cards:'Ajustes · Cards', frases:'Ajustes · Frases', escrita:'Ajustes · Escrita', desenho:'Ajustes · Desenhar'}[state.mode];
   let body = '';
-  if(state.mode!=='escrita'){
+  if(state.mode==='desenho'){
+    body += `<div class="setting"><div class="setting-note">Desenhe uma letra por vez. Quando o app reconhece a letra esperada, ela entra sozinha; você também pode tocar numa das sugestões. Vale escrever em kanji ou só em kana.</div></div>`;
+  }
+  if(state.mode!=='escrita' && state.mode!=='desenho'){
     body += `<div class="setting"><div class="setting-label">Direção</div>${segHtml([['jp',DIR_LABEL.jp],['pt',DIR_LABEL.pt]], direction, 'setDirection')}
       <div class="setting-note">${direction==='jp' ? 'Vê o japonês e lembra o significado.' : 'Vê o português e lembra como se diz em japonês.'}</div></div>`;
   }
@@ -740,7 +752,16 @@ function afterRender(){
 }
 function render(){ renderInner(); afterRender(); }
 
+// ===== Modo Desenhar (desenho.js) =====
+let drawCtl = null;
+function drawDone(ok, written){
+  if(drawCtl){ drawCtl.destroy(); drawCtl = null; }
+  state.writeOk = ok; state.drawWritten = written; state.writeChecked = true;
+  Sons.play('cards', ok ? 'acerto' : 'erro');
+  render();
+}
 function renderInner(){
+  if(drawCtl){ drawCtl.destroy(); drawCtl = null; }
   const main = document.getElementById("main");
   document.onkeydown = null;
   document.querySelectorAll(".tab").forEach(t=>{ const active = t.dataset.tab===state.tab; t.classList.toggle("active", active); t.setAttribute("aria-selected", active); });
@@ -776,6 +797,41 @@ function renderInner(){
       const back = `${tag}<div class="sentence">${s.front}</div><div class="answer"><div class="meaning">${s.back}</div></div>`;
       currentAnswer = fraseAnswer;
       main.innerHTML = statsHtml + flipCardHtml(direction==='pt' ? ptFront : jpFront, back) + flipActionsHtml('Não lembrei', 'Lembrei ✓');
+
+    } else if(state.mode==="desenho"){
+      if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
+      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + `<div class="empty">🎉 Fim da rodada de desenho.</div><button class="btn yes" style="width:100%" onclick="buildQueue();render();">🔁 Praticar de novo</button>`; return; }
+      const v = state.queue[state.idx];
+      if(!state.writeChecked){
+        main.innerHTML = statsHtml + `
+          <div class="card nohand draw-prompt"><div class="draw-prompt-row"><span class="meaning-big">${v.meaning}</span><span class="badge nivel-${v.nivel}">${v.nivel}</span></div>
+            <div class="face-sub">Escreva em japonês${v.kanji!==v.kana ? ' (kanji ou kana)' : ''}</div></div>
+          <div id="drawArea"><div class="empty">Carregando reconhecimento…</div></div>`;
+        const idx = state.idx;
+        Desenho.load('../').then(()=>{
+          if(state.mode!=='desenho' || state.idx!==idx || state.writeChecked || !document.getElementById('drawArea')) return;
+          drawCtl = Desenho.mount(document.getElementById('drawArea'), {answers: [v.kanji, v.kana], onDone: drawDone});
+        }).catch(()=>{
+          const el = document.getElementById('drawArea');
+          if(el) el.innerHTML = `<div class="empty">Não consegui carregar o reconhecimento de escrita.<br>Confira a conexão e tente de novo.</div>`;
+        });
+      } else {
+        main.innerHTML = statsHtml + `
+          <div class="card nohand">
+            ${cardTag(v)}
+            <div class="meaning-big">${v.meaning}</div>
+            <div class="answer">
+              <div class="${state.writeOk?'result-ok':'result-no'}">${state.writeOk ? '✓ Certo!' : '✗ Não foi dessa vez'}</div>
+              ${state.drawWritten ? `<div class="face-sub" style="margin-top:10px">você escreveu</div><div class="kana" style="font-size:24px;color:var(--text)">${state.drawWritten}</div>` : ''}
+              <div class="face-sub" style="margin-top:10px">resposta</div>
+              <div class="kanji">${v.kanji}</div>${v.kana!==v.kanji ? `<div class="kana">${v.kana}</div>` : ''}
+              <div class="romaji">${v.romaji}</div>
+            </div>
+          </div>
+          ${!state.writeOk && state.drawWritten ? `<button type="button" class="know-btn" onclick="writeNext(true)">✓ Eu escrevi certo — o reconhecimento errou</button>` : ''}
+          <div class="actions"><button class="btn next" onclick="writeNext(${state.writeOk})">Próxima →</button></div>`;
+        document.onkeydown = (ev)=>{ if(ev.key==="Enter"){ ev.preventDefault(); writeNext(state.writeOk); } };
+      }
 
     } else { // escrita
       if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
