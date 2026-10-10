@@ -33,6 +33,24 @@ const Sons = (()=>{
     o.start(t); o.stop(t + dur + 0.03);
   }
 
+  // "Fwip" de papel: ruído branco curto passando por um filtro que sobe.
+  function swoosh(dur, {from=900, to=3200, gain=0.12}={}){
+    const c = audio(); if(!c) return;
+    const t = c.currentTime;
+    const buf = c.createBuffer(1, Math.ceil(c.sampleRate * dur), c.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let i=0; i<data.length; i++) data[i] = Math.random()*2 - 1;
+    const src = c.createBufferSource(); src.buffer = buf;
+    const f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 1.2;
+    f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t + dur);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + dur*0.3);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(c.destination);
+    src.start(t); src.stop(t + dur + 0.02);
+  }
+
   const SOUNDS = {
     acerto:   ()=>{ tone(880, 0, .12, {type:"triangle"}); tone(1320, .07, .2, {type:"triangle"}); },
     erro:     ()=>{ tone(196, 0, .24, {type:"square", gain:.06, to:130}); },
@@ -43,6 +61,7 @@ const Sons = (()=>{
     // Cards: bem discretos, para não cansar depois de muitas repetições.
     sabia:    ()=>{ tone(988, 0, .1, {gain:.08}); tone(1318, .05, .12, {gain:.06}); },
     praticar: ()=>{ tone(392, 0, .14, {gain:.07, to:330}); },
+    virar:    ()=>{ swoosh(.16); },
   };
 
   function enabled(group){

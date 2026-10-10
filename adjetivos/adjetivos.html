@@ -597,7 +597,7 @@ function sheetHtml(){
     body += `<div class="setting"><div class="setting-label">Palavras novas por dia</div>${segHtml(NEW_LIMIT_OPTIONS.map(n=>[n, n||'∞']), newLimit, 'setNewLimit')}
       <div class="setting-note">Novas hoje: ${nt.count}${newLimit ? ' de ' + (newLimit + nt.extra) : ''}. Vale para verbos e adjetivos.</div></div>`;
     body += `<div class="setting"><div class="setting-label">Tipo de adjetivo</div>${segHtml(CARD_FILTERS, cardFilterValue(), 'setCardFilter')}</div>`;
-    body += `<div class="setting"><button type="button" class="switch-row" onclick="toggleTestMode()" aria-pressed="${state.testMode}"><span>🧪 Modo teste<br><span class="setting-note">Intervalos zerados: tudo volta na hora.</span></span><span class="switch ${state.testMode?'on':''}"></span></button></div>`;
+    <!-- body += `<div class="setting"><button type="button" class="switch-row" onclick="toggleTestMode()" aria-pressed="${state.testMode}"><span>🧪 Modo teste<br><span class="setting-note">Intervalos zerados: tudo volta na hora.</span></span><span class="switch ${state.testMode?'on':''}"></span></button></div>`; -->
   }
   if(state.mode==='frases'){
     body += `<div class="setting"><div class="setting-label">Escrita das frases</div>${segHtml([[true,'漢 Kanji'],[false,'あ Hiragana']], state.showKanji, 'setKanji')}</div>`;
@@ -640,6 +640,7 @@ function flipCard(){
     const hint = document.getElementById('cardHint'); if(hint) hint.textContent = '← arraste: praticar · arraste: sabia →';
   }
   card.classList.toggle('flipped');
+  Sons.play('cards', 'virar');
 }
 function answerAnimated(correct){
   const wrap = document.getElementById('flipWrap');
