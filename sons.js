@@ -1,12 +1,12 @@
 // Sons do app, gerados com Web Audio (sem arquivos de áudio: funciona offline
 // e não pesa no PWA). Dois grupos com liga/desliga próprio, salvos no aparelho:
 //   "jogo"  — Jogo de Pares (ligado por padrão)
-//   "cards" — Cards, Frases e Escrita (desligado por padrão)
+//   "cards" — Cards, Frases e Escrita (ligado por padrão)
 // Navegadores só tocam som depois de um toque na página; no iPhone o modo
 // silencioso também corta os sons.
 const Sons = (()=>{
   const KEYS = {jogo:"jp-sound-game", cards:"jp-sound-cards"};
-  const DEFAULTS = {jogo:true, cards:false};
+  const DEFAULTS = {jogo:true, cards:true};
   let ctx = null;
 
   function audio(){

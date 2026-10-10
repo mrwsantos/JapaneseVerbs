@@ -64,7 +64,7 @@ O botão no canto (ex.: "日本語 → PT ⚙️") abre os ajustes do modo atual
   adjetivo) e modo teste.
 - **Frases**: frases em kanji ou só em hiragana.
 - **Escrita**: quais formas praticar.
-- **🔊 Sons** (todos os modos): sons discretos ao responder. Começa desligado.
+- **🔊 Sons** (todos os modos): sons discretos ao responder. Começa ligado.
 
 ## Modo Cards (o principal)
 
