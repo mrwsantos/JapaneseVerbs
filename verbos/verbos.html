@@ -164,6 +164,56 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .conj-row{display:flex;justify-content:space-between;padding:4px 0}
 .conj-row .lbl{color:var(--sub)}
 .reset{display:block;margin:20px auto 0;font-size:12px;color:var(--sub);background:none;border:none;text-decoration:underline;cursor:pointer}
+.session{margin:2px 0 14px}
+.session-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.counts{display:flex;gap:10px;font-size:11px;color:var(--sub)}
+.counts b{color:var(--text);font-weight:700}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
+.dot.new{background:#8aa4f0}.dot.learning{background:#e8b04a}.dot.learned{background:#4fb57a}
+.settings-btn{display:flex;align-items:center;gap:6px;padding:6px 10px 6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12px;font-weight:600;color:var(--sub);max-width:62%;white-space:nowrap}
+.settings-btn span:first-child{overflow:hidden;text-overflow:ellipsis}
+.settings-btn:hover{color:var(--text)}
+.progress{flex:1;height:6px;border-radius:99px;background:var(--chip);overflow:hidden}
+.progress-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .35s cubic-bezier(.16,1,.3,1)}
+.session-sub{font-size:11px;color:var(--sub);margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.flip-wrap{position:relative;perspective:1200px;touch-action:pan-y;user-select:none;-webkit-user-select:none;transition:transform .25s ease,opacity .25s ease;animation:cardIn .35s cubic-bezier(.16,1,.3,1)}
+.flip-wrap.dragging{transition:none}
+.flip-wrap.leaving{opacity:0}
+.flip{display:grid;cursor:pointer;transition:transform .45s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d;outline:none;border-radius:20px}
+.flip:focus-visible .face{box-shadow:0 0 0 3px var(--accent)}
+.flip.flipped{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:20px;padding:32px 20px;min-height:250px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;text-align:center}
+.face.back{transform:rotateY(180deg)}
+.face .tag-row{margin-bottom:4px}
+.face-sub{font-size:12px;color:var(--sub)}
+.face .answer{width:100%}
+.swipe-tag{position:absolute;top:18px;padding:4px 10px;border-radius:8px;font-weight:700;font-size:13px;opacity:0;transition:opacity .1s;pointer-events:none;border:2px solid;background:var(--card)}
+.swipe-tag.left{left:18px;color:#c0503f;border-color:#c0503f;transform:rotate(-8deg)}
+.swipe-tag.right{right:18px;color:#2f8f57;border-color:#2f8f57;transform:rotate(8deg)}
+.flip-wrap[data-swipe="left"] .swipe-tag.left,.flip-wrap[data-swipe="right"] .swipe-tag.right{opacity:1}
+.card-hint{text-align:center;font-size:11px;color:var(--sub);margin-top:10px;min-height:14px}
+.flip-actions{transition:opacity .2s ease,transform .2s ease}
+.flip-actions:not(.show){opacity:0;pointer-events:none;transform:translateY(12px)}
+@keyframes cardIn{from{opacity:0;transform:translateX(24px) scale(.98)}to{opacity:1;transform:none}}
+.sheet-backdrop{position:fixed;inset:0;background:rgba(20,15,35,.45);z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.sheet-backdrop.anim{animation:fadeIn .2s ease}
+.sheet{background:var(--card);width:100%;max-width:480px;border-radius:22px 22px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:85vh;overflow-y:auto;box-shadow:0 -8px 30px rgba(0,0,0,.2)}
+.sheet-backdrop.anim .sheet{animation:sheetUp .3s cubic-bezier(.16,1,.3,1)}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+.sheet-handle{width:40px;height:4px;border-radius:9px;background:var(--border);margin:0 auto 12px}
+.sheet h2{font-size:16px;margin:0 0 4px}
+.setting{margin:16px 0}
+.setting-label{font-size:12px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;margin-bottom:8px}
+.setting-note{font-size:12px;color:var(--sub);margin-top:6px}
+.seg{display:flex;gap:4px;padding:4px;background:var(--chip);border-radius:12px}
+.seg button{flex:1;padding:9px 4px;border-radius:9px;font-size:13px;font-weight:600;color:var(--sub);white-space:nowrap}
+.seg button.active{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.setting .pillrow{justify-content:flex-start;margin:0}
+.switch-row{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;font-size:14px;text-align:left}
+.switch{width:44px;height:26px;border-radius:99px;background:var(--border);position:relative;flex:none;transition:background-color .2s ease}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s ease}
+.switch.on{background:var(--accent)}
+.switch.on::after{transform:translateX(18px)}
 </style>
 </head>
 <body>
@@ -512,7 +562,178 @@ function counts(){
   return {novo, praticando, aprendido};
 }
 
-function render(){
+// ===== Estudo: direção, ajustes e cards no estilo Anki/Quizlet =====
+const DIRECTION_KEY = "jp-direction"; // compartilhado entre verbos e adjetivos
+function loadDirection(){ try{ return localStorage.getItem(DIRECTION_KEY)==='pt' ? 'pt' : 'jp'; }catch(e){ return 'jp'; } }
+let direction = loadDirection();
+function setDirection(d){ direction = d; try{ localStorage.setItem(DIRECTION_KEY, d); }catch(e){} state.revealed = false; render(); }
+const DIR_LABEL = {jp:'日本語 → PT', pt:'PT → 日本語'};
+const CARD_FILTERS = [['all','Todos'],[1,'Grupo 1'],[2,'Grupo 2'],[3,'Grupo 3']];
+function setCardFilter(v){ setCardGroupFilter(v); }
+function cardFilterValue(){ return state.cardGroupFilter; }
+function cardTag(v){ return `<div class="tag-row"><span class="group-tag">${GROUP_NAME[v.group]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>`; }
+
+function openSheet(){ state.sheet = true; state.sheetAnim = true; render(); }
+function closeSheet(){ state.sheet = false; render(); }
+window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && state.sheet) closeSheet(); });
+
+function settingsSummary(){
+  const parts = [];
+  if(state.mode!=='escrita') parts.push(DIR_LABEL[direction]);
+  if(state.mode==='cards'){
+    const f = CARD_FILTERS.find(([val])=> val===cardFilterValue());
+    if(f && f[0]!=='all') parts.push(f[1]);
+    if(state.testMode) parts.push('🧪 teste');
+  }
+  if(state.mode==='frases') parts.push(state.showKanji ? '漢字' : 'かな');
+  if(state.mode==='escrita'){
+    const f = state.writeFilter;
+    parts.push(f.shuffle ? '🎲 Embaralhado' : [f.polite==='formal'?'Formal':'Informal', f.past?'Passado':'Presente', f.neg?'Negativo':''].filter(Boolean).join(' · '));
+  }
+  return parts.join(' · ');
+}
+function sessionBar(c){
+  const total = state.queue.length, done = Math.min(state.idx, total);
+  const pct = total ? Math.round(done/total*100) : 0;
+  const nt = touchNewToday();
+  const right = state.mode==='cards' ? `novas hoje ${nt.count}${newLimit ? '/' + (newLimit + nt.extra) : ''}` : '';
+  return `<div class="session">
+    <div class="session-top">
+      <div class="progress" role="progressbar" aria-label="Progresso da rodada" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <button type="button" class="settings-btn" onclick="openSheet()" aria-label="Ajustes"><span>${settingsSummary()}</span><span aria-hidden="true">⚙️</span></button>
+    </div>
+    <div class="session-sub">
+      <div class="counts"><span><i class="dot new"></i><b>${c.novo}</b> novos</span><span><i class="dot learning"></i><b>${c.praticando}</b> praticando</span><span><i class="dot learned"></i><b>${c.aprendido}</b> aprendidos</span></div>
+      <span>${total-done} na fila${right ? ' · ' + right : ''}</span>
+    </div>
+  </div>`;
+}
+function segHtml(opts, cur, fn){
+  return `<div class="seg">${opts.map(([val,label])=>`<button type="button" class="${val===cur?'active':''}" aria-pressed="${val===cur}" onclick='${fn}(${JSON.stringify(val)})'>${label}</button>`).join('')}</div>`;
+}
+function writePillsHtml(){
+  const f = state.writeFilter;
+  return `<div class="pillrow">
+    <button type="button" class="pill ${f.polite==='informal'&&!f.shuffle?'active':''}" aria-pressed="${f.polite==='informal'&&!f.shuffle}" onclick="toggleFilter('informal')">Informal</button>
+    <button type="button" class="pill ${f.polite==='formal'&&!f.shuffle?'active':''}" aria-pressed="${f.polite==='formal'&&!f.shuffle}" onclick="toggleFilter('formal')">Formal</button>
+    <button type="button" class="pill ${f.past&&!f.shuffle?'active':''}" aria-pressed="${f.past&&!f.shuffle}" onclick="toggleFilter('past')">Passado</button>
+    <button type="button" class="pill ${f.neg&&!f.shuffle?'active':''}" aria-pressed="${f.neg&&!f.shuffle}" onclick="toggleFilter('neg')">Negativo</button>
+    <button type="button" class="pill ${f.shuffle?'active':''}" aria-pressed="${!!f.shuffle}" onclick="toggleFilter('shuffle')">🎲 Embaralhado</button>
+  </div>`;
+}
+function setKanji(v){ if(state.showKanji!==v) toggleKanji(); }
+function sheetHtml(){
+  const title = {cards:'Ajustes · Cards', frases:'Ajustes · Frases', escrita:'Ajustes · Escrita'}[state.mode];
+  let body = '';
+  if(state.mode!=='escrita'){
+    body += `<div class="setting"><div class="setting-label">Direção</div>${segHtml([['jp',DIR_LABEL.jp],['pt',DIR_LABEL.pt]], direction, 'setDirection')}
+      <div class="setting-note">${direction==='jp' ? 'Vê o japonês e lembra o significado.' : 'Vê o português e lembra como se diz em japonês.'}</div></div>`;
+  }
+  if(state.mode==='cards'){
+    const nt = touchNewToday();
+    body += `<div class="setting"><div class="setting-label">Palavras novas por dia</div>${segHtml(NEW_LIMIT_OPTIONS.map(n=>[n, n||'∞']), newLimit, 'setNewLimit')}
+      <div class="setting-note">Novas hoje: ${nt.count}${newLimit ? ' de ' + (newLimit + nt.extra) : ''}. Vale para verbos e adjetivos.</div></div>`;
+    body += `<div class="setting"><div class="setting-label">Grupo dos verbos</div>${segHtml(CARD_FILTERS, cardFilterValue(), 'setCardFilter')}</div>`;
+    body += `<div class="setting"><button type="button" class="switch-row" onclick="toggleTestMode()" aria-pressed="${state.testMode}"><span>🧪 Modo teste<br><span class="setting-note">Intervalos zerados: tudo volta na hora.</span></span><span class="switch ${state.testMode?'on':''}"></span></button></div>`;
+  }
+  if(state.mode==='frases'){
+    body += `<div class="setting"><div class="setting-label">Escrita das frases</div>${segHtml([[true,'漢 Kanji'],[false,'あ Hiragana']], state.showKanji, 'setKanji')}</div>`;
+  }
+  if(state.mode==='escrita'){
+    body += `<div class="setting"><div class="setting-label">Formas para praticar</div>${writePillsHtml()}</div>`;
+  }
+  return `<div class="sheet-backdrop ${state.sheetAnim?'anim':''}" onclick="closeSheet()">
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="${title}" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div><h2>${title}</h2>${body}
+      <button type="button" class="modal-close" onclick="closeSheet()">Pronto</button>
+    </div></div>`;
+}
+
+function flipCardHtml(front, back){
+  return `<div class="flip-wrap" id="flipWrap">
+    <div class="flip ${state.revealed?'flipped':''}" id="card" role="button" tabindex="0" aria-label="Virar card">
+      <div class="face front">${front}<div class="hint">Toque para virar</div></div>
+      <div class="face back">${back}</div>
+    </div>
+    <div class="swipe-tag left">Praticar</div><div class="swipe-tag right">Sabia</div>
+  </div>
+  <div class="card-hint" id="cardHint">${state.revealed ? '← arraste: praticar · arraste: sabia →' : 'Espaço vira · 1/← praticar · 2/→ sabia'}</div>`;
+}
+function flipActionsHtml(noLabel, yesLabel){
+  return `<div class="actions flip-actions ${state.revealed?'show':''}" id="flipActions"><button class="btn no" onclick="answerAnimated(false)">${noLabel}</button><button class="btn yes" onclick="answerAnimated(true)">${yesLabel}</button></div>`;
+}
+function jpFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div>`; }
+function ptFaceHtml(v){ return `${cardTag(v)}<div class="meaning-big">${v.meaning}</div><div class="face-sub">Como se diz em japonês?</div>`; }
+function answerFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div><div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>`; }
+
+let currentAnswer = null; // answer (Cards) ou fraseAnswer (Frases)
+let animating = false;
+function flipCard(){
+  const card = document.getElementById('card'); if(!card) return;
+  if(!state.revealed){
+    state.revealed = true;
+    const acts = document.getElementById('flipActions'); if(acts) acts.classList.add('show');
+    const hint = document.getElementById('cardHint'); if(hint) hint.textContent = '← arraste: praticar · arraste: sabia →';
+  }
+  card.classList.toggle('flipped');
+}
+function answerAnimated(correct){
+  const wrap = document.getElementById('flipWrap');
+  if(animating || !state.revealed || !wrap || !currentAnswer) return;
+  animating = true;
+  const fn = currentAnswer;
+  wrap.classList.remove('dragging'); wrap.classList.add('leaving');
+  wrap.style.transform = `translateX(${correct?120:-120}%) rotate(${correct?14:-14}deg)`;
+  setTimeout(()=>{ animating = false; fn(correct); }, 230);
+}
+// Toque vira o card; depois de virado, arrastar para a direita = Sabia,
+// para a esquerda = Praticar mais (como no Quizlet/Tinder).
+function setupCardGestures(){
+  const card = document.getElementById('card'), wrap = document.getElementById('flipWrap');
+  if(!card || !wrap) return;
+  let sx = 0, dx = 0, dragging = false, moved = false;
+  card.addEventListener('pointerdown', (e)=>{
+    if(e.button!==0 || animating) return;
+    sx = e.clientX; dx = 0; dragging = true; moved = false;
+    card.setPointerCapture(e.pointerId); wrap.classList.add('dragging');
+  });
+  card.addEventListener('pointermove', (e)=>{
+    if(!dragging) return;
+    dx = e.clientX - sx;
+    if(Math.abs(dx) > 8) moved = true;
+    const shown = state.revealed ? dx : dx * 0.2; // sem resposta à vista, só "balança"
+    wrap.style.transform = `translateX(${shown}px) rotate(${shown/22}deg)`;
+    wrap.dataset.swipe = state.revealed && dx > 50 ? 'right' : state.revealed && dx < -50 ? 'left' : '';
+  });
+  const end = ()=>{
+    if(!dragging) return;
+    dragging = false; wrap.classList.remove('dragging'); wrap.dataset.swipe = '';
+    if(state.revealed && Math.abs(dx) > 90){ answerAnimated(dx > 0); return; }
+    wrap.style.transform = '';
+    if(!moved) flipCard();
+  };
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', ()=>{ dragging = false; wrap.classList.remove('dragging'); wrap.style.transform = ''; wrap.dataset.swipe = ''; });
+  document.onkeydown = (e)=>{
+    if(state.sheet) return;
+    const tag = e.target.tagName;
+    if(tag==='INPUT' || tag==='SELECT' || tag==='TEXTAREA') return;
+    if(e.key===' ' || (e.key==='Enter' && tag!=='BUTTON')){ e.preventDefault(); flipCard(); return; }
+    if(e.key==='1' || e.key==='ArrowLeft') answerAnimated(false);
+    if(e.key==='2' || e.key==='ArrowRight') answerAnimated(true);
+  };
+}
+function afterRender(){
+  if(state.tab!=='study'){ state.sheet = false; return; }
+  if(document.getElementById('flipWrap')) setupCardGestures();
+  if(state.sheet){
+    document.getElementById('main').insertAdjacentHTML('beforeend', sheetHtml());
+    state.sheetAnim = false;
+  }
+}
+function render(){ renderInner(); afterRender(); }
+
+function renderInner(){
   const main = document.getElementById("main");
   document.onkeydown = null;
   document.querySelectorAll(".tab").forEach(t=>{ const active = t.dataset.tab===state.tab; t.classList.toggle("active", active); t.setAttribute("aria-selected", active); });
@@ -521,69 +742,39 @@ function render(){
   const c = counts();
 
   if(state.tab==="study"){
-    const statsHtml = `<div class="stats"><div><b>${c.novo}</b>Novos</div><div><b>${c.praticando}</b>Praticando</div><div><b>${c.aprendido}</b>Aprendidos</div><div><b>${state.queue.length-state.idx}</b>Na fila</div></div>`;
-    const testToggleHtml = state.mode==="cards" ? `<button class="reset" style="margin:0 0 10px" onclick="toggleTestMode()">${state.testMode?'🧪 Modo teste: ON (toque pra desligar)':'Ativar modo teste (intervalos = 0)'}</button>` : '';
+    const statsHtml = sessionBar(c);
 
     if(state.mode==="cards"){
-      const groupFilterHtml = `<div class="pillrow">
-        <button type="button" class="pill ${state.cardGroupFilter==='all'?'active':''}" aria-pressed="${state.cardGroupFilter==='all'}" onclick="setCardGroupFilter('all')">Todos</button>
-        <button type="button" class="pill ${state.cardGroupFilter===1?'active':''}" aria-pressed="${state.cardGroupFilter===1}" onclick="setCardGroupFilter(1)">Grupo 1</button>
-        <button type="button" class="pill ${state.cardGroupFilter===2?'active':''}" aria-pressed="${state.cardGroupFilter===2}" onclick="setCardGroupFilter(2)">Grupo 2</button>
-        <button type="button" class="pill ${state.cardGroupFilter===3?'active':''}" aria-pressed="${state.cardGroupFilter===3}" onclick="setCardGroupFilter(3)">Grupo 3</button>
-      </div>`;
-      const nt = touchNewToday();
-      const newLimitHtml = `<div class="newlimit">Novas hoje: ${nt.count}${newLimit ? '/' + (newLimit + nt.extra) : ''} · por dia:
-        <select aria-label="Palavras novas por dia" onchange="setNewLimit(+this.value)">${NEW_LIMIT_OPTIONS.map(n=>`<option value="${n}" ${n===newLimit?'selected':''}>${n||'sem limite'}</option>`).join('')}</select></div>`;
       if(state.idx >= state.queue.length){
         const newLeft = cardPool().filter(isNew).length;
         const doneHtml = newLeft>0 && newSlotsLeft()===0
           ? `<div class="empty">🎉 Rodada de hoje concluída!<br>Ainda faltam ${newLeft} verbos novos — quer mais?</div><button type="button" class="know-btn" onclick="moreNew()">+10 novas</button>`
           : `<div class="empty">🎉 Nada pendente agora.<br>Volte mais tarde ou revise as listas.</div>`;
-        main.innerHTML = statsHtml + newLimitHtml + testToggleHtml + groupFilterHtml + doneHtml; return;
+        main.innerHTML = statsHtml + doneHtml; return;
       }
       const v = state.queue[state.idx];
-      const cardTag = state.revealed ? 'div' : 'button';
-      const cardAttrs = state.revealed ? 'class="card nohand" id="card"' : 'type="button" class="card" id="card"';
-      main.innerHTML = statsHtml + newLimitHtml + testToggleHtml + groupFilterHtml + `
-        <${cardTag} ${cardAttrs}>
-          <div class="tag-row"><span class="group-tag">${GROUP_NAME[v.group]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>
-          <div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div>
-          ${state.revealed ? `<div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>` : `<div class="hint">Toque para ver a resposta</div>`}
-        </${cardTag}>
-        ${getStatus(v)==='novo' ? `<button type="button" class="know-btn" onclick="knowIt()">✓ Já sei essa — marcar como aprendida</button>` : ''}
-        ${state.revealed ? `<div class="actions"><button class="btn no" onclick="answer(false)">Praticar mais</button><button class="btn yes" onclick="answer(true)">Sabia</button></div>` : ``}`;
-      if(!state.revealed) document.getElementById("card").onclick = ()=>{ state.revealed=true; render(); };
+      currentAnswer = answer;
+      main.innerHTML = statsHtml
+        + flipCardHtml(direction==='pt' ? ptFaceHtml(v) : jpFaceHtml(v), answerFaceHtml(v))
+        + (getStatus(v)==='novo' ? `<button type="button" class="know-btn" onclick="knowIt()">✓ Já sei essa — marcar como aprendida</button>` : '')
+        + flipActionsHtml('Praticar mais', 'Sabia');
 
     } else if(state.mode==="frases"){
-      const kanjiToggleHtml = `<div class="pillrow">
-        <button type="button" class="pill ${state.showKanji?'active':''}" aria-pressed="${state.showKanji}" onclick="toggleKanji()">${state.showKanji ? '漢 Kanji' : 'あ Hiragana'}</button>
-      </div>`;
-      if(state.queue.length===0){ main.innerHTML = statsHtml + kanjiToggleHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
-      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + kanjiToggleHtml + `<div class="empty">🎉 Fim das frases desta rodada.</div><button class="btn next" style="margin-top:12px" onclick="buildQueue();render();">Recomeçar</button>`; return; }
+      if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
+      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + `<div class="empty">🎉 Fim das frases desta rodada.</div><button class="btn next" style="margin-top:12px;width:100%" onclick="buildQueue();render();">Recomeçar</button>`; return; }
       const v = state.queue[state.idx]; const s = sentenceFor(v, state.showKanji);
-      const cardTag2 = state.revealed ? 'div' : 'button';
-      const cardAttrs2 = state.revealed ? 'class="card nohand" id="card"' : 'type="button" class="card" id="card"';
-      main.innerHTML = statsHtml + kanjiToggleHtml + `
-        <${cardTag2} ${cardAttrs2}>
-          <div class="tag-row"><span class="group-tag">${state.showKanji ? v.kanji : v.kana} · ${GROUP_NAME[v.group]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>
-          <div class="sentence">${s.front}</div>
-          ${state.revealed ? `<div class="answer"><div class="meaning">${s.back}</div></div>` : `<div class="hint">Toque para ver a tradução</div>`}
-        </${cardTag2}>
-        ${state.revealed ? `<div class="actions"><button class="btn no" onclick="fraseAnswer(false)">Não lembrei</button><button class="btn yes" onclick="fraseAnswer(true)">Lembrei ✓</button></div>` : ``}`;
-      if(!state.revealed) document.getElementById("card").onclick = ()=>{ state.revealed=true; render(); };
+      const tag = `<div class="tag-row"><span class="group-tag">${state.showKanji ? v.kanji : v.kana} · ${GROUP_NAME[v.group]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>`;
+      const jpFront = `${tag}<div class="sentence">${s.front}</div>`;
+      const ptFront = `${tag}<div class="sentence">${s.back}</div><div class="face-sub">Como fica em japonês?</div>`;
+      const back = `${tag}<div class="sentence">${s.front}</div><div class="answer"><div class="meaning">${s.back}</div></div>`;
+      currentAnswer = fraseAnswer;
+      main.innerHTML = statsHtml + flipCardHtml(direction==='pt' ? ptFront : jpFront, back) + flipActionsHtml('Não lembrei', 'Lembrei ✓');
 
     } else { // escrita
       if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
       if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + `<div class="empty">🎉 Fim da rodada de escrita.</div><div class="actions"><button class="btn yes" onclick="buildQueue();render();">🔁 Praticar de novo</button></div>`; return; }
       const v = state.queue[state.idx];
       const f = state.writeFilter;
-      const pillsHtml = `<div class="pillrow">
-        <button type="button" class="pill ${f.polite==='informal'&&!f.shuffle?'active':''}" aria-pressed="${f.polite==='informal'&&!f.shuffle}" onclick="toggleFilter('informal')">Informal</button>
-        <button type="button" class="pill ${f.polite==='formal'&&!f.shuffle?'active':''}" aria-pressed="${f.polite==='formal'&&!f.shuffle}" onclick="toggleFilter('formal')">Formal</button>
-        <button type="button" class="pill ${f.past&&!f.shuffle?'active':''}" aria-pressed="${f.past&&!f.shuffle}" onclick="toggleFilter('past')">Passado</button>
-        <button type="button" class="pill ${f.neg&&!f.shuffle?'active':''}" aria-pressed="${f.neg&&!f.shuffle}" onclick="toggleFilter('neg')">Negativo</button>
-        <button type="button" class="pill ${f.shuffle?'active':''}" aria-pressed="${!!f.shuffle}" onclick="toggleFilter('shuffle')">🎲 Embaralhado</button>
-      </div>`;
       if(f.shuffle && !state.shuffledFilter) state.shuffledFilter = randomFilter();
       const eff = f.shuffle ? state.shuffledFilter : f;
       const tagsHtml = `<div class="tags">
@@ -594,7 +785,7 @@ function render(){
       </div>`;
       const ptPhrase = ptForm(v, eff.past, eff.neg);
       if(!state.writeChecked){
-        main.innerHTML = statsHtml + pillsHtml + `
+        main.innerHTML = statsHtml + `
           <div class="card nohand">
             <div class="tag-row"><span class="group-tag">${GROUP_NAME[v.group]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>
             <div class="meaning-big">${ptPhrase}</div>
@@ -604,10 +795,10 @@ function render(){
           </div>
           <div class="actions"><button class="btn yes" onclick="checkWrite()">Conferir</button></div>`;
         const inp = document.getElementById("writeInput");
-        inp.focus();
+        if(!state.sheet) inp.focus();
         inp.onkeydown = (ev)=>{ if(ev.key==="Enter"){ ev.stopPropagation(); checkWrite(); } };
       } else {
-        main.innerHTML = statsHtml + pillsHtml + `
+        main.innerHTML = statsHtml + `
           <div class="card nohand">
             <div class="tag-row"><span class="group-tag">${GROUP_NAME[v.group]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>
             <div class="meaning-big">${ptPhrase}</div>

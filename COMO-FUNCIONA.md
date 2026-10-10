@@ -11,6 +11,7 @@ index.html              tela inicial (abre direto o último modo usado)
 manifest.json, sw.js    PWA: instalação e funcionamento offline
 verbos/verbos.html      app de verbos      (dados em verbos/data.js)
 adjetivos/adjetivos.html app de adjetivos  (dados em adjetivos/data.js)
+jogo/jogo.html          jogo de pares (usa os dados dos dois apps)
 icons/, fonts/
 ```
 
@@ -40,6 +41,29 @@ volta para revisão:
 Uma palavra nova precisa de **2 acertos em dias diferentes** para chegar em
 Praticando (acerta hoje → nível 1, volta amanhã → acerta → nível 2).
 
+## Como estudar um card
+
+Funciona como no Anki/Quizlet:
+
+- **Toque** no card (ou **Espaço**) para virar e ver a resposta. Toque de novo
+  para espiar a frente.
+- Depois de virar, **arraste para a direita** = Sabia / Lembrei, **arraste para
+  a esquerda** = Praticar mais / Não lembrei. Os botões embaixo fazem o mesmo.
+- No teclado: **1** ou **←** = praticar, **2** ou **→** = sabia.
+- A barra no topo mostra o progresso da rodada e quantas palavras faltam.
+
+## ⚙️ Ajustes
+
+O botão no canto (ex.: "日本語 → PT ⚙️") abre os ajustes do modo atual:
+
+- **Direção** (Cards e Frases, vale para verbos e adjetivos):
+  **日本語 → PT** mostra o japonês e você lembra o significado;
+  **PT → 日本語** mostra o português e você lembra como se diz em japonês.
+- **Cards**: palavras novas por dia, filtro (grupo do verbo / tipo de
+  adjetivo) e modo teste.
+- **Frases**: frases em kanji ou só em hiragana.
+- **Escrita**: quais formas praticar.
+
 ## Modo Cards (o principal)
 
 A rodada do dia é: **revisões vencidas** + **palavras novas até o limite diário**.
@@ -55,8 +79,9 @@ A rodada do dia é: **revisões vencidas** + **palavras novas até o limite diá
   verbos e adjetivos, mas cada um conta as suas novas separadamente.
 - Acabou a rodada e ainda tem palavras novas? Toque em **+10 novas** para
   continuar estudando.
-- Filtros: verbos por grupo (1, 2, 3), adjetivos por tipo (い / な).
-- **Modo teste** zera os intervalos (tudo volta na hora) — útil só para testar.
+- Filtros (nos Ajustes): verbos por grupo (1, 2, 3), adjetivos por tipo (い / な).
+- **Modo teste** (nos Ajustes) zera os intervalos (tudo volta na hora) — útil só
+  para testar.
 
 > Repetir no mesmo dia uma palavra que você já acertou não ajuda a memorizar; o
 > que fixa é revisar depois de alguns dias. Por isso só os **erros** voltam na
@@ -68,7 +93,8 @@ Prática extra com as palavras em **Praticando** ou **Aprendido**, embaralhadas.
 
 - Aparece a frase **em português** já conjugada (ex.: "não comeu", "não era
   grande") e você escreve em japonês — vale romaji, hiragana, katakana ou kanji.
-- Filtros: Informal / Formal, Passado, Negativo ou 🎲 Embaralhado.
+- Formas (nos Ajustes): Informal / Formal, Passado, Negativo ou 🎲 Embaralhado.
+- Não muda com a Direção: aqui é sempre português → você escreve em japonês.
 - Acertou → sobe um nível. Errou → desce um nível, mas **nunca abaixo de
   Praticando** (escrita é treino extra, não te faz "desaprender").
 
@@ -78,6 +104,20 @@ Frases de exemplo com o verbo, para lembrar o significado em contexto
 (alternável entre kanji e hiragana). Cada acerto conta até 2; errar desce um
 nível (sem sair de Praticando). São necessários **2 acertos** em Frases para
 um verbo ficar **Aprendido**.
+
+## 🎮 Jogo de Pares
+
+Página própria (botão na tela inicial). Português de um lado, japonês do
+outro, 5 pares por vez:
+
+- Começa com **10 segundos**; cada par certo dá **+2s** e as casas usadas
+  recebem palavras novas.
+- Só entram verbos e adjetivos que você já está **praticando** ou **aprendeu**
+  (precisa de pelo menos 6; se não tiver, dá para jogar com as palavras N5).
+- Palavras com o mesmo sentido (ex.: 危ない e 危険, "perigoso") nunca aparecem
+  juntas, para o par nunca ficar ambíguo.
+- Errar não tira tempo, mas o relógio continua correndo. O recorde fica salvo.
+- O jogo não mexe no seu progresso do SRS.
 
 ## Listas
 

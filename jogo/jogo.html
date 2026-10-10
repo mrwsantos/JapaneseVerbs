@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jogo de Pares — 日本語</title>
+<meta name="theme-color" content="#6b47ea">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Japonês SRS">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/app-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../icons/app-192.png">
+<style>
+:root{
+  --bg:#f8f7fb; --card:#ffffff; --text:#1c1a24; --sub:#6c6879;
+  --accent:#6b47ea; --accent2:#ea6b47; --border:#e4e1ec; --chip:#efedf7;
+  --ok:#2f8f57; --ok-bg:#d3ecdc; --no:#c0503f; --no-bg:#f5d6d2;
+  --shadow:0 1px 2px rgba(30,20,60,.04), 0 8px 24px rgba(30,20,60,.06);
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#9a7bff; --accent2:#ff9472; --border:#37334a; --chip:#2a2736; --ok:#9fe0b8; --ok-bg:#20402c; --no:#f5b8ae; --no-bg:#4a2621; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); } }
+:root[data-theme="dark"]{ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#9a7bff; --accent2:#ff9472; --border:#37334a; --chip:#2a2736; --ok:#9fe0b8; --ok-bg:#20402c; --no:#f5b8ae; --no-bg:#4a2621; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+@font-face{font-family:"Google Sans";src:url('../fonts/GoogleSans-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:"Google Sans";src:url('../fonts/GoogleSans-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+body{background:var(--bg);color:var(--text);font-family:"Google Sans",-apple-system,"Hiragino Sans",sans-serif;display:flex;flex-direction:column;min-height:100%;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes popIn{0%{opacity:0;transform:scale(.85)}65%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+@keyframes floatUp{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-34px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important} }
+header{position:relative;padding:16px 16px calc(12px + env(safe-area-inset-top,0px));text-align:center;border-bottom:1px solid var(--border)}
+h1{font-size:16px;margin:0;font-weight:700}
+.home-btn,.theme-btn{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px;color:inherit;text-decoration:none;line-height:1.2}
+.home-btn{left:14px}.theme-btn{right:14px}
+.home-btn:hover,.theme-btn:hover{background:var(--chip)}
+main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:16px 16px 24px;display:flex;flex-direction:column}
+
+/* Tela inicial e fim de jogo */
+.panel{text-align:center;padding:24px 4px;animation:fadeInUp .35s cubic-bezier(.16,1,.3,1)}
+.big-emoji{font-size:52px;line-height:1}
+.panel h2{font-size:22px;margin:12px 0 6px}
+.panel p{color:var(--sub);font-size:14px;line-height:1.55;margin:6px 0}
+.rules{display:grid;gap:8px;margin:18px 0;text-align:left}
+.rule{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;font-size:14px}
+.rule b{font-size:18px;min-width:28px;text-align:center}
+.pool{font-size:13px;color:var(--sub);margin:4px 0 18px}
+.pool b{color:var(--text)}
+.cta{display:block;width:100%;padding:15px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:16px;font-weight:700;box-shadow:var(--shadow);transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+.cta:active{transform:scale(.97)}
+.ghost{display:block;width:100%;margin-top:10px;padding:13px;border-radius:14px;border:1px solid var(--border);color:var(--sub);font-weight:600;font-size:14px}
+.score-big{font-size:64px;font-weight:700;line-height:1;margin:8px 0 2px;font-variant-numeric:tabular-nums}
+.record{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:99px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:12px;font-weight:700;animation:popIn .5s cubic-bezier(.34,1.56,.64,1)}
+
+/* Jogo */
+.hud{position:relative;display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.clock{font-size:28px;font-weight:700;min-width:74px;font-variant-numeric:tabular-nums}
+.clock.low{color:var(--no);animation:pulse .6s ease infinite}
+.score{margin-left:auto;text-align:right;font-size:12px;color:var(--sub)}
+.score b{display:block;color:var(--text);font-size:22px;font-variant-numeric:tabular-nums}
+.timebar{height:8px;border-radius:99px;background:var(--chip);overflow:hidden;margin-bottom:16px}
+.timebar div{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transform-origin:left;will-change:transform}
+.timebar.low div{background:var(--no)}
+.cols-head{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;text-align:center}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative}
+.col{display:grid;gap:10px;grid-auto-rows:1fr}
+.tile{position:relative;min-height:66px;padding:8px 8px;border-radius:14px;background:var(--card);border:2px solid var(--border);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:14px;font-weight:600;line-height:1.25;transition:border-color .12s ease,background-color .12s ease,transform .12s ease;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.tile:active{transform:scale(.97)}
+.tile .jp{font-size:19px;font-weight:600}
+.tile .kana{font-size:11px;color:var(--sub);font-weight:400;margin-top:2px}
+.tile.sel{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--card));box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent);transform:translateY(-2px)}
+.tile.ok{border-color:var(--ok);background:var(--ok-bg)}
+.tile.no{border-color:var(--no);background:var(--no-bg);animation:shake .35s ease}
+.tile.fresh{animation:popIn .35s cubic-bezier(.34,1.56,.64,1)}
+.bonus{position:absolute;left:50%;top:-6px;font-weight:700;color:var(--ok);font-size:15px;pointer-events:none;animation:floatUp .8s ease forwards}
+.tip{text-align:center;font-size:12px;color:var(--sub);margin-top:14px}
+</style>
+</head>
+<body>
+<header>
+  <a class="home-btn" href="../index.html?home" aria-label="Início">⌂</a>
+  <h1>🎮 Jogo de Pares</h1>
+  <button type="button" class="theme-btn" id="themeBtn" aria-label="Alternar tema"></button>
+</header>
+<main id="main"></main>
+
+<script src="../verbos/data.js"></script>
+<script src="../adjetivos/data.js"></script>
+<script>
+// Jogo de pares: português de um lado, japonês do outro. Começa com 10s;
+// cada par certo dá +2s e as casas usadas recebem palavras novas.
+// O vocabulário vem dos verbos e adjetivos em "Praticando" ou "Aprendido".
+const START_SECONDS = 10;
+const BONUS_SECONDS = 2;
+const PAIRS = 5;
+const BEST_KEY = "jp-game-best";
+
+const THEME_KEY = "jp-theme";
+let themeMode = 'auto';
+try{ themeMode = localStorage.getItem(THEME_KEY) || 'auto'; }catch(e){}
+function applyTheme(mode){
+  if(mode==='light' || mode==='dark') document.documentElement.setAttribute('data-theme', mode);
+  else document.documentElement.removeAttribute('data-theme');
+  const btn = document.getElementById('themeBtn');
+  btn.textContent = mode==='light' ? '☀️' : mode==='dark' ? '🌙' : '🔄';
+  btn.title = 'Tema: ' + (mode==='light'?'claro':mode==='dark'?'escuro':'automático');
+}
+applyTheme(themeMode);
+document.getElementById('themeBtn').onclick = ()=>{
+  themeMode = themeMode==='auto' ? 'light' : themeMode==='light' ? 'dark' : 'auto';
+  try{ localStorage.setItem(THEME_KEY, themeMode); }catch(e){}
+  applyTheme(themeMode);
+};
+
+function loadJSON(key){ try{ return JSON.parse(localStorage.getItem(key)) || {}; }catch(e){ return {}; } }
+function loadBest(){ try{ return parseInt(localStorage.getItem(BEST_KEY),10) || 0; }catch(e){ return 0; } }
+function saveBest(n){ try{ localStorage.setItem(BEST_KEY, String(n)); }catch(e){} }
+
+// Mesmos ids e chaves de progresso dos apps de verbos e adjetivos.
+function buildPool(onlyStudied){
+  const pv = loadJSON("jpverbs-progress-v2"), pa = loadJSON("jpadj-progress-v1");
+  const studied = (prog, i)=> prog[i] && prog[i].level >= 2;
+  const verbs = VERBS_RAW.map((w,i)=>({...w, key:'v'+i})).filter((w,i)=> onlyStudied ? studied(pv,i) : w.nivel==='N5');
+  const adjs = ADJ_RAW.map((w,i)=>({...w, key:'a'+i})).filter((w,i)=> onlyStudied ? studied(pa,i) : w.nivel==='N5');
+  return {verbs: verbs.length, adjs: adjs.length, words: verbs.concat(adjs).map(w=>({...w, senses: sensesOf(w.meaning)}))};
+}
+// "frio / gelado (objeto)" -> ["frio","gelado"]: duas palavras que dividem um
+// sentido nunca aparecem juntas, senão o par ficaria ambíguo.
+function sensesOf(meaning){ return meaning.split('/').map(t=>t.replace(/\(.*?\)/g,'').trim().toLowerCase()).filter(Boolean); }
+function clash(a, b){ return a.senses.some(s=> b.senses.includes(s)); }
+function distinctSenseCount(words){
+  const picked = [];
+  for(const w of words) if(!picked.some(p=> clash(p, w))) picked.push(w);
+  return picked.length;
+}
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+function vibrate(p){ try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} }
+
+let game = null;
+
+function drawWord(){
+  const shown = game.left.filter(Boolean);
+  const ok = (w)=> !shown.some(s=> s.key===w.key || clash(s, w));
+  for(let tries=0; tries<2; tries++){
+    while(game.deck.length){
+      const w = game.deck.pop();
+      if(ok(w) && w.key!==game.lastKey) return w;
+      game.skipped.push(w);
+    }
+    // Baralho acabou: embaralha de novo tudo que não está na tela.
+    game.deck = shuffle(game.skipped.concat(game.used)); game.skipped = []; game.used = [];
+  }
+  return game.pool.find(ok) || game.pool[0];
+}
+
+function startGame(onlyStudied){
+  const {words} = buildPool(onlyStudied);
+  game = {pool: words, deck: shuffle(words.slice()), skipped: [], used: [], lastKey: null,
+          left: Array(PAIRS).fill(null), right: Array(PAIRS).fill(null),
+          sel: null, score: 0, endAt: 0, over: false, busy: false, onlyStudied};
+  for(let i=0;i<PAIRS;i++){ game.left[i] = drawWord(); }
+  game.right = shuffle(game.left.slice());
+  renderBoard(true);
+  game.endAt = performance.now() + START_SECONDS*1000;
+  requestAnimationFrame(tick);
+}
+
+function tick(now){
+  if(!game || game.over) return;
+  const left = Math.max(0, game.endAt - now);
+  const secs = left/1000;
+  const clock = document.getElementById('clock'), bar = document.getElementById('timebar');
+  if(clock){
+    clock.textContent = secs.toFixed(1) + 's';
+    const low = secs < 3;
+    clock.classList.toggle('low', low); bar.classList.toggle('low', low);
+    bar.firstElementChild.style.transform = `scaleX(${Math.min(1, secs/START_SECONDS)})`;
+  }
+  if(left <= 0){ endGame(); return; }
+  requestAnimationFrame(tick);
+}
+
+function tileHtml(side, i, fresh){
+  const w = game[side][i];
+  const inner = side==='left' ? w.meaning : `<span class="jp">${w.kanji}</span>${w.kanji!==w.kana ? `<span class="kana">${w.kana}</span>` : ''}`;
+  const sel = game.sel && game.sel.side===side && game.sel.i===i ? ' sel' : '';
+  return `<button type="button" class="tile${sel}${fresh?' fresh':''}" id="${side}-${i}" onclick="pick('${side}',${i})">${inner}</button>`;
+}
+function renderBoard(fresh){
+  document.getElementById('main').innerHTML = `
+    <div class="hud">
+      <div class="clock" id="clock">${START_SECONDS.toFixed(1)}s</div>
+      <div class="score">pares<b id="score">${game.score}</b></div>
+    </div>
+    <div class="timebar" id="timebar"><div></div></div>
+    <div class="cols-head"><span>Português</span><span>日本語</span></div>
+    <div class="board">
+      <div class="col">${game.left.map((_,i)=>tileHtml('left',i,fresh)).join('')}</div>
+      <div class="col">${game.right.map((_,i)=>tileHtml('right',i,fresh)).join('')}</div>
+    </div>
+    <p class="tip">Toque numa palavra de cada lado. Par certo: +${BONUS_SECONDS}s.</p>`;
+}
+function replaceTile(side, i){
+  const el = document.getElementById(`${side}-${i}`);
+  el.outerHTML = tileHtml(side, i, true);
+}
+
+function pick(side, i){
+  if(!game || game.over || game.busy) return;
+  const el = document.getElementById(`${side}-${i}`);
+  if(!game.sel){ game.sel = {side, i}; el.classList.add('sel'); return; }
+  if(game.sel.side===side){
+    document.getElementById(`${game.sel.side}-${game.sel.i}`).classList.remove('sel');
+    if(game.sel.i===i){ game.sel = null; return; }
+    game.sel = {side, i}; el.classList.add('sel'); return;
+  }
+  const li = side==='left' ? i : game.sel.i, ri = side==='right' ? i : game.sel.i;
+  game.sel = null;
+  const L = document.getElementById(`left-${li}`), R = document.getElementById(`right-${ri}`);
+  L.classList.remove('sel'); R.classList.remove('sel');
+  const lw = game.left[li], rw = game.right[ri];
+  if(lw.key===rw.key || clash(lw, rw)) matched(li, ri, L, R);
+  else missed(L, R);
+}
+
+function matched(li, ri, L, R){
+  game.score++; game.endAt += BONUS_SECONDS*1000; game.busy = true;
+  vibrate(15);
+  L.classList.add('ok'); R.classList.add('ok');
+  document.getElementById('score').textContent = game.score;
+  const plus = document.createElement('span'); plus.className = 'bonus'; plus.textContent = `+${BONUS_SECONDS}s`;
+  document.getElementById('clock').parentElement.appendChild(plus);
+  plus.style.left = '50px'; setTimeout(()=>plus.remove(), 800);
+  setTimeout(()=>{
+    if(game.over) return;
+    const done = game.left[li];
+    game.used.push(done); game.lastKey = done.key;
+    game.left[li] = null;
+    const w = drawWord();
+    game.left[li] = w;
+    // A palavra nova não entra sempre na mesma linha dos dois lados (senão o
+    // par ficaria óbvio): no japonês ela pode trocar de lugar com outra casa.
+    const k = Math.floor(Math.random()*PAIRS);
+    if(k===ri){ game.right[ri] = w; }
+    else { game.right[ri] = game.right[k]; game.right[k] = w; replaceTile('right', k); }
+    replaceTile('left', li); replaceTile('right', ri);
+    game.busy = false;
+  }, 260);
+}
+function missed(L, R){
+  vibrate([30,40,30]);
+  L.classList.add('no'); R.classList.add('no');
+  setTimeout(()=>{ L.classList.remove('no'); R.classList.remove('no'); }, 380);
+}
+
+function endGame(){
+  game.over = true;
+  const best = loadBest();
+  const record = game.score > best;
+  if(record) saveBest(game.score);
+  vibrate(80);
+  document.getElementById('main').innerHTML = `
+    <div class="panel">
+      <div class="big-emoji">⏰</div>
+      <h2>Tempo esgotado!</h2>
+      <div class="score-big">${game.score}</div>
+      <p>${game.score===1 ? 'par certo' : 'pares certos'}</p>
+      ${record ? `<span class="record">🏆 Novo recorde!</span>` : `<p>Recorde: <b>${best}</b></p>`}
+      <div style="height:22px"></div>
+      <button type="button" class="cta" onclick="startGame(${game.onlyStudied})">Jogar de novo</button>
+      <button type="button" class="ghost" onclick="showStart()">Voltar</button>
+    </div>`;
+}
+
+function showStart(){
+  game = null;
+  const {verbs, adjs, words} = buildPool(true);
+  const enough = distinctSenseCount(words) >= PAIRS + 1;
+  const best = loadBest();
+  document.getElementById('main').innerHTML = `
+    <div class="panel">
+      <div class="big-emoji">🎮</div>
+      <h2>Ligue os pares</h2>
+      <p>Português de um lado, japonês do outro.<br>Ligue cada palavra ao seu par antes do tempo acabar.</p>
+      <div class="rules">
+        <div class="rule"><b>⏱️</b><span>Você começa com <strong>${START_SECONDS} segundos</strong>.</span></div>
+        <div class="rule"><b>✅</b><span>Cada par certo dá <strong>+${BONUS_SECONDS}s</strong> e traz palavras novas.</span></div>
+        <div class="rule"><b>📚</b><span>Só entram palavras que você já está <strong>praticando</strong> ou <strong>aprendeu</strong>.</span></div>
+      </div>
+      <p class="pool">Seu vocabulário: <b>${verbs}</b> verbos + <b>${adjs}</b> adjetivos${best ? ` · recorde <b>${best}</b>` : ''}</p>
+      ${enough
+        ? `<button type="button" class="cta" onclick="startGame(true)">Começar</button>`
+        : `<p>Você ainda precisa de pelo menos ${PAIRS + 1} palavras em Praticando ou Aprendido. Estude mais um pouco nos Cards!</p>
+           <div style="height:10px"></div>
+           <button type="button" class="cta" onclick="startGame(false)">Jogar com as palavras N5</button>
+           <a class="ghost" style="text-decoration:none" href="../index.html?home">Ir estudar</a>`}
+    </div>`;
+}
+
+showStart();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("../sw.js").catch(()=>{}); });
+}
+</script>
+</body>
+</html>

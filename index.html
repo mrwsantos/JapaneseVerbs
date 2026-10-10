@@ -58,6 +58,8 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
 .choice .arrow{margin-left:auto;color:var(--sub);font-size:20px}
 .verbos{--accent:#6b47ea}
 .adjetivos{--accent:#ea6b47}
+.jogo{--accent:#c25ab0}
+.choice .game-icon{width:56px;height:56px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(135deg,#6b47ea,#ea6b47)}
 .hint{text-align:center;color:var(--sub);font-size:12px;margin-top:10px}
 .guide{margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);font-size:14px;line-height:1.55}
 .guide summary{cursor:pointer;padding:16px 18px;font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center}
@@ -94,6 +96,11 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
     <div><b>形容詞 · Adjetivos</b><span>Adjetivos い e な, conjugação e escrita</span></div>
     <div class="arrow">›</div>
   </a>
+  <a class="choice jogo" href="jogo/jogo.html">
+    <div class="game-icon" aria-hidden="true">🎮</div>
+    <div><b>Jogo de Pares</b><span>Ligue português e japonês contra o relógio</span></div>
+    <div class="arrow">›</div>
+  </a>
   <p class="hint">Dá pra trocar de modo a qualquer hora pelo topo do app.</p>
 
   <!-- Mesmo conteúdo de COMO-FUNCIONA.md; manter os dois em sincronia. -->
@@ -113,6 +120,16 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
       </ul>
       <p>Uma palavra nova precisa de <b>2 acertos em dias diferentes</b> para chegar em Praticando.</p>
 
+      <h3>👆 Como estudar um card</h3>
+      <ul>
+        <li><b>Toque</b> no card para virar e ver a resposta.</li>
+        <li>Depois de virar, <b>arraste →</b> = Sabia, <b>arraste ←</b> = Praticar mais (ou use os botões).</li>
+        <li>No teclado: Espaço vira, <b>1/←</b> praticar, <b>2/→</b> sabia.</li>
+      </ul>
+
+      <h3>⚙️ Ajustes</h3>
+      <p>O botão no canto da tela de estudo abre os ajustes do modo: <b>direção</b> (日本語 → PT ou PT → 日本語), palavras novas por dia, filtros, modo teste, kanji/hiragana nas frases e formas da escrita.</p>
+
       <h3>🗂️ Cards (o principal)</h3>
       <p>A rodada do dia é: <b>revisões vencidas</b> + <b>palavras novas até o limite diário</b>.</p>
       <ul>
@@ -129,6 +146,9 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
 
       <h3>💬 Frases (só verbos)</h3>
       <p>Frases de exemplo para lembrar o verbo em contexto. São necessários <b>2 acertos</b> aqui para um verbo ficar Aprendido.</p>
+
+      <h3>🎮 Jogo de Pares</h3>
+      <p>Português de um lado, japonês do outro. Começa com <b>10 segundos</b> e cada par certo dá <b>+2s</b> e traz palavras novas. Usa só os verbos e adjetivos que você está praticando ou já aprendeu, e não mexe no seu progresso.</p>
 
       <h3>💾 Seu progresso</h3>
       <p>Fica salvo <b>no navegador deste aparelho</b>. Desinstalar o app ou limpar os dados do site apaga tudo — use <b>⬇ Exportar progresso</b> (no fim das abas "Todos os verbos" e "Todos os Adjetivos", um arquivo por modo) para ter um backup.</p>
