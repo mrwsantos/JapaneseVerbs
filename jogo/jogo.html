@@ -127,6 +127,7 @@ const BONUS_SECONDS = 2;
 const PAIRS = 5;
 const BEST_KEY = "jp-game-best";
 const HARD_STREAK = 10; // acertos seguidos para entrar no modo HARD
+const HARD_BONUS_SECONDS = 4; // tempo extra ao entrar no modo HARD (além dos +2s do par)
 
 const THEME_KEY = "jp-theme";
 let themeMode = 'auto';
@@ -280,12 +281,14 @@ function matched(li, ri, L, R){
   L.classList.add('ok'); R.classList.add('ok');
   document.getElementById('score').textContent = game.score;
   game.streak++; game.bestStreak = Math.max(game.bestStreak, game.streak);
+  let bonus = BONUS_SECONDS;
   if(game.streak===HARD_STREAK && !game.hard){
     setHard(true); Sons.play('jogo', 'hard'); vibrate([40,30,80]);
-    showBanner(`Acertou ${HARD_STREAK}! 🔥`, 'MODO HARD');
+    game.endAt += HARD_BONUS_SECONDS*1000; bonus += HARD_BONUS_SECONDS;
+    showBanner(`Acertou ${HARD_STREAK}! 🔥`, `MODO HARD · +${HARD_BONUS_SECONDS}s`);
   }
   updateStreak();
-  const plus = document.createElement('span'); plus.className = 'bonus'; plus.textContent = `+${BONUS_SECONDS}s`;
+  const plus = document.createElement('span'); plus.className = 'bonus'; plus.textContent = `+${bonus}s`;
   document.getElementById('clock').parentElement.appendChild(plus);
   plus.style.left = '50px'; setTimeout(()=>plus.remove(), 800);
   setTimeout(()=>{
@@ -372,7 +375,7 @@ function showStart(){
       <div class="rules">
         <div class="rule"><b>⏱️</b><span>Você começa com <strong>${START_SECONDS} segundos</strong>.</span></div>
         <div class="rule"><b>✅</b><span>Cada par certo dá <strong>+${BONUS_SECONDS}s</strong> e traz palavras novas.</span></div>
-        <div class="rule"><b>🔥</b><span><strong>${HARD_STREAK} acertos seguidos</strong> = modo HARD: some o kana, fica só o kanji. Errou, volta ao normal e a contagem recomeça.</span></div>
+        <div class="rule"><b>🔥</b><span><strong>${HARD_STREAK} acertos seguidos</strong> = modo HARD: ganha <strong>+${HARD_BONUS_SECONDS}s</strong> extras, some o kana e fica só o kanji. Errou, volta ao normal e a contagem recomeça.</span></div>
         <div class="rule"><b>📚</b><span>Só entram palavras que você já está <strong>praticando</strong> ou <strong>aprendeu</strong>.</span></div>
       </div>
       <p class="pool">Seu vocabulário: <b>${verbs}</b> verbos + <b>${adjs}</b> adjetivos${best ? ` · recorde <b>${best}</b>` : ''}</p>

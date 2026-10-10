@@ -119,8 +119,8 @@ outro, 5 pares por vez:
 - Palavras com o mesmo sentido (ex.: 危ない e 危険, "perigoso") nunca aparecem
   juntas, para o par nunca ficar ambíguo.
 - Errar não tira tempo, mas o relógio continua correndo. O recorde fica salvo.
-- **🔥 Modo HARD**: com **10 acertos seguidos** aparece "Acertou 10!", a tela fica
-  vermelha/escura e o kana some (fica só o kanji). Errou, volta ao normal e a
+- **🔥 Modo HARD**: com **10 acertos seguidos** aparece "Acertou 10!", você ganha
+  **+4s** extras (além dos +2s do par), a tela fica vermelha/escura e o kana some (fica só o kanji). Errou, volta ao normal e a
   contagem recomeça. O contador 🔥 x/10 fica embaixo dos pontos.
 - Sons de acerto, erro, fim e recorde, e tic-tac nos últimos 3 segundos
   (cada vez mais rápido). O botão 🔊/🔇 no topo liga e desliga.
