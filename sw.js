@@ -1,4 +1,4 @@
-const CACHE_NAME = "jp-srs-cache-v6";
+const CACHE_NAME = "jp-srs-cache-v7";
 // Caches deste app (inclui os nomes antigos de quando verbos e adjetivos eram
 // apps separados), para limpar versões velhas sem tocar em caches de terceiros.
 const OWN_CACHE_PREFIXES = ["jp-srs-", "jpverbs-", "jpadj-"];
@@ -15,8 +15,8 @@ const APP_SHELL = [
   "./icons/app-192.png",
   "./icons/verbos-192.png",
   "./icons/adjetivos-192.png",
-  "./fonts/GoogleSans-Regular.ttf",
-  "./fonts/GoogleSans-Bold.ttf"
+  "./fonts/RobotoMono-Regular.ttf",
+  "./fonts/RobotoMono-Bold.ttf"
 ];
 
 self.addEventListener("install", (event) => {

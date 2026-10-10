@@ -23,9 +23,10 @@
 :root[data-theme="dark"]{ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#8768f0; --accent2:#7f97f8; --border:#37334a; --chip:#2a2736; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-@font-face{font-family:"Google Sans";src:url('../fonts/GoogleSans-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
-@font-face{font-family:"Google Sans";src:url('../fonts/GoogleSans-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
-body{background:var(--bg);color:var(--text);font-family:"Google Sans",-apple-system,"Hiragino Sans",sans-serif;display:flex;flex-direction:column;min-height:100%;-webkit-font-smoothing:antialiased}
+@font-face{font-family:"Roboto Mono";src:url('../fonts/RobotoMono-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:"Roboto Mono";src:url('../fonts/RobotoMono-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+body{background:var(--bg);color:var(--text);font-family:"Roboto Mono",ui-monospace,-apple-system,"Hiragino Sans",sans-serif;display:flex;flex-direction:column;min-height:100%;-webkit-font-smoothing:antialiased}
+input,select,textarea{font-family:inherit}
 button{font:inherit;color:inherit;background:none;border:none;-webkit-appearance:none;appearance:none;cursor:pointer}
 button,.pill,.tab,.mode{transition:background-color .15s ease,color .15s ease,border-color .15s ease,transform .18s cubic-bezier(.34,1.56,.64,1)}
 button:active,.pill:active,.tab:active,.mode:active{transform:scale(.96);transition-duration:.08s}
