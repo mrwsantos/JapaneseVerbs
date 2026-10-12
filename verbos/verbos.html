@@ -225,7 +225,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 <header>
   <button type="button" class="theme-btn" id="themeBtn" aria-label="Alternar tema"></button>
   <a class="home-btn" href="../index.html?home" aria-label="Início" title="Início"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M10 20.5V15h4v5.5"/></svg></a>
-  <h1><nav class="app-switch" aria-label="Modo"><a href="verbos.html" class="active" aria-current="page"><span class="jp">動詞</span>Verbos</a><a href="../adjetivos/adjetivos.html"><span class="jp">形容詞</span>Adjetivos</a></nav></h1>
+  <h1><nav class="app-switch" aria-label="Modo"><a href="verbos.html" class="active" aria-current="page">VERBOS</a><a href="../adjetivos/adjetivos.html">ADJETIVOS</a></nav></h1>
 </header>
 <div class="tabs" role="tablist">
   <button type="button" class="tab active" role="tab" aria-selected="true" data-tab="study">Estudar</button>
@@ -462,12 +462,17 @@ function toggleFilter(kind){
 // ===== Palavras novas por dia =====
 // Limite compartilhado entre verbos e adjetivos; o contador de novas vistas
 // hoje é de cada app. "Nova" = nunca respondida (due 0).
-const NEW_LIMIT_KEY = "jp-new-limit";
-const NEW_LIMIT_OPTIONS = [10,20,30,50,0]; // 0 = sem limite
+//
+// DECISÃO (2026-10-13): o limite diário era escolhido pelo usuário nos
+// Ajustes (10/20/30/50/sem limite). Virou fixo em 2 lotes (NEW_DECK_SIZE*2)
+// porque, com as palavras novas entrando em lotes de 10, o controle manual
+// por lote ("Próximo lote") já pausa o ritmo — o seletor de limite diário
+// ficou redundante. Se no futuro fizer falta escolher outro valor, reabilitar
+// é voltar ao histórico do git (commit que introduziu esta decisão) e
+// restaurar NEW_LIMIT_KEY/NEW_LIMIT_OPTIONS/loadNewLimit/setNewLimit.
+const NEW_DECK_SIZE = 10;
+const newLimit = NEW_DECK_SIZE * 2; // fixo, não configurável (ver decisão acima)
 const NEW_TODAY_KEY = "jpverbs-new-today";
-function loadNewLimit(){ try{ const n = parseInt(localStorage.getItem(NEW_LIMIT_KEY),10); return NEW_LIMIT_OPTIONS.includes(n) ? n : 20; }catch(e){ return 20; } }
-let newLimit = loadNewLimit();
-function setNewLimit(n){ newLimit = n; try{ localStorage.setItem(NEW_LIMIT_KEY, String(n)); }catch(e){} buildQueue(); render(); }
 function loadNewToday(){ try{ const d = JSON.parse(localStorage.getItem(NEW_TODAY_KEY)); if(d && d.day===today()) return d; }catch(e){} return {day:today(), count:0, extra:0}; }
 let newToday = loadNewToday();
 function touchNewToday(){ if(newToday.day!==today()) newToday = {day:today(), count:0, extra:0}; return newToday; }
@@ -480,10 +485,13 @@ function cardPool(){ return state.cardGroupFilter==='all' ? VERBS : VERBS.filter
 function buildQueue(){
   const t = today();
   if(state.mode==="cards"){
-    // Revisões vencidas primeiro, depois as novas até o limite do dia.
+    // Revisões vencidas primeiro, depois um lote de até 10 novas (as mais
+    // comuns primeiro), respeitando o limite diário. Erros voltam pro fim
+    // da rodada até acertar; só depois o próximo lote fica disponível.
     const pool = cardPool();
     const reviews = pool.filter(v=> !isNew(v) && getEntry(v.id).due <= t).sort((a,b)=> getEntry(a.id).due - getEntry(b.id).due);
-    const news = pool.filter(isNew).slice(0, newSlotsLeft());
+    const newsPool = pool.filter(isNew).sort((a,b)=> (a.freq||99) - (b.freq||99));
+    const news = newsPool.slice(0, Math.min(NEW_DECK_SIZE, newSlotsLeft()));
     state.queue = reviews.concat(news);
   } else {
     state.queue = VERBS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }).sort(()=>Math.random()-0.5);
@@ -508,13 +516,15 @@ function answer(correct){
 // volta na revisão de 14 dias. Se nunca tinha sido respondida, não gasta o
 // limite de novas: outra nova entra no lugar.
 function knowIt(){
-  const v = state.queue[state.idx]; const e = getEntry(v.id);
+  const v = state.queue[state.idx];
+  if(!confirm(`Marcar "${v.kanji}" (${v.meaning}) como já aprendida?\nEla só volta em revisão daqui a 14 dias.`)) return;
+  const e = getEntry(v.id);
   const wasUnseen = e.due===0;
   e.level = 4; e.due = today() + INTERVALS[4]; e.fraseHits = 2;
   saveProgress(progress); state.idx++; state.revealed = false;
   state.queue = state.queue.filter((w,i)=> i < state.idx || w.id!==v.id);
   if(wasUnseen){
-    const next = cardPool().find(w=> isNew(w) && !state.queue.includes(w));
+    const next = cardPool().filter(w=> isNew(w) && !state.queue.includes(w)).sort((a,b)=> (a.freq||99) - (b.freq||99))[0];
     if(next) state.queue.push(next);
   }
   render();
@@ -637,9 +647,6 @@ function sheetHtml(){
       <div class="setting-note">${direction==='jp' ? 'Vê o japonês e lembra o significado.' : 'Vê o português e lembra como se diz em japonês.'}</div></div>`;
   }
   if(state.mode==='cards'){
-    const nt = touchNewToday();
-    body += `<div class="setting"><div class="setting-label">Palavras novas por dia</div>${segHtml(NEW_LIMIT_OPTIONS.map(n=>[n, n||'∞']), newLimit, 'setNewLimit')}
-      <div class="setting-note">Novas hoje: ${nt.count}${newLimit ? ' de ' + (newLimit + nt.extra) : ''}. Vale para verbos e adjetivos.</div></div>`;
     body += `<div class="setting"><div class="setting-label">Grupo dos verbos</div>${segHtml(CARD_FILTERS, cardFilterValue(), 'setCardFilter')}</div>`;
     <!-- body += `<div class="setting"><button type="button" class="switch-row" onclick="toggleTestMode()" aria-pressed="${state.testMode}"><span>🧪 Modo teste<br><span class="setting-note">Intervalos zerados: tudo volta na hora.</span></span><span class="switch ${state.testMode?'on':''}"></span></button></div>`; -->
   }
@@ -665,7 +672,7 @@ function flipCardHtml(front, back){
     </div>
     <div class="swipe-tag left">Praticar</div><div class="swipe-tag right">Sabia</div>
   </div>
-  <div class="card-hint" id="cardHint">${state.revealed ? '← arraste: praticar · arraste: sabia →' : 'Espaço vira · 1/← praticar · 2/→ sabia'}</div>`;
+  <div class="card-hint" id="cardHint">${state.revealed ? '← arraste: praticar · arraste: sabia →' : 'Espaço vira'}</div>`;
 }
 function flipActionsHtml(noLabel, yesLabel){
   return `<div class="actions flip-actions ${state.revealed?'show':''}" id="flipActions"><button class="btn no" onclick="answerAnimated(false)">${noLabel}</button><button class="btn yes" onclick="answerAnimated(true)">${yesLabel}</button></div>`;
@@ -757,7 +764,10 @@ function renderInner(){
     if(state.mode==="cards"){
       if(state.idx >= state.queue.length){
         const newLeft = cardPool().filter(isNew).length;
-        const doneHtml = newLeft>0 && newSlotsLeft()===0
+        const capLeft = newSlotsLeft();
+        const doneHtml = newLeft>0 && capLeft>0
+          ? `<div class="empty">🎉 Lote concluído!<br>Ainda há ${newLeft} verbos novos disponíveis hoje.</div><button type="button" class="know-btn" onclick="buildQueue();render();">Próximo lote (10 novas)</button>`
+          : newLeft>0 && capLeft===0
           ? `<div class="empty">🎉 Rodada de hoje concluída!<br>Ainda faltam ${newLeft} verbos novos — quer mais?</div><button type="button" class="know-btn" onclick="moreNew()">+10 novas</button>`
           : `<div class="empty">🎉 Nada pendente agora.<br>Volte mais tarde ou revise as listas.</div>`;
         main.innerHTML = statsHtml + doneHtml; return;

@@ -73,22 +73,46 @@ O botão no canto (ex.: "日本語 → PT ⚙️") abre os ajustes do modo atual
 
 ## Modo Cards (o principal)
 
-A rodada do dia é: **revisões vencidas** + **palavras novas até o limite diário**.
+A rodada do dia é: **revisões vencidas** + **um lote de até 10 palavras novas**.
 
 - **Sabia** → sobe um nível e a palavra só volta depois do intervalo.
 - **Praticar mais** → volta ao nível 0 e **volta no fim da rodada** (depois das
-  outras palavras do dia), até você acertar.
+  outras palavras do dia), até você acertar. Ou seja: dentro de um lote, os
+  erros ficam voltando até você acertar todos — só então o lote conta como
+  concluído.
 - **✓ Já sei essa** (em qualquer palavra ainda em Novo, mesmo depois de errar)
   → vai direto para **Aprendido** e só volta na revisão de 14 dias. Se errar
   nessa revisão, recomeça do zero. Se a palavra nunca tinha sido respondida, não
-  gasta o limite do dia: outra palavra nova entra no lugar.
-- **Novas por dia**: 10, 20 (padrão), 30, 50 ou sem limite. O limite vale para
-  verbos e adjetivos, mas cada um conta as suas novas separadamente.
-- Acabou a rodada e ainda tem palavras novas? Toque em **+10 novas** para
-  continuar estudando.
+  gasta o limite do dia: outra palavra nova (a mais comum disponível) entra no
+  lugar.
+- **Lotes de 10**: as palavras novas entram em lotes fixos de 10, das mais
+  comuns para as mais raras (veja "Popularidade" abaixo). Só depois que um lote
+  é inteiramente acertado aparece o botão **Próximo lote (10 novas)**, desde que
+  ainda caibam dentro do limite diário.
+- **Novas por dia**: fixo em 20 (2 lotes de 10) — não é mais escolhido pelo
+  usuário nos Ajustes. É o total de palavras novas (somando todos os lotes)
+  permitido por dia; vale para verbos e adjetivos, mas cada um conta as suas
+  novas separadamente. Se bater o limite e ainda tiver palavras novas, aparece
+  **+10 novas** para abrir uma folga extra só para hoje.
+  > **Decisão (2026-10-13):** antes dava pra escolher 10/20/30/50/sem limite.
+  > Virou fixo porque, com as novas entrando em lotes de 10, o botão
+  > "Próximo lote" já controla o ritmo — o seletor de limite diário ficou
+  > redundante. Se um dia fizer falta escolher outro valor, está tudo no
+  > histórico do git (procure por `NEW_LIMIT_OPTIONS`/`setNewLimit` nos commits
+  > de `verbos.html`/`adjetivos.html`) para reabilitar.
 - Filtros (nos Ajustes): verbos por grupo (1, 2, 3), adjetivos por tipo (い / な).
 - **Modo teste** (nos Ajustes) zera os intervalos (tudo volta na hora) — útil só
   para testar.
+
+### Popularidade (`freq`)
+
+Cada verbo/adjetivo tem em `data.js` uma propriedade `freq` de 1 (muito comum)
+a 4+ (mais raro), estimada à mão por frequência de uso no dia a dia —
+independente do nível JLPL (`nivel`), já que uma palavra N3 pode ser mais usada
+no cotidiano que uma N5. Essa propriedade só decide a **ordem de entrada** das
+palavras novas dentro do pool filtrado (grupo/tipo); ela nunca reordena o array
+nem muda o `id` (que é a posição no array e é o que guarda o progresso salvo),
+então dá pra editar os valores de `freq` livremente sem perder progresso.
 
 > Repetir no mesmo dia uma palavra que você já acertou não ajuda a memorizar; o
 > que fixa é revisar depois de alguns dias. Por isso só os **erros** voltam na
