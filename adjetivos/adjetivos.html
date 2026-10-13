@@ -451,6 +451,13 @@ function newSlotsLeft(){ const d = touchNewToday(); return newLimit===0 ? Infini
 function moreNew(){ touchNewToday().extra += 10; saveNewToday(); buildQueue(); render(); }
 function cardPool(){ return state.cardTypeFilter==='all' ? ADJS : ADJS.filter(v=>v.type===state.cardTypeFilter); }
 
+// O lote (deckIds/deckWrongIds) fica salvo pra sobreviver a trocar de app
+// (verbos ↔ adjetivos é navegação de página, zera qualquer variável em
+// memória) e a fechar/reabrir o navegador no meio de um lote.
+const DECK_KEY = "jpadj-deck";
+function loadDeck(){ try{ const d = JSON.parse(localStorage.getItem(DECK_KEY)); if(d && Array.isArray(d.deckIds) && Array.isArray(d.deckWrongIds)) return d; }catch(e){} return {deckIds:[], deckWrongIds:[]}; }
+function saveDeck(){ try{ localStorage.setItem(DECK_KEY, JSON.stringify({deckIds: state.deckIds, deckWrongIds: state.deckWrongIds})); }catch(e){} }
+
 function buildQueue(){
   const t = today();
   if(state.mode==="cards"){
@@ -459,13 +466,30 @@ function buildQueue(){
     // aparece uma vez nesse passe; as erradas vão para `deckWrongIds` e, ao
     // fim do passe, formam um lote menor só com elas (ver continueDeck()),
     // repetindo até não restar nenhum erro — só então libera o próximo lote.
+    //
+    // Se já existe um lote salvo (de uma sessão/app anterior) com palavras
+    // ainda não respondidas neste passe (due===0) ou erradas pendentes,
+    // retoma ele em vez de sortear um lote novo.
     const pool = cardPool();
     const reviews = pool.filter(v=> !isNew(v) && getEntry(v.id).due <= t).sort((a,b)=> getEntry(a.id).due - getEntry(b.id).due);
-    const newsPool = pool.filter(isNew).sort((a,b)=> (a.freq||99) - (b.freq||99));
-    const news = newsPool.slice(0, Math.min(NEW_DECK_SIZE, newSlotsLeft()));
-    state.queue = reviews.concat(news);
-    state.deckIds = news.map(w=>w.id);
-    state.deckWrongIds = [];
+    const saved = loadDeck();
+    const savedPending = saved.deckIds.filter(id=> ADJS[id] && getEntry(id).due===0);
+    // Uma errada do lote pode já ter sido corrigida pela revisão (devido
+    // hoje) antes de reabrir o "Continuar" — não precisa repetir de novo.
+    const stillWrong = saved.deckWrongIds.filter(id=> ADJS[id] && getEntry(id).due <= t);
+    if(savedPending.length > 0 || stillWrong.length > 0){
+      state.deckIds = saved.deckIds;
+      state.deckWrongIds = stillWrong;
+      state.queue = reviews.concat(savedPending.map(id=>ADJS[id]));
+      if(stillWrong.length !== saved.deckWrongIds.length) saveDeck();
+    } else {
+      const newsPool = pool.filter(isNew).sort((a,b)=> (a.freq||99) - (b.freq||99));
+      const news = newsPool.slice(0, Math.min(NEW_DECK_SIZE, newSlotsLeft()));
+      state.queue = reviews.concat(news);
+      state.deckIds = news.map(w=>w.id);
+      state.deckWrongIds = [];
+      saveDeck();
+    }
   } else {
     state.queue = ADJS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }).sort(()=>Math.random()-0.5);
     state.deckIds = [];
@@ -489,6 +513,7 @@ function continueDeck(){
   state.deckWrongIds = [];
   state.queue = state.deckIds.map(id=>ADJS[id]);
   state.idx = 0; state.revealed = false; state.writeChecked=false;
+  saveDeck();
   render();
 }
 function setCardTypeFilter(t){ state.cardTypeFilter = t; buildQueue(); render(); }
@@ -506,7 +531,13 @@ function answer(correct){
     // ainda nesta rodada (continua tentando até acertar hoje).
     if(inDeck) state.deckWrongIds.push(v.id);
     else state.queue.push(v);
+  } else {
+    // Acertou: se já tinha errado antes no lote (e voltou como revisão antes
+    // de abrir o "Continuar"), não precisa repetir — tira da lista.
+    const wi = state.deckWrongIds.indexOf(v.id);
+    if(wi!==-1) state.deckWrongIds.splice(wi,1);
   }
+  saveDeck();
   render();
 }
 // "Já sei": palavra ainda em Novo que já domino vai direto para Aprendido e só
@@ -524,6 +555,9 @@ function knowIt(){
     const next = cardPool().filter(w=> isNew(w) && !state.queue.includes(w)).sort((a,b)=> (a.freq||99) - (b.freq||99))[0];
     if(next){ state.queue.push(next); state.deckIds.push(next.id); }
   }
+  const wi = state.deckWrongIds.indexOf(v.id);
+  if(wi!==-1) state.deckWrongIds.splice(wi,1);
+  saveDeck();
   render();
 }
 function toggleTestMode(){ state.testMode = !state.testMode; render(); }
@@ -978,7 +1012,7 @@ function infoModal(){
 }
 
 function toggleExpand(id){ state.expanded = (state.expanded===id) ? null : id; render(); }
-function resetProgress(){ if(confirm("Zerar todo o progresso salvo?")){ progress = {}; saveProgress(progress); buildQueue(); render(); } }
+function resetProgress(){ if(confirm("Zerar todo o progresso salvo?")){ progress = {}; saveProgress(progress); try{ localStorage.removeItem(DECK_KEY); }catch(e){} buildQueue(); render(); } }
 
 function exportProgress(){
   try{
@@ -1006,6 +1040,7 @@ function importProgress(file){
       if(!confirm('Substituir o progresso atual de adjetivos pelo do arquivo?')) return;
       progress = imported;
       saveProgress(progress);
+      try{ localStorage.removeItem(DECK_KEY); }catch(e){}
       buildQueue();
       render();
       alert('Progresso importado com sucesso!');
