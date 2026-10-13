@@ -196,6 +196,19 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .flip-wrap[data-swipe="left"] .swipe-tag.left,.flip-wrap[data-swipe="right"] .swipe-tag.right{opacity:1}
 .card-hint{text-align:center;font-size:11px;color:var(--sub);margin-top:10px;min-height:14px}
 .flip-actions{transition:opacity .2s ease,transform .2s ease}
+/* Exemplo numa frase (verso do card): abre esticando o card para baixo */
+.ex-toggle{margin-top:12px;background:none;border:none;padding:6px 10px;color:var(--accent);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.ex-toggle .label{text-decoration:underline;text-underline-offset:3px}
+.ex-toggle .chev{display:inline-block;transition:transform .3s ease}
+.ex-toggle[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.example{display:grid;grid-template-rows:0fr;width:100%;transition:grid-template-rows .35s cubic-bezier(.16,1,.3,1)}
+.example.open{grid-template-rows:1fr}
+.example > div{overflow:hidden}
+.example-in{margin-top:4px;padding-top:14px;border-top:1px dashed var(--border);opacity:0;transition:opacity .25s ease}
+.example.open .example-in{opacity:1;transition-delay:.1s}
+.ex-jp{font-size:20px;font-weight:600;line-height:1.5}
+.ex-pt{font-size:13px;color:var(--sub);margin-top:6px;line-height:1.4}
+.ex-jp mark,.ex-pt mark{background:none;color:var(--accent);font-weight:700}
 .flip-actions:not(.show){opacity:0;pointer-events:none;transform:translateY(12px)}
 @keyframes cardIn{from{opacity:0;transform:translateX(24px) scale(.98)}to{opacity:1;transform:none}}
 .sheet-backdrop{position:fixed;inset:0;background:rgba(20,15,35,.45);z-index:60;display:flex;align-items:flex-end;justify-content:center}
@@ -413,7 +426,7 @@ function matchesWrittenAnswer(rawInput, targetKana, targetRomaji, targetKanji){
   return false;
 }
 
-let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], revealed:false, expanded:null, writeChecked:false, writeOk:false, testMode:false,
+let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], reviewWrongIds:[], reviewEnd:0, revealed:false, exampleFor:null, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
   search:'', learningSearch:'', groupExpanded:{1:false,2:false,3:false}, showGroupInfo:false, showLearningInfo:false,
   showKanji: loadKanjiPref(), cardGroupFilter:'all', nivelFilter:'all', groupCollapsed:{1:false,2:false,3:false}};
@@ -505,6 +518,8 @@ function buildQueue(){
     const pool = cardPool();
     const reviews = pool.filter(v=> !isNew(v) && getEntry(v.id).due <= t).sort((a,b)=> getEntry(a.id).due - getEntry(b.id).due);
     state.reviewIds = reviews.map(w=>w.id);
+    state.reviewWrongIds = [];
+    state.reviewEnd = reviews.length; // queue[0..reviewEnd) = passe de revisões
     const saved = loadDeck();
     const savedPending = saved.deckIds.filter(id=> VERBS[id] && getEntry(id).due===0);
     // Uma errada do lote pode já ter sido corrigida pela revisão (devido
@@ -528,6 +543,8 @@ function buildQueue(){
     state.deckIds = [];
     state.deckWrongIds = [];
     state.reviewIds = [];
+    state.reviewWrongIds = [];
+    state.reviewEnd = 0;
   }
   state.idx = 0; state.revealed = false; state.writeChecked=false;
 }
@@ -537,11 +554,21 @@ function deckPosition(){
   if(state.mode!=='cards') return null;
   const v = state.queue[state.idx];
   if(!v) return null;
-  let i = state.deckIds.indexOf(v.id);
+  if(state.idx < state.reviewEnd) return {label:'Revendo', pos: state.idx - (state.reviewEnd - state.reviewIds.length) + 1, total: state.reviewIds.length};
+  const i = state.deckIds.indexOf(v.id);
   if(i!==-1) return {label:'Card', pos: i+1, total: state.deckIds.length};
-  i = state.reviewIds.indexOf(v.id);
-  if(i!==-1) return {label:'Revendo', pos: i+1, total: state.reviewIds.length};
   return null;
+}
+// Revisões erradas também formam uma rodada menor só com elas, logo depois
+// do passe de revisões e antes das novas, até zerar os erros.
+function continueReviews(){
+  const ids = state.reviewWrongIds;
+  state.reviewWrongIds = [];
+  state.reviewIds = ids.slice();
+  state.queue.splice(state.idx, 0, ...ids.map(id=>VERBS[id]));
+  state.reviewEnd = state.idx + ids.length;
+  state.revealed = false;
+  render();
 }
 // Depois de passar por todo o lote, um novo lote (menor) com só as palavras
 // erradas, até zerar os erros.
@@ -549,6 +576,7 @@ function continueDeck(){
   state.deckIds = state.deckWrongIds.slice();
   state.deckWrongIds = [];
   state.queue = state.deckIds.map(id=>VERBS[id]);
+  state.reviewEnd = 0;
   state.idx = 0; state.revealed = false; state.writeChecked=false;
   saveDeck();
   render();
@@ -557,17 +585,21 @@ function setCardGroupFilter(g){ state.cardGroupFilter = g; buildQueue(); render(
 
 function answer(correct){
   const v = state.queue[state.idx]; const e = getEntry(v.id);
-  const inDeck = state.deckIds.includes(v.id);
+  const inReview = state.idx < state.reviewEnd;
   if(e.due===0){ touchNewToday().count++; saveNewToday(); }
   e.level = correct ? Math.min(e.level+1, INTERVALS.length-1) : 0;
   e.due = state.testMode ? today() : today() + INTERVALS[e.level];
   saveProgress(progress); state.idx++; state.revealed = false;
   if(state.testMode) state.queue.push(v);
   else if(!correct){
-    // Errou: se é do lote, vira o próximo lote (menor); se é revisão, volta
-    // ainda nesta rodada (continua tentando até acertar hoje).
-    if(inDeck) state.deckWrongIds.push(v.id);
-    else state.queue.push(v);
+    // Errou: se é revisão, entra na rodada de revisões erradas (logo depois
+    // do passe de revisões); se é do lote, vira o próximo lote (menor).
+    if(inReview){
+      state.reviewWrongIds.push(v.id);
+      const wi = state.deckWrongIds.indexOf(v.id); // já vai repetir na revisão
+      if(wi!==-1) state.deckWrongIds.splice(wi,1);
+    }
+    else state.deckWrongIds.push(v.id);
   } else {
     // Acertou: se já tinha errado antes no lote (e voltou como revisão antes
     // de abrir o "Continuar"), não precisa repetir — tira da lista.
@@ -588,6 +620,8 @@ function knowIt(){
   e.level = 4; e.due = today() + INTERVALS[4]; e.fraseHits = 2;
   saveProgress(progress); state.idx++; state.revealed = false;
   state.queue = state.queue.filter((w,i)=> i < state.idx || w.id!==v.id);
+  const ri = state.reviewWrongIds.indexOf(v.id);
+  if(ri!==-1) state.reviewWrongIds.splice(ri,1);
   if(wasUnseen){
     const next = cardPool().filter(w=> isNew(w) && !state.queue.includes(w)).sort((a,b)=> (a.freq||99) - (b.freq||99))[0];
     if(next){ state.queue.push(next); state.deckIds.push(next.id); }
@@ -746,19 +780,46 @@ function flipActionsHtml(noLabel, yesLabel){
 }
 function jpFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div>`; }
 function ptFaceHtml(v){ return `${cardTag(v)}<div class="meaning-big">${v.meaning}</div><div class="face-sub">Como se diz em japonês?</div>`; }
-function answerFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div><div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>`; }
+function answerFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div><div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>${exampleHtml(v)}`; }
 
+// Exemplo do verso: a frase do modo Frases com o verbo em destaque. Em
+// português destaca ptPresent (ou fraseHl, quando a frase usa outra palavra).
+function exampleOf(v){
+  if(!v.fraseFront || !v.fraseBack) return null;
+  const word = v.fraseHl || v.ptPresent || '';
+  const i = word ? v.fraseBack.toLowerCase().indexOf(word.toLowerCase()) : -1;
+  const pt = i===-1 ? v.fraseBack : v.fraseBack.slice(0,i) + '[' + v.fraseBack.slice(i, i+word.length) + ']' + v.fraseBack.slice(i+word.length);
+  return {jp: v.fraseFront + '[' + v.kanji + ']。', pt};
+}
 let currentAnswer = null; // answer (Cards) ou fraseAnswer (Frases)
 let animating = false;
+// Vira uma vez só: depois de ver a resposta não dá para voltar à frente.
 function flipCard(){
-  const card = document.getElementById('card'); if(!card) return;
-  if(!state.revealed){
-    state.revealed = true;
-    const acts = document.getElementById('flipActions'); if(acts) acts.classList.add('show');
-    const hint = document.getElementById('cardHint'); if(hint) hint.textContent = '← arraste: praticar · arraste: sabia →';
-  }
-  card.classList.toggle('flipped');
+  const card = document.getElementById('card'); if(!card || state.revealed) return;
+  state.revealed = true;
+  state.exampleFor = null;
+  const acts = document.getElementById('flipActions'); if(acts) acts.classList.add('show');
+  const hint = document.getElementById('cardHint'); if(hint) hint.textContent = '← arraste: praticar · arraste: sabia →';
+  card.classList.add('flipped');
+  card.setAttribute('aria-label', 'Resposta');
   Sons.play('cards', 'virar');
+}
+// "Ver numa frase": abre/fecha o exemplo no verso do card.
+function toggleExample(id){
+  state.exampleFor = state.exampleFor===id ? null : id;
+  const open = state.exampleFor===id;
+  const box = document.getElementById('example'), btn = document.getElementById('exToggle');
+  if(box) box.classList.toggle('open', open);
+  if(btn){ btn.setAttribute('aria-expanded', open); btn.querySelector('.label').textContent = open ? 'Esconder frase' : 'Ver numa frase'; }
+}
+// Trecho entre [ ] vira destaque (cor accent).
+function markHl(text){ return text.replace(/\[([^\]]+)\]/g, '<mark>$1</mark>'); }
+function exampleHtml(v){
+  const ex = exampleOf(v);
+  if(!ex) return '';
+  const open = state.revealed && state.exampleFor===v.id;
+  return `<button type="button" class="ex-toggle" id="exToggle" aria-expanded="${open}" aria-controls="example" onclick="toggleExample(${v.id})"><span class="label">${open ? 'Esconder frase' : 'Ver numa frase'}</span> <span class="chev" aria-hidden="true">▾</span></button>
+    <div class="example ${open?'open':''}" id="example"><div><div class="example-in"><div class="ex-jp" lang="ja">${markHl(ex.jp)}</div><div class="ex-pt">${markHl(ex.pt)}</div></div></div></div>`;
 }
 function answerAnimated(correct){
   const wrap = document.getElementById('flipWrap');
@@ -777,7 +838,7 @@ function setupCardGestures(){
   if(!card || !wrap) return;
   let sx = 0, dx = 0, dragging = false, moved = false;
   card.addEventListener('pointerdown', (e)=>{
-    if(e.button!==0 || animating) return;
+    if(e.button!==0 || animating || e.target.closest('.ex-toggle')) return;
     sx = e.clientX; dx = 0; dragging = true; moved = false;
     card.setPointerCapture(e.pointerId); wrap.classList.add('dragging');
   });
@@ -829,6 +890,11 @@ function renderInner(){
     const statsHtml = sessionBar(c);
 
     if(state.mode==="cards"){
+      if(state.idx === state.reviewEnd && state.reviewWrongIds.length > 0){
+        const n = state.reviewWrongIds.length;
+        main.innerHTML = statsHtml + `<div class="empty">🔁 Revisão concluída!<br>Vamos repetir ${n === 1 ? 'a 1 que você errou' : `as ${n} que você errou`} antes de seguir.</div><button type="button" class="know-btn" onclick="continueReviews()">Continuar</button>`;
+        return;
+      }
       if(state.idx >= state.queue.length){
         let doneHtml;
         if(state.deckWrongIds.length > 0){

@@ -51,8 +51,12 @@ Praticando (acerta hoje → nível 1, volta amanhã → acerta → nível 2).
 
 Funciona como no Anki/Quizlet:
 
-- **Toque** no card (ou **Espaço**) para virar e ver a resposta. Toque de novo
-  para espiar a frente.
+- **Toque** no card (ou **Espaço**) para virar e ver a resposta. Depois de
+  virado ele **não desvira** (nada de espiar a frente de novo).
+- No verso, **Ver numa frase** estica o card para baixo com um exemplo: a frase
+  em japonês, com a palavra destacada na cor do app, e embaixo, menor, a
+  tradução. Os verbos usam a frase do modo Frases; as dos adjetivos ficam em
+  `adjetivos/data.js` (`frase`/`frasePt`, palavra em destaque entre `[ ]`).
 - Depois de virar, **arraste para a direita** = Sabia / Lembrei, **arraste para
   a esquerda** = Praticar mais / Não lembrei. Os botões embaixo fazem o mesmo.
 - No teclado: **1** ou **←** = praticar, **2** ou **→** = sabia.
@@ -76,8 +80,10 @@ O botão no canto (ex.: "日本語 → PT ⚙️") abre os ajustes do modo atual
 A rodada do dia é: **revisões vencidas** + **um lote de até 10 palavras novas**.
 
 - **Sabia** → sobe um nível e a palavra só volta depois do intervalo. Numa
-  revisão (palavra que já passou do lote em dias anteriores), errar faz ela
-  **voltar ainda nesta rodada**, até acertar.
+  revisão (palavra que já passou do lote em dias anteriores), errar guarda
+  ela para uma **rodada só das revisões erradas**: no fim das revisões
+  ("Revendo 35/35") aparece **Continuar** e você repete só as que errou
+  ("Revendo 1/3"), até zerar — só depois entram as palavras novas.
 - **Praticar mais** → volta ao nível 0. Numa palavra do **lote** (nova, vista
   por 1ª vez hoje), ela não volta na hora: continua no mesmo passe pelas
   outras 9, e só reaparece depois, num lote menor só com as que você errou
