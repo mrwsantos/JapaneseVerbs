@@ -54,9 +54,9 @@ Funciona como no Anki/Quizlet:
 - **Toque** no card (ou **Espaço**) para virar e ver a resposta. Depois de
   virado ele **não desvira** (nada de espiar a frente de novo).
 - No verso, **Ver numa frase** estica o card para baixo com um exemplo: a frase
-  em japonês, com a palavra destacada na cor do app, e embaixo, menor, a
-  tradução. Os verbos usam a frase do modo Frases; as dos adjetivos ficam em
-  `adjetivos/data.js` (`frase`/`frasePt`, palavra em destaque entre `[ ]`).
+  em japonês, com a palavra destacada na cor do app, a mesma frase em
+  hiragana e embaixo, menor, a tradução. Os verbos usam a frase do modo Frases; as dos adjetivos ficam em
+  `adjetivos/data.js` (`frase`/`fraseKana`/`frasePt`, palavra em destaque entre `[ ]`).
 - Depois de virar, **arraste para a direita** = Sabia / Lembrei, **arraste para
   a esquerda** = Praticar mais / Não lembrei. Os botões embaixo fazem o mesmo.
 - No teclado: **1** ou **←** = praticar, **2** ou **→** = sabia.

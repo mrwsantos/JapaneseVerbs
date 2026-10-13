@@ -198,8 +198,9 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .example-in{margin-top:4px;padding-top:14px;border-top:1px dashed var(--border);opacity:0;transition:opacity .25s ease}
 .example.open .example-in{opacity:1;transition-delay:.1s}
 .ex-jp{font-size:20px;font-weight:600;line-height:1.5}
+.ex-kana{font-size:14px;color:var(--sub);margin-top:2px;line-height:1.5}
 .ex-pt{font-size:13px;color:var(--sub);margin-top:6px;line-height:1.4}
-.ex-jp mark,.ex-pt mark{background:none;color:var(--accent);font-weight:700}
+.ex-jp mark,.ex-kana mark,.ex-pt mark{background:none;color:var(--accent);font-weight:700}
 .flip-actions:not(.show){opacity:0;pointer-events:none;transform:translateY(12px)}
 @keyframes cardIn{from{opacity:0;transform:translateX(24px) scale(.98)}to{opacity:1;transform:none}}
 .sheet-backdrop{position:fixed;inset:0;background:rgba(20,15,35,.45);z-index:60;display:flex;align-items:flex-end;justify-content:center}
@@ -743,8 +744,8 @@ function jpFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div>
 function ptFaceHtml(v){ return `${cardTag(v)}<div class="meaning-big">${v.meaning}</div><div class="face-sub">Como se diz em japonês?</div>`; }
 function answerFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div><div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>${exampleHtml(v)}`; }
 
-// Exemplo do verso (frase/frasePt em data.js, palavra em destaque entre [ ]).
-function exampleOf(v){ return v.frase && v.frasePt ? {jp: v.frase, pt: v.frasePt} : null; }
+// Exemplo do verso (frase/fraseKana/frasePt em data.js, palavra em destaque entre [ ]).
+function exampleOf(v){ return v.frase && v.frasePt ? {jp: v.frase, kana: v.fraseKana, pt: v.frasePt} : null; }
 let currentAnswer = null; // answer (Cards) ou fraseAnswer (Frases)
 let animating = false;
 // Vira uma vez só: depois de ver a resposta não dá para voltar à frente.
@@ -773,7 +774,7 @@ function exampleHtml(v){
   if(!ex) return '';
   const open = state.revealed && state.exampleFor===v.id;
   return `<button type="button" class="ex-toggle" id="exToggle" aria-expanded="${open}" aria-controls="example" onclick="toggleExample(${v.id})"><span class="label">${open ? 'Esconder frase' : 'Ver numa frase'}</span> <span class="chev" aria-hidden="true">▾</span></button>
-    <div class="example ${open?'open':''}" id="example"><div><div class="example-in"><div class="ex-jp" lang="ja">${markHl(ex.jp)}</div><div class="ex-pt">${markHl(ex.pt)}</div></div></div></div>`;
+    <div class="example ${open?'open':''}" id="example"><div><div class="example-in"><div class="ex-jp" lang="ja">${markHl(ex.jp)}</div><div class="ex-kana" lang="ja">${markHl(ex.kana)}</div><div class="ex-pt">${markHl(ex.pt)}</div></div></div></div>`;
 }
 function answerAnimated(correct){
   const wrap = document.getElementById('flipWrap');
