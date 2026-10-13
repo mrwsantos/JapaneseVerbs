@@ -814,13 +814,13 @@ function toggleExample(id){
   if(btn){ btn.setAttribute('aria-expanded', open); btn.querySelector('.label').textContent = open ? 'Esconder frase' : 'Ver numa frase'; }
 }
 // Trecho entre [ ] vira destaque (cor accent).
-function markHl(text){ return text.replace(/\[([^\]]+)\]/g, '<mark>$1</mark>'); }
+function markHl(text){ return String(text||'').replace(/\[([^\]]+)\]/g, '<mark>$1</mark>'); }
 function exampleHtml(v){
   const ex = exampleOf(v);
   if(!ex) return '';
   const open = state.revealed && state.exampleFor===v.id;
   return `<button type="button" class="ex-toggle" id="exToggle" aria-expanded="${open}" aria-controls="example" onclick="toggleExample(${v.id})"><span class="label">${open ? 'Esconder frase' : 'Ver numa frase'}</span> <span class="chev" aria-hidden="true">▾</span></button>
-    <div class="example ${open?'open':''}" id="example"><div><div class="example-in"><div class="ex-jp" lang="ja">${markHl(ex.jp)}</div><div class="ex-kana" lang="ja">${markHl(ex.kana)}</div><div class="ex-pt">${markHl(ex.pt)}</div></div></div></div>`;
+    <div class="example ${open?'open':''}" id="example"><div><div class="example-in"><div class="ex-jp" lang="ja">${markHl(ex.jp)}</div>${ex.kana ? `<div class="ex-kana" lang="ja">${markHl(ex.kana)}</div>` : ''}<div class="ex-pt">${markHl(ex.pt)}</div></div></div></div>`;
 }
 function answerAnimated(correct){
   const wrap = document.getElementById('flipWrap');
