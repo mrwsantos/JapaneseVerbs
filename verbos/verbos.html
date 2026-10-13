@@ -415,7 +415,7 @@ function matchesWrittenAnswer(rawInput, targetKana, targetRomaji, targetKanji){
 
 let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], revealed:false, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
-  search:'', groupExpanded:{1:false,2:false,3:false}, showGroupInfo:false, showLearningInfo:false,
+  search:'', learningSearch:'', groupExpanded:{1:false,2:false,3:false}, showGroupInfo:false, showLearningInfo:false,
   showKanji: loadKanjiPref(), cardGroupFilter:'all', nivelFilter:'all', groupCollapsed:{1:false,2:false,3:false}};
 
 function targetKey(f){
@@ -973,12 +973,38 @@ function renderInner(){
     return;
   }
 
-  const list = (state.tab==="learning" ? VERBS.filter(v=>getStatus(v)==='praticando') : VERBS.filter(v=>getStatus(v)==='aprendido')).sort(compareVerbsForDisplay);
+  const learningQuery = (state.learningSearch||'').trim();
+  const learningNeedle = learningQuery.toLowerCase();
+  const baseList = (state.tab==="learning" ? VERBS.filter(v=>getStatus(v)==='praticando') : VERBS.filter(v=>getStatus(v)==='aprendido')).sort(compareVerbsForDisplay);
+  const list = (state.tab==="learning" && learningQuery)
+    ? baseList.filter(v=> v.kanji.includes(learningQuery) || v.kana.includes(learningQuery) ||
+        v.romaji.toLowerCase().includes(learningNeedle) || v.meaning.toLowerCase().includes(learningNeedle) ||
+        v.nivel.toLowerCase().includes(learningNeedle))
+    : baseList;
   const learningHeaderHtml = state.tab==="learning"
-    ? `<div class="search-row" style="justify-content:flex-end"><button type="button" class="info-btn" aria-label="Quando uma palavra aparece em Praticando" onclick="toggleLearningInfo()">ℹ️</button></div>`
+    ? `<div class="search-row">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="learningSearchInput" placeholder="Buscar por kanji, kana, romaji, nível ou significado" value="${escapeAttr(learningQuery)}">
+        </div>
+        <button type="button" class="info-btn" aria-label="Quando uma palavra aparece em Praticando" onclick="toggleLearningInfo()">ℹ️</button>
+      </div>`
     : '';
-  if(list.length===0){ main.innerHTML = learningHeaderHtml + `<div class="empty">Nada aqui ainda.</div>` + learningInfoModal(); return; }
-  main.innerHTML = learningHeaderHtml + list.map(renderListItem).join("") + footerHtml + learningInfoModal();
+  if(list.length===0){
+    main.innerHTML = learningHeaderHtml + `<div class="empty">${state.tab==="learning" && learningQuery ? 'Nenhum verbo encontrado.' : 'Nada aqui ainda.'}</div>` + learningInfoModal();
+  } else {
+    main.innerHTML = learningHeaderHtml + list.map(renderListItem).join("") + footerHtml + learningInfoModal();
+  }
+  if(state.tab==="learning"){
+    const searchInp = document.getElementById("learningSearchInput");
+    searchInp.oninput = function(){
+      const pos = this.selectionStart;
+      state.learningSearch = this.value;
+      render();
+      const inp = document.getElementById("learningSearchInput");
+      if(inp){ inp.focus(); try{ inp.setSelectionRange(pos,pos); }catch(e){} }
+    };
+  }
 }
 
 function escapeAttr(s){ return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
@@ -1067,6 +1093,19 @@ function learningInfoModal(){
       <p>O nível volta pra 0 e os 2 acertos recomeçam do zero.</p>
       <h3>Atalho</h3>
       <p>Em qualquer verbo ainda "Novo", o botão <b>✓ Já sei essa</b> pula direto pra "Aprendido", sem passar por "Praticando".</p>
+      <hr class="modal-divider">
+      <h2>Níveis de 0 a 6</h2>
+      <p class="subtle" style="margin-bottom:10px">Cada acerto sobe um nível (até o 6, o máximo); cada erro zera de volta pro nível 0. O nível só define quanto tempo falta até a palavra voltar pra revisão.</p>
+      <div class="conj">
+        <div class="conj-row"><span class="lbl">Nível 0</span><span>hoje · Novo</span></div>
+        <div class="conj-row"><span class="lbl">Nível 1</span><span>1 dia · Novo</span></div>
+        <div class="conj-row"><span class="lbl">Nível 2</span><span>3 dias · Praticando</span></div>
+        <div class="conj-row"><span class="lbl">Nível 3</span><span>7 dias · Praticando</span></div>
+        <div class="conj-row"><span class="lbl">Nível 4</span><span>14 dias · Praticando*</span></div>
+        <div class="conj-row"><span class="lbl">Nível 5</span><span>30 dias · Aprendido</span></div>
+        <div class="conj-row"><span class="lbl">Nível 6</span><span>60 dias · Aprendido (máximo)</span></div>
+      </div>
+      <p class="subtle" style="margin-top:8px">*só passa a contar como Aprendido depois de 2 acertos no modo Frases — até lá, mesmo em nível 4+, continua em Praticando.</p>
       <button type="button" class="modal-close" onclick="toggleLearningInfo()">Entendi</button>
     </div>
   </div>`;
