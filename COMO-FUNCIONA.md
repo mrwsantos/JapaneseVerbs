@@ -89,6 +89,12 @@ A rodada do dia é: **revisões vencidas** + **um lote de até 10 palavras novas
   comuns para as mais raras (veja "Popularidade" abaixo). Só depois que um lote
   é inteiramente acertado aparece o botão **Próximo lote (10 novas)**, desde que
   ainda caibam dentro do limite diário.
+- A barra de progresso mostra **"lote X/10"** — quantas das 10 palavras novas
+  do lote atual já foram acertadas (sobem esse contador só quando saem do
+  "devido hoje", ou seja, quando você acerta de vez; erradas continuam
+  reaparecendo até você acertar, sem contar ainda). Esse número é separado da
+  fila cheia (revisões vencidas + lote), que pode passar de 10 — é esperado,
+  as revisões antigas entram na mesma rodada mas não fazem parte do lote.
 - **Novas por dia**: fixo em 20 (2 lotes de 10) — não é mais escolhido pelo
   usuário nos Ajustes. É o total de palavras novas (somando todos os lotes)
   permitido por dia; vale para verbos e adjetivos, mas cada um conta as suas

@@ -168,7 +168,7 @@ function buildPool(){
 }
 // "frio / gelado (objeto)" -> ["frio","gelado"]: duas palavras que dividem um
 // sentido nunca aparecem juntas, senão o par ficaria ambíguo.
-function sensesOf(meaning){ return meaning.split('/').map(t=>t.replace(/\(.*?\)/g,'').trim().toLowerCase()).filter(Boolean); }
+function sensesOf(meaning){ return meaning.replace(/\(.*?\)/g,'').split('/').map(t=>t.trim().toLowerCase()).filter(Boolean); }
 function clash(a, b){ return a.senses.some(s=> b.senses.includes(s)); }
 function distinctSenseCount(words){
   const picked = [];

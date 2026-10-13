@@ -397,7 +397,7 @@ function altKanaForms(kanaForm){
   return Array.from(alts);
 }
 
-let state = {tab:"study", mode:"cards", queue:[], idx:0, revealed:false, expanded:null, writeChecked:false, writeOk:false, testMode:false,
+let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], revealed:false, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
   search:'', groupExpanded:{i:false,na:false}, groupCollapsed:{i:false,na:false}, showInfo:false,
   cardTypeFilter:'all', listTypeFilter:'all', nivelFilter:'all'};
@@ -461,10 +461,20 @@ function buildQueue(){
     const newsPool = pool.filter(isNew).sort((a,b)=> (a.freq||99) - (b.freq||99));
     const news = newsPool.slice(0, Math.min(NEW_DECK_SIZE, newSlotsLeft()));
     state.queue = reviews.concat(news);
+    state.deckIds = news.map(w=>w.id);
   } else {
     state.queue = ADJS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }).sort(()=>Math.random()-0.5);
+    state.deckIds = [];
   }
   state.idx = 0; state.revealed = false; state.writeChecked=false;
+}
+// Progresso do lote atual de palavras novas (ex.: 2/10), separado das
+// revisões vencidas — essas ficam na mesma fila mas não contam aqui, pra dar
+// visibilidade se um erro específico já voltou e foi corrigido ou não.
+function deckProgress(){
+  if(!state.deckIds || !state.deckIds.length) return null;
+  const done = state.deckIds.filter(id=> getEntry(id).due > today()).length;
+  return {done, total: state.deckIds.length};
 }
 function setCardTypeFilter(t){ state.cardTypeFilter = t; buildQueue(); render(); }
 
@@ -574,7 +584,8 @@ function sessionBar(c){
   const total = state.queue.length, done = Math.min(state.idx, total);
   const pct = total ? Math.round(done/total*100) : 0;
   const nt = touchNewToday();
-  const right = state.mode==='cards' ? `novas hoje ${nt.count}${newLimit ? '/' + (newLimit + nt.extra) : ''}` : '';
+  const deck = state.mode==='cards' ? deckProgress() : null;
+  const right = state.mode==='cards' ? `novas hoje ${nt.count}${newLimit ? '/' + (newLimit + nt.extra) : ''}${deck ? ' · lote ' + deck.done + '/' + deck.total : ''}` : '';
   return `<div class="session">
     <div class="session-top">
       <div class="progress" role="progressbar" aria-label="Progresso da rodada" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><div class="progress-bar" style="width:${pct}%"></div></div>
