@@ -75,26 +75,26 @@ O botão no canto (ex.: "日本語 → PT ⚙️") abre os ajustes do modo atual
 
 A rodada do dia é: **revisões vencidas** + **um lote de até 10 palavras novas**.
 
-- **Sabia** → sobe um nível e a palavra só volta depois do intervalo.
-- **Praticar mais** → volta ao nível 0 e **volta no fim da rodada** (depois das
-  outras palavras do dia), até você acertar. Ou seja: dentro de um lote, os
-  erros ficam voltando até você acertar todos — só então o lote conta como
-  concluído.
+- **Sabia** → sobe um nível e a palavra só volta depois do intervalo. Numa
+  revisão (palavra que já passou do lote em dias anteriores), errar faz ela
+  **voltar ainda nesta rodada**, até acertar.
+- **Praticar mais** → volta ao nível 0. Numa palavra do **lote** (nova, vista
+  por 1ª vez hoje), ela não volta na hora: continua no mesmo passe pelas
+  outras 9, e só reaparece depois, num lote menor só com as que você errou
+  (ver "Lotes de 10" abaixo).
 - **✓ Já sei essa** (em qualquer palavra ainda em Novo, mesmo depois de errar)
   → vai direto para **Aprendido** e só volta na revisão de 14 dias. Se errar
   nessa revisão, recomeça do zero. Se a palavra nunca tinha sido respondida, não
   gasta o limite do dia: outra palavra nova (a mais comum disponível) entra no
   lugar.
 - **Lotes de 10**: as palavras novas entram em lotes fixos de 10, das mais
-  comuns para as mais raras (veja "Popularidade" abaixo). Só depois que um lote
-  é inteiramente acertado aparece o botão **Próximo lote (10 novas)**, desde que
-  ainda caibam dentro do limite diário.
-- A barra de progresso mostra **"lote X/10"** — quantas das 10 palavras novas
-  do lote atual já foram acertadas (sobem esse contador só quando saem do
-  "devido hoje", ou seja, quando você acerta de vez; erradas continuam
-  reaparecendo até você acertar, sem contar ainda). Esse número é separado da
-  fila cheia (revisões vencidas + lote), que pode passar de 10 — é esperado,
-  as revisões antigas entram na mesma rodada mas não fazem parte do lote.
+  comuns para as mais raras (veja "Popularidade" abaixo). Você passa pelas 10
+  uma vez (a barra mostra **"X/10"** — a posição da carta atual dentro do
+  lote). No fim do passe, se errou alguma, aparece **Continuar**: um novo
+  passe, menor, só com as que errou (ex.: "3/3"). Repete até não restar
+  nenhuma errada — só então aparece **Próximo lote (10 novas)**, desde que
+  ainda caiba no limite diário. O "X/10" não aparece durante revisões
+  (palavras de lotes de dias anteriores) — só durante um passe de lote.
 - **Novas por dia**: fixo em 20 (2 lotes de 10) — não é mais escolhido pelo
   usuário nos Ajustes. É o total de palavras novas (somando todos os lotes)
   permitido por dia; vale para verbos e adjetivos, mas cada um conta as suas
