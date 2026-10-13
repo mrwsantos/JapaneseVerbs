@@ -415,7 +415,7 @@ function matchesWrittenAnswer(rawInput, targetKana, targetRomaji, targetKanji){
 
 let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], revealed:false, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
-  search:'', groupExpanded:{1:false,2:false,3:false}, showGroupInfo:false,
+  search:'', groupExpanded:{1:false,2:false,3:false}, showGroupInfo:false, showLearningInfo:false,
   showKanji: loadKanjiPref(), cardGroupFilter:'all', nivelFilter:'all', groupCollapsed:{1:false,2:false,3:false}};
 
 function targetKey(f){
@@ -974,8 +974,11 @@ function renderInner(){
   }
 
   const list = (state.tab==="learning" ? VERBS.filter(v=>getStatus(v)==='praticando') : VERBS.filter(v=>getStatus(v)==='aprendido')).sort(compareVerbsForDisplay);
-  if(list.length===0){ main.innerHTML = `<div class="empty">Nada aqui ainda.</div>`; return; }
-  main.innerHTML = list.map(renderListItem).join("") + footerHtml;
+  const learningHeaderHtml = state.tab==="learning"
+    ? `<div class="search-row" style="justify-content:flex-end"><button type="button" class="info-btn" aria-label="Quando uma palavra aparece em Praticando" onclick="toggleLearningInfo()">ℹ️</button></div>`
+    : '';
+  if(list.length===0){ main.innerHTML = learningHeaderHtml + `<div class="empty">Nada aqui ainda.</div>` + learningInfoModal(); return; }
+  main.innerHTML = learningHeaderHtml + list.map(renderListItem).join("") + footerHtml + learningInfoModal();
 }
 
 function escapeAttr(s){ return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
@@ -1045,6 +1048,26 @@ function groupInfoModal(){
       <h3><span class="badge nivel-N1">N1</span> Avançado</h3>
       <p>Nível mais alto do JLPT — compreensão de japonês complexo em contextos variados, incluindo textos acadêmicos e formais.</p>
       <button type="button" class="modal-close" onclick="toggleGroupInfo()">Entendi</button>
+    </div>
+  </div>`;
+}
+
+function toggleLearningInfo(){ state.showLearningInfo = !state.showLearningInfo; render(); }
+function learningInfoModal(){
+  if(!state.showLearningInfo) return "";
+  return `<div class="modal-backdrop" onclick="if(event.target===this) toggleLearningInfo()">
+    <div class="modal">
+      <h2>Quando um verbo aparece aqui?</h2>
+      <p>Pra sair de "Novo" e entrar em "Praticando", o verbo precisa de <b>2 acertos em dias diferentes</b> — não dá pra forçar respondendo certo várias vezes no mesmo dia.</p>
+      <h3>1º acerto</h3>
+      <p>Sobe do nível 0 pro nível 1. Ainda conta como "Novo" e só volta pra revisão <b>1 dia depois</b>.</p>
+      <h3>2º acerto, no dia seguinte</h3>
+      <p>Sobe do nível 1 pro nível 2 — aí sim ele vira "Praticando".</p>
+      <h3>Errou no meio do caminho?</h3>
+      <p>O nível volta pra 0 e os 2 acertos recomeçam do zero.</p>
+      <h3>Atalho</h3>
+      <p>Em qualquer verbo ainda "Novo", o botão <b>✓ Já sei essa</b> pula direto pra "Aprendido", sem passar por "Praticando".</p>
+      <button type="button" class="modal-close" onclick="toggleLearningInfo()">Entendi</button>
     </div>
   </div>`;
 }

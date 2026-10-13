@@ -400,7 +400,7 @@ function altKanaForms(kanaForm){
 
 let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], revealed:false, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
-  search:'', groupExpanded:{i:false,na:false}, groupCollapsed:{i:false,na:false}, showInfo:false,
+  search:'', groupExpanded:{i:false,na:false}, groupCollapsed:{i:false,na:false}, showInfo:false, showLearningInfo:false,
   cardTypeFilter:'all', listTypeFilter:'all', nivelFilter:'all'};
 
 function targetKey(f){
@@ -931,8 +931,11 @@ function renderInner(){
   }
 
   const list = (state.tab==="learning" ? ADJS.filter(v=>getStatus(v)==='praticando') : ADJS.filter(v=>getStatus(v)==='aprendido')).sort(compareAdjForDisplay);
-  if(list.length===0){ main.innerHTML = `<div class="empty">Nada aqui ainda.</div>`; return; }
-  main.innerHTML = list.map(renderListItem).join("") + footerHtml;
+  const learningHeaderHtml = state.tab==="learning"
+    ? `<div class="search-row" style="justify-content:flex-end"><button type="button" class="info-btn" aria-label="Quando uma palavra aparece em Praticando" onclick="toggleLearningInfo()">ℹ️</button></div>`
+    : '';
+  if(list.length===0){ main.innerHTML = learningHeaderHtml + `<div class="empty">Nada aqui ainda.</div>` + learningInfoModal(); return; }
+  main.innerHTML = learningHeaderHtml + list.map(renderListItem).join("") + footerHtml + learningInfoModal();
 }
 
 function escapeAttr(s){ return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
@@ -1012,6 +1015,26 @@ function infoModal(){
       <p class="subtle" style="margin-top:8px">じゃ é a forma falada/casual de では — ambas corretas (元気ではない = 元気じゃない). Na escrita formal, costuma-se usar じゃありません/ではありません no lugar de じゃないです.</p>
       <p class="subtle">同じ ("igual/mesmo") é um caso especial: mesmo sendo -na, não usa な antes do substantivo (同じ人, não 同じな人).</p>
       <button type="button" class="modal-close" onclick="toggleInfo()">Entendi</button>
+    </div>
+  </div>`;
+}
+
+function toggleLearningInfo(){ state.showLearningInfo = !state.showLearningInfo; render(); }
+function learningInfoModal(){
+  if(!state.showLearningInfo) return "";
+  return `<div class="modal-backdrop" onclick="if(event.target===this) toggleLearningInfo()">
+    <div class="modal">
+      <h2>Quando um adjetivo aparece aqui?</h2>
+      <p>Pra sair de "Novo" e entrar em "Praticando", o adjetivo precisa de <b>2 acertos em dias diferentes</b> — não dá pra forçar respondendo certo várias vezes no mesmo dia.</p>
+      <h3>1º acerto</h3>
+      <p>Sobe do nível 0 pro nível 1. Ainda conta como "Novo" e só volta pra revisão <b>1 dia depois</b>.</p>
+      <h3>2º acerto, no dia seguinte</h3>
+      <p>Sobe do nível 1 pro nível 2 — aí sim ele vira "Praticando".</p>
+      <h3>Errou no meio do caminho?</h3>
+      <p>O nível volta pra 0 e os 2 acertos recomeçam do zero.</p>
+      <h3>Atalho</h3>
+      <p>Em qualquer adjetivo ainda "Novo", o botão <b>✓ Já sei essa</b> pula direto pra "Aprendido", sem passar por "Praticando".</p>
+      <button type="button" class="modal-close" onclick="toggleLearningInfo()">Entendi</button>
     </div>
   </div>`;
 }
