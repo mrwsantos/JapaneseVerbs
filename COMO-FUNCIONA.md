@@ -184,6 +184,9 @@ a tradução em português embaixo (com a parte que muda destacada).
   mesma palavra em outra forma (treina a conjugação), as outras são palavras
   diferentes na mesma forma (nunca com o mesmo significado).
 - **Digitar** (nos Ajustes): escreva a forma em romaji, kana ou kanji.
+- Cada palavra aparece uma vez por rodada; **errou, ela volta no fim da
+  rodada** (com outra frase/forma sorteada) até acertar. No fim, **Recomeçar**
+  embaralha tudo de novo.
 - **Conjugação** (nos Ajustes): 🎲 Variada (padrão) ou Só presente.
 - Começa **só em hiragana** (frase e alternativas). O botão **漢 Ver em kanji** no
   card troca para kanji (a leitura em hiragana aparece depois de responder); vale para os dois apps

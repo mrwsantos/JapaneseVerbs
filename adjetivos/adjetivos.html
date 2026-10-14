@@ -606,7 +606,8 @@ Frases.setup({
   kind: (w)=> w.type,
   studied: (w)=> { const e = progress[w.id]; return !!e && e.level >= 2; },
   altForms: altKanaForms,
-  score: (v, ok)=> fraseScore(v, ok),
+  // Errou: a palavra volta no fim da rodada (com outra frase/forma sorteada).
+  score(v, ok){ fraseScore(v, ok); if(!ok) state.queue.push(v); },
   next(){ state.idx++; render(); },
   render: ()=> render(),
   showKanji: ()=> state.showKanji,
