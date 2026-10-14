@@ -131,7 +131,9 @@ const Frases = (()=>{
     const kanji = A.showKanji(), it = q.item;
     const [pre, post, ans] = kanji ? [it.pre, it.post, it.ans] : [it.preK, it.postK, it.ansK];
     const blank = q.done ? `<mark>${ans}</mark>` : `<span class="fq-blank" aria-label="lacuna">？</span>`;
-    let h = `<div class="card nohand fq-card">
+    // Aviso só quando a forma importa (frase conjugável).
+    let h = q.key!=="fixed" ? `<div class="fq-note">⚠️ Atenção ao <b>tempo verbal</b> e à <b>formalidade</b>: veja as etiquetas e a tradução.</div>` : "";
+    h += `<div class="card nohand fq-card">
       ${tagsHtml(q.key)}
       <div class="sentence fq-jp" lang="ja">${pre}${blank}${post}</div>
       ${q.done && kanji && it.ans!==it.ansK ? `<div class="fq-kana" lang="ja">${it.preK}<mark>${it.ansK}</mark>${it.postK}</div>` : ""}
