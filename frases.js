@@ -6,13 +6,14 @@
 //
 // Adaptador:
 //   words            todas as palavras do app (distratores)
-//   keys(v)          formas possíveis na frase de v: chaves de FORM, ou ['fixed']
+//   variants(v)      frases de exemplo de v (uma é sorteada por pergunta)
+//   keys(v, s)       formas possíveis na frase s: chaves de FORM, ou ['fixed']
 //                    quando a frase não admite conjugar (palavra no meio da frase)
-//   item(v, key)     {pre, post, preK, postK, ans, ansK, pt}: frase em kanji e em
+//   item(v, key, s)  {pre, post, preK, postK, ans, ansK, pt}: frase em kanji e em
 //                    kana com a lacuna, resposta (kanji/kana) e a tradução, com a
 //                    palavra em destaque entre [ ]
-//   blank(w, key, v) {ans, ansK}: a palavra w na forma `key`, para a frase de v
-//                    (null se não serve)
+//   blank(w, key, v, s) {ans, ansK}: a palavra w na forma `key`, para a frase s de
+//                    v (null se não serve)
 //   kind(w)          tipo da palavra (distratores do mesmo tipo vêm primeiro)
 //   studied(w)       palavra já estudada (preferida como distrator)
 //   altForms(kana)   (opcional) variações aceitas ao digitar
@@ -20,6 +21,7 @@
 //   next()           avança para a próxima frase
 //   render()         redesenha a tela
 //   showKanji()      frase em kanji (true) ou só em kana
+//   toggleKanji      nome da função global que alterna kanji/kana (botão no card)
 const Frases = (()=>{
   const FORM = {
     dict:{f:0,p:0,n:0}, masu:{f:1,p:0,n:0}, nai:{f:0,p:0,n:1}, masen:{f:1,p:0,n:1},
@@ -59,13 +61,14 @@ const Frases = (()=>{
   }
 
   function makeQuestion(v){
-    let keys = A.keys(v);
+    const s = pick(A.variants(v));
+    let keys = A.keys(v, s);
     if(forms==="basica"){
       const basic = keys.filter((k)=> k==="dict" || k==="masu" || k==="fixed");
       if(basic.length) keys = basic;
     }
     const key = pick(keys);
-    const item = A.item(v, key);
+    const item = A.item(v, key, s);
     const opts = [{ans: item.ans, ansK: item.ansK, ok: true}];
     const seen = new Set([item.ans, item.ansK]);
     const add = (o)=>{
@@ -77,7 +80,7 @@ const Frases = (()=>{
     if(key!=="fixed" && forms!=="basica"){
       const F = FORM[key];
       for(const k of shuffle([keyOf(F.f, 1-F.p, F.n), keyOf(F.f, F.p, 1-F.n), keyOf(F.f, 1-F.p, 1-F.n)])){
-        if(add(A.blank(v, k, v))) break;
+        if(add(A.blank(v, k, v, s))) break;
       }
     }
     // O resto: outras palavras na mesma forma, sem sentido em comum com a certa.
@@ -85,7 +88,7 @@ const Frases = (()=>{
     const score = (w)=> (A.kind(w)===A.kind(v) ? 2 : 0) + (A.studied(w) ? 1 : 0);
     const cands = shuffle(A.words.filter((w)=> w!==v && !senses(w).some((s)=> vs.includes(s))))
       .sort((a, b)=> score(b) - score(a));
-    for(const w of cands){ if(opts.length>=4) break; add(A.blank(w, key, v)); }
+    for(const w of cands){ if(opts.length>=4) break; add(A.blank(w, key, v, s)); }
     q = {v, key, item, opts: shuffle(opts), chosen: -1, typed: "", done: false, ok: false};
   }
 
@@ -138,6 +141,7 @@ const Frases = (()=>{
       <div class="sentence fq-jp" lang="ja">${pre}${blank}${post}</div>
       ${kanji && (it.pre+it.ans+it.post)!==(it.preK+it.ansK+it.postK) ? `<div class="fq-kana" lang="ja">${it.preK}${q.done ? `<mark>${it.ansK}</mark>` : `<span class="fq-blank sm" aria-hidden="true">？</span>`}${it.postK}</div>` : ""}
       <div class="fq-pt">${markHl(it.pt)}</div>
+      <button type="button" class="fq-script" onclick="${A.toggleKanji}()" aria-pressed="${kanji}">${kanji ? "あ Ver só em hiragana" : "漢 Ver em kanji"}</button>
       ${q.done ? `<div class="fq-result"><span class="${q.ok?'result-ok':'result-no'}">${q.ok ? '✓ Certo!' : '✗ Não foi dessa vez'}</span></div>` : ""}
     </div>`;
     if(input==="opcoes"){

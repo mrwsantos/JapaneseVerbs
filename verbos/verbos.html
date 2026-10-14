@@ -208,6 +208,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .fq-kana{font-size:14px;color:var(--sub)}
 .fq-pt{font-size:14px;color:var(--sub);line-height:1.45}
 .fq-result{margin-top:4px}
+.fq-script{align-self:center;margin-top:6px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--chip);color:var(--text);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
 .fq-result .result-ok{color:#2e9a5c}
 .fq-result .result-no{color:#d9584a}
 .fq-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
@@ -315,8 +316,10 @@ function toggleTheme(){
   applyTheme(themeMode);
 }
 
-const KANJI_KEY = "jpverbs-frase-kanji";
-function loadKanjiPref(){ try{ const v = localStorage.getItem(KANJI_KEY); return v===null ? true : v==='1'; }catch(e){ return true; } }
+// Frases: começa só em hiragana; o botão no card (ou os Ajustes) liga o kanji.
+// Vale para verbos e adjetivos.
+const KANJI_KEY = "jp-frase-kanji";
+function loadKanjiPref(){ try{ return localStorage.getItem(KANJI_KEY)==='1'; }catch(e){ return false; } }
 function saveKanjiPref(v){ try{ localStorage.setItem(KANJI_KEY, v ? '1' : '0'); }catch(e){} }
 function toggleKanji(){ state.showKanji = !state.showKanji; saveKanjiPref(state.showKanji); render(); }
 
@@ -572,19 +575,24 @@ function buildQueue(){
 }
 
 // ===== Modo Frases (lógica comum em ../frases.js) =====
-// A frase do verbo (fraseFront + verbo) com o verbo conjugado na lacuna. Em
-// português troca a palavra destacada (fraseHl ou ptPresent) pelo passado
-// (fraseHlPast ou ptPast) e/ou põe "não" antes.
+// Frases do verbo (a principal + frasesExtra), com o verbo conjugado na
+// lacuna. Em português troca a palavra destacada (hl ou ptPresent) pelo
+// passado (hlPast ou ptPast) e/ou põe "não" antes.
 function verbBlank(w, key){ const k = conjugate(w)[key]; return {ans: kanjiFormFor(w, k), ansK: k}; }
+function verbVariants(v){
+  return [{f: v.fraseFront, k: v.fraseFrontKana, pt: v.fraseBack, hl: v.fraseHl, hlPast: v.fraseHlPast},
+    ...(v.frasesExtra||[]).map(([f, k, pt, hl, hlPast])=> ({f, k, pt, hl, hlPast}))];
+}
 Frases.setup({
   words: VERBS,
-  keys: (v)=> Frases.FUTURE.test(v.fraseFront + v.fraseBack) ? Frases.PRESENT : Frases.KEYS,
-  item(v, key){
+  variants: verbVariants,
+  keys: (v, s)=> Frases.FUTURE.test(s.f + s.pt) ? Frases.PRESENT : Frases.KEYS,
+  item(v, key, s){
     const b = verbBlank(v, key), F = Frases.FORM[key];
-    const word = v.fraseHl || v.ptPresent;
-    const repl = F.p ? (v.fraseHl ? v.fraseHlPast : v.ptPast) : word;
-    const pt = Frases.ptVerb(v.fraseBack, word, repl || word, !!F.n) || v.fraseBack;
-    return {pre: v.fraseFront, post: "。", preK: v.fraseFrontKana, postK: "。", ans: b.ans, ansK: b.ansK, pt};
+    const word = s.hl || v.ptPresent;
+    const repl = F.p ? (s.hl ? s.hlPast : v.ptPast) : word;
+    const pt = Frases.ptVerb(s.pt, word, repl || word, !!F.n) || s.pt;
+    return {pre: s.f, post: "。", preK: s.k, postK: "。", ans: b.ans, ansK: b.ansK, pt};
   },
   blank: (w, key)=> verbBlank(w, key),
   kind: (w)=> w.group,
@@ -593,6 +601,7 @@ Frases.setup({
   next(){ state.idx++; render(); },
   render: ()=> render(),
   showKanji: ()=> state.showKanji,
+  toggleKanji: "toggleKanji",
 });
 // Posição da carta atual dentro do lote (ex.: "Card 2/10") ou das revisões
 // da rodada (ex.: "Revendo 1/13"); null fora do modo Cards.

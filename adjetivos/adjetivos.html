@@ -200,6 +200,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .fq-kana{font-size:14px;color:var(--sub)}
 .fq-pt{font-size:14px;color:var(--sub);line-height:1.45}
 .fq-result{margin-top:4px}
+.fq-script{align-self:center;margin-top:6px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--chip);color:var(--text);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
 .fq-result .result-ok{color:#2e9a5c}
 .fq-result .result-no{color:#d9584a}
 .fq-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
@@ -314,8 +315,10 @@ function toggleTheme(){
   applyTheme(themeMode);
 }
 
-const KANJI_KEY = "jpadj-frase-kanji";
-function loadKanjiPref(){ try{ const v = localStorage.getItem(KANJI_KEY); return v===null ? true : v==='1'; }catch(e){ return true; } }
+// Frases: começa só em hiragana; o botão no card (ou os Ajustes) liga o kanji.
+// Vale para verbos e adjetivos.
+const KANJI_KEY = "jp-frase-kanji";
+function loadKanjiPref(){ try{ return localStorage.getItem(KANJI_KEY)==='1'; }catch(e){ return false; } }
 function saveKanjiPref(v){ try{ localStorage.setItem(KANJI_KEY, v ? '1' : '0'); }catch(e){} }
 function toggleKanji(){ state.showKanji = !state.showKanji; saveKanjiPref(state.showKanji); render(); }
 
@@ -563,35 +566,41 @@ function adjCopula(pt){
   while((m = re.exec(pt)) && m.index < b) last = m;
   return last;
 }
-const ADJ_NO_NEG = /とても|少し|いつも|一番|ので|もらって|なくて/;
+// て/くて + adjetivo = causa ("passei e estou feliz"): negar não faz sentido.
+const ADJ_NO_NEG = /とても|少し|いつも|一番|ので|て\[/;
 const ADJ_NO_PAST = /今も/;
 function splitBr(s){ const i = s.indexOf("["), j = s.indexOf("]"); return {pre: s.slice(0,i), mid: s.slice(i+1,j), post: s.slice(j+1)}; }
-function adjConjugable(v){ return /\]です。$/.test(v.frase) && /\]です。$/.test(v.fraseKana||"") && !!adjCopula(v.frasePt); }
+function adjConjugable(s){ return /\]です。$/.test(s.f) && /\]です。$/.test(s.k) && !!adjCopula(s.pt); }
+function adjVariants(v){
+  return [{f: v.frase, k: v.fraseKana || v.frase, pt: v.frasePt},
+    ...(v.frasesExtra||[]).map(([f, k, pt])=> ({f, k, pt}))];
+}
 Frases.setup({
   words: ADJS,
-  keys(v){
-    if(!adjConjugable(v)) return ["fixed"];
-    let keys = Frases.FUTURE.test(v.frase + v.frasePt) || ADJ_NO_PAST.test(v.frase) ? Frases.PRESENT : Frases.KEYS;
-    // とても/少し/いつも/一番 com negativo soa errado; causa/efeito (ので, もらって) negado não faz sentido.
-    if(ADJ_NO_NEG.test(v.frase)) keys = keys.filter((k)=> !Frases.FORM[k].n);
+  variants: adjVariants,
+  keys(v, fr){
+    if(!adjConjugable(fr)) return ["fixed"];
+    let keys = Frases.FUTURE.test(fr.f + fr.pt) || ADJ_NO_PAST.test(fr.f) ? Frases.PRESENT : Frases.KEYS;
+    // とても/少し/いつも/一番 com negativo soa errado; causa/efeito (ので, て) negado não faz sentido.
+    if(ADJ_NO_NEG.test(fr.f)) keys = keys.filter((k)=> !Frases.FORM[k].n);
     return keys;
   },
-  item(v, key){
-    const s = splitBr(v.frase), k = splitBr(v.fraseKana || v.frase);
-    if(key==="fixed") return {pre: s.pre, post: s.post, preK: k.pre, postK: k.post, ans: s.mid, ansK: k.mid, pt: v.frasePt};
+  item(v, key, fr){
+    const s = splitBr(fr.f), k = splitBr(fr.k);
+    if(key==="fixed") return {pre: s.pre, post: s.post, preK: k.pre, postK: k.post, ans: s.mid, ansK: k.mid, pt: fr.pt};
     const c = adjConjugate(v)[key], F = Frases.FORM[key];
-    const m = adjCopula(v.frasePt), start = m.index + m[1].length, cop = m[2];
+    const m = adjCopula(fr.pt), start = m.index + m[1].length, cop = m[2];
     let w = F.p ? ADJ_COP_PAST[cop.toLowerCase()] : cop.toLowerCase();
     if(F.n) w = "não " + w;
     if(start===0) w = w.charAt(0).toUpperCase() + w.slice(1);
     // Destaque vai do verbo de ligação até o adjetivo: "[não era grande]".
-    const pt = v.frasePt.slice(0, start) + "[" + w + v.frasePt.slice(start + cop.length).replace("[", "");
+    const pt = fr.pt.slice(0, start) + "[" + w + fr.pt.slice(start + cop.length).replace("[", "");
     return {pre: s.pre, post: "。", preK: k.pre, postK: "。", ans: kanjiFormFor(v, c), ansK: c, pt};
   },
-  blank(w, key, v){
+  blank(w, key, v, fr){
     if(key!=="fixed"){ const c = adjConjugate(w)[key]; return {ans: kanjiFormFor(w, c), ansK: c}; }
     if(w.type!==v.type) return null;
-    const s = splitBr(v.frase), k = splitBr(v.fraseKana || v.frase);
+    const s = splitBr(fr.f), k = splitBr(fr.k);
     if(!s.mid.startsWith(v.kanji) || !k.mid.startsWith(v.kana)) return null;
     return {ans: w.kanji + s.mid.slice(v.kanji.length), ansK: w.kana + k.mid.slice(v.kana.length)};
   },
@@ -602,6 +611,7 @@ Frases.setup({
   next(){ state.idx++; render(); },
   render: ()=> render(),
   showKanji: ()=> state.showKanji,
+  toggleKanji: "toggleKanji",
 });
 // Posição da carta atual dentro do lote (ex.: "Card 2/10") ou das revisões
 // da rodada (ex.: "Revendo 1/13"); null fora do modo Cards.

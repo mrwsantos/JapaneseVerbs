@@ -185,9 +185,13 @@ a tradução em português embaixo (com a parte que muda destacada).
   diferentes na mesma forma (nunca com o mesmo significado).
 - **Digitar** (nos Ajustes): escreva a forma em romaji, kana ou kanji.
 - **Conjugação** (nos Ajustes): 🎲 Variada (padrão) ou Só presente.
-- Kanji ou só hiragana nas frases (nos Ajustes).
+- Começa **só em hiragana** (frase e alternativas). O botão **漢 Ver em kanji** no
+  card troca para kanji, com o hiragana pequeno embaixo; vale para os dois apps
+  e fica salvo (também nos Ajustes).
+- **3 frases por palavra**: a cada vez uma é sorteada (`frasesExtra` nos
+  `data.js`). O progresso é por palavra, não por frase.
 - Frases no futuro (明日, 来年) não vão para o passado; nos adjetivos, frases com
-  とても/少し/いつも/一番 não vão para o negativo. Adjetivo no meio da frase
+  とても/少し/いつも/一番 ou causa (て + adjetivo) não vão para o negativo. Adjetivo no meio da frase
   (ex.: [小さい]犬) fica sem conjugar.
 - **Verbos**: cada acerto conta até 2; errar desce um nível (sem sair de
   Praticando). São necessários **2 acertos** em Frases para um verbo ficar
