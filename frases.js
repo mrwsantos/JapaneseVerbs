@@ -139,7 +139,7 @@ const Frases = (()=>{
     h += `<div class="card nohand fq-card">
       ${tagsHtml(q.key)}
       <div class="sentence fq-jp" lang="ja">${pre}${blank}${post}</div>
-      ${kanji && (it.pre+it.ans+it.post)!==(it.preK+it.ansK+it.postK) ? `<div class="fq-kana" lang="ja">${it.preK}${q.done ? `<mark>${it.ansK}</mark>` : `<span class="fq-blank sm" aria-hidden="true">？</span>`}${it.postK}</div>` : ""}
+      ${q.done && kanji && (it.pre+it.ans+it.post)!==(it.preK+it.ansK+it.postK) ? `<div class="fq-kana" lang="ja">${it.preK}<mark>${it.ansK}</mark>${it.postK}</div>` : ""}
       <div class="fq-pt">${markHl(it.pt)}</div>
       <button type="button" class="fq-script" onclick="${A.toggleKanji}()" aria-pressed="${kanji}">${kanji ? "あ Ver só em hiragana" : "漢 Ver em kanji"}</button>
       ${q.done ? `<div class="fq-result"><span class="${q.ok?'result-ok':'result-no'}">${q.ok ? '✓ Certo!' : '✗ Não foi dessa vez'}</span></div>` : ""}

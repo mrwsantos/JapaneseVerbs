@@ -186,7 +186,7 @@ a tradução em português embaixo (com a parte que muda destacada).
 - **Digitar** (nos Ajustes): escreva a forma em romaji, kana ou kanji.
 - **Conjugação** (nos Ajustes): 🎲 Variada (padrão) ou Só presente.
 - Começa **só em hiragana** (frase e alternativas). O botão **漢 Ver em kanji** no
-  card troca para kanji, com o hiragana pequeno embaixo; vale para os dois apps
+  card troca para kanji (a leitura em hiragana aparece depois de responder); vale para os dois apps
   e fica salvo (também nos Ajustes).
 - **3 frases por palavra**: a cada vez uma é sorteada (`frasesExtra` nos
   `data.js`). O progresso é por palavra, não por frase.
