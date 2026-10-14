@@ -156,6 +156,8 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .conj{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:13px}
 .conj-row{display:flex;justify-content:space-between;padding:4px 0}
 .conj-row .lbl{color:var(--sub)}
+.kanji-toggle{text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--border);cursor:pointer}
+.kanji-toggle:hover{text-decoration-color:var(--accent)}
 .reset{display:block;margin:20px auto 0;font-size:12px;color:var(--sub);background:none;border:none;text-decoration:underline;cursor:pointer}
 .session{margin:2px 0 14px}
 .session-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -373,6 +375,17 @@ function adjConjugate(v){
   };
 }
 
+function conjRowsHtml(c){
+  return `<div class="conj-row"><span class="lbl">Informal (dic.)</span><span>${c.dict}</span></div>
+    <div class="conj-row"><span class="lbl">Formal</span><span>${c.masu}</span></div>
+    <div class="conj-row"><span class="lbl">Negativo informal</span><span>${c.nai}</span></div>
+    <div class="conj-row"><span class="lbl">Negativo formal</span><span>${c.masen}</span></div>
+    <div class="conj-row"><span class="lbl">Passado informal</span><span>${c.ta}</span></div>
+    <div class="conj-row"><span class="lbl">Passado formal</span><span>${c.mashita}</span></div>
+    <div class="conj-row"><span class="lbl">Passado neg. informal</span><span>${c.nakatta}</span></div>
+    <div class="conj-row"><span class="lbl">Passado neg. formal</span><span>${c.masendeshita}</span></div>`;
+}
+
 const H = {'あ':'a','い':'i','う':'u','え':'e','お':'o','か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
 'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go','さ':'sa','し':'shi','す':'su','せ':'se','そ':'so',
 'ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo','た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to',
@@ -446,7 +459,7 @@ function altKanaForms(kanaForm){
   return Array.from(alts);
 }
 
-let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], reviewWrongIds:[], reviewEnd:0, revealed:false, exampleFor:null, expanded:null, writeChecked:false, writeOk:false, testMode:false,
+let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], reviewWrongIds:[], reviewEnd:0, revealed:false, exampleFor:null, answerConjFor:null, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
   search:'', learningSearch:'', groupExpanded:{i:false,na:false}, groupCollapsed:{i:false,na:false}, showInfo:false, showLearningInfo:false,
   showKanji: loadKanjiPref(), cardTypeFilter:'all', listTypeFilter:'all', nivelFilter:'all'};
@@ -755,7 +768,7 @@ const DIRECTION_KEY = "jp-direction"; // compartilhado entre verbos e adjetivos
 function loadDirection(){ try{ return localStorage.getItem(DIRECTION_KEY)==='pt' ? 'pt' : 'jp'; }catch(e){ return 'jp'; } }
 let direction = loadDirection();
 function setDirection(d){ direction = d; try{ localStorage.setItem(DIRECTION_KEY, d); }catch(e){} state.revealed = false; render(); }
-const DIR_LABEL = {jp:'日本語 → PT', pt:'PT → 日本語'};
+const DIR_LABEL = {jp:'JP → PT', pt:'PT → JP'};
 const CARD_FILTERS = [['all','Todos'],['i','Adjetivos -i'],['na','Adjetivos -na']];
 function setCardFilter(v){ setCardTypeFilter(v); }
 function cardFilterValue(){ return state.cardTypeFilter; }
@@ -774,7 +787,7 @@ function settingsSummary(){
     if(f && f[0]!=='all') parts.push(f[1]);
     if(state.testMode) parts.push('🧪 teste');
   }
-  if(state.mode==='frases') parts.push(state.showKanji ? '漢字' : 'かな', Frases.summary());
+  if(state.mode==='frases') parts.push(state.showKanji ? 'Kanji' : 'Kana', Frases.summary());
   if(state.mode==='escrita'){
     const f = state.writeFilter;
     parts.push(f.shuffle ? '🎲 Embaralhado' : [f.polite==='formal'?'Formal':'Informal', f.past?'Passado':'Presente', f.neg?'Negativo':''].filter(Boolean).join(' · '));
@@ -822,7 +835,7 @@ function sheetHtml(){
     <!-- body += `<div class="setting"><button type="button" class="switch-row" onclick="toggleTestMode()" aria-pressed="${state.testMode}"><span>🧪 Modo teste<br><span class="setting-note">Intervalos zerados: tudo volta na hora.</span></span><span class="switch ${state.testMode?'on':''}"></span></button></div>`; -->
   }
   if(state.mode==='frases'){
-    body += `<div class="setting"><div class="setting-label">Escrita das frases</div>${segHtml([[true,'漢 Kanji'],[false,'あ Hiragana']], state.showKanji, 'setKanji')}</div>`;
+    body += `<div class="setting"><div class="setting-label">Escrita das frases</div>${segHtml([[true,'Kanji'],[false,'Hiragana']], state.showKanji, 'setKanji')}</div>`;
     body += Frases.settingsHtml(segHtml);
   }
   if(state.mode==='escrita'){
@@ -851,7 +864,10 @@ function flipActionsHtml(noLabel, yesLabel){
 }
 function jpFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div>`; }
 function ptFaceHtml(v){ return `${cardTag(v)}<div class="meaning-big">${v.meaning}</div><div class="face-sub">Como se diz em japonês?</div>`; }
-function answerFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div><div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>${exampleHtml(v)}`; }
+function answerFaceHtml(v){
+  const conjOpen = state.answerConjFor===v.id;
+  return `${cardTag(v)}<button type="button" class="kanji kanji-toggle" aria-expanded="${conjOpen}" aria-controls="answerConj" onclick="event.stopPropagation(); toggleAnswerConj(${v.id})">${v.kanji}</button><div class="kana">${v.kana}</div><div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>${conjOpen ? `<div class="conj" id="answerConj">${conjRowsHtml(adjConjugate(v))}</div>` : ''}${exampleHtml(v)}`;
+}
 
 // Exemplo do verso (frase/fraseKana/frasePt em data.js, palavra em destaque entre [ ]).
 function exampleOf(v){ return v.frase && v.frasePt ? {jp: v.frase, kana: v.fraseKana, pt: v.frasePt} : null; }
@@ -862,6 +878,7 @@ function flipCard(){
   const card = document.getElementById('card'); if(!card || state.revealed) return;
   state.revealed = true;
   state.exampleFor = null;
+  state.answerConjFor = null;
   const acts = document.getElementById('flipActions'); if(acts) acts.classList.add('show');
   const hint = document.getElementById('cardHint'); if(hint) hint.textContent = '← arraste: praticar · arraste: sabia →';
   card.classList.add('flipped');
@@ -876,6 +893,7 @@ function toggleExample(id){
   if(box) box.classList.toggle('open', open);
   if(btn){ btn.setAttribute('aria-expanded', open); btn.querySelector('.label').textContent = open ? 'Esconder frase' : 'Ver numa frase'; }
 }
+function toggleAnswerConj(id){ state.answerConjFor = state.answerConjFor===id ? null : id; render(); }
 // Trecho entre [ ] vira destaque (cor accent).
 function markHl(text){ return String(text||'').replace(/\[([^\]]+)\]/g, '<mark>$1</mark>'); }
 function exampleHtml(v){
@@ -902,7 +920,7 @@ function setupCardGestures(){
   if(!card || !wrap) return;
   let sx = 0, dx = 0, dragging = false, moved = false;
   card.addEventListener('pointerdown', (e)=>{
-    if(e.button!==0 || animating || e.target.closest('.ex-toggle')) return;
+    if(e.button!==0 || animating || e.target.closest('.ex-toggle') || e.target.closest('.kanji-toggle')) return;
     sx = e.clientX; dx = 0; dragging = true; moved = false;
     card.setPointerCapture(e.pointerId); wrap.classList.add('dragging');
   });
@@ -1148,17 +1166,7 @@ function renderListItem(v, idx){
   const label = s==='aprendido'?'Aprendido':(s==='praticando'?'Praticando':'Novo');
   let conjHtml = "";
   if(state.expanded===v.id){
-    const c = adjConjugate(v);
-    conjHtml = `<div class="conj">
-      <div class="conj-row"><span class="lbl">Informal (dic.)</span><span>${c.dict}</span></div>
-      <div class="conj-row"><span class="lbl">Formal</span><span>${c.masu}</span></div>
-      <div class="conj-row"><span class="lbl">Negativo informal</span><span>${c.nai}</span></div>
-      <div class="conj-row"><span class="lbl">Negativo formal</span><span>${c.masen}</span></div>
-      <div class="conj-row"><span class="lbl">Passado informal</span><span>${c.ta}</span></div>
-      <div class="conj-row"><span class="lbl">Passado formal</span><span>${c.mashita}</span></div>
-      <div class="conj-row"><span class="lbl">Passado neg. informal</span><span>${c.nakatta}</span></div>
-      <div class="conj-row"><span class="lbl">Passado neg. formal</span><span>${c.masendeshita}</span></div>
-    </div>`;
+    conjHtml = `<div class="conj">${conjRowsHtml(adjConjugate(v))}</div>`;
   }
   return `<button type="button" class="list-item" style="animation-delay:${delay}ms" aria-expanded="${state.expanded===v.id}" onclick="toggleExpand(${v.id})">
     <div class="row"><div><div class="l-kanji">${v.kanji} <span style="color:var(--sub);font-size:12px">${v.kana}</span></div><div class="l-meaning">${v.meaning}</div></div>

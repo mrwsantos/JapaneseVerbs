@@ -64,11 +64,11 @@ Funciona como no Anki/Quizlet:
 
 ## ⚙️ Ajustes
 
-O botão no canto (ex.: "日本語 → PT ⚙️") abre os ajustes do modo atual:
+O botão no canto (ex.: "JP → PT ⚙️") abre os ajustes do modo atual:
 
 - **Direção** (Cards e Frases, vale para verbos e adjetivos):
-  **日本語 → PT** mostra o japonês e você lembra o significado;
-  **PT → 日本語** mostra o português e você lembra como se diz em japonês.
+  **JP → PT** mostra o japonês e você lembra o significado;
+  **PT → JP** mostra o português e você lembra como se diz em japonês.
 - **Cards**: palavras novas por dia, filtro (grupo do verbo / tipo de
   adjetivo) e modo teste.
 - **Frases**: frases em kanji ou só em hiragana.
@@ -188,7 +188,7 @@ a tradução em português embaixo (com a parte que muda destacada).
   rodada** (com outra frase/forma sorteada) até acertar. No fim, **Recomeçar**
   embaralha tudo de novo.
 - **Conjugação** (nos Ajustes): 🎲 Variada (padrão) ou Só presente.
-- Começa **só em hiragana** (frase e alternativas). O botão **漢 Ver em kanji** no
+- Começa **só em hiragana** (frase e alternativas). O botão **Ver em kanji** no
   card troca para kanji (a leitura em hiragana aparece depois de responder); vale para os dois apps
   e fica salvo (também nos Ajustes).
 - **3 frases por palavra**: a cada vez uma é sorteada (`frasesExtra` nos
