@@ -196,6 +196,27 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .flip-wrap[data-swipe="left"] .swipe-tag.left,.flip-wrap[data-swipe="right"] .swipe-tag.right{opacity:1}
 .card-hint{text-align:center;font-size:11px;color:var(--sub);margin-top:10px;min-height:14px}
 .flip-actions{transition:opacity .2s ease,transform .2s ease}
+/* Modo Frases: lacuna + alternativas */
+.fq-card{gap:10px}
+.fq-jp{font-size:22px}
+.fq-jp mark,.fq-kana mark,.fq-pt mark{background:none;color:var(--accent);font-weight:700}
+.fq-blank{display:inline-block;min-width:3.2em;border-bottom:2px solid var(--accent);color:var(--accent);margin:0 3px;animation:blink 1.4s ease infinite}
+@keyframes blink{50%{opacity:.35}}
+.fq-kana{font-size:14px;color:var(--sub)}
+.fq-pt{font-size:14px;color:var(--sub);line-height:1.45}
+.fq-result{margin-top:4px}
+.fq-result .result-ok{color:#2e9a5c}
+.fq-result .result-no{color:#d9584a}
+.fq-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.fq-opt{position:relative;padding:16px 8px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;font-size:17px;font-weight:600;box-shadow:var(--shadow);cursor:pointer}
+.fq-opt .fq-n{position:absolute;top:5px;left:8px;font-size:10px;color:var(--sub);font-weight:400}
+.fq-opt.ok{background:#d3ecdc;color:#1f5c38;border-color:#7cc49a}
+.fq-opt.no{background:#f5d6d2;color:#8a2c20;border-color:#e09a90;animation:shake .35s ease}
+.fq-opt.dim{opacity:.45}
+.fq-opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.fq-input{margin-top:14px}
+.fq-typed{text-align:center;font-size:13px;color:var(--sub);margin-top:12px}
 /* Exemplo numa frase (verso do card): abre esticando o card para baixo */
 .ex-toggle{margin-top:12px;background:none;border:none;padding:6px 10px;color:var(--accent);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .ex-toggle .label{text-decoration:underline;text-underline-offset:3px}
@@ -254,6 +275,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
   <button type="button" class="mode" role="tab" aria-selected="false" data-mode="frases">💬 Frases</button>
 </div>
 <script src="../sons.js"></script>
+<script src="../frases.js"></script>
 <script src="data.js"></script>
 <main id="main"></main>
 
@@ -356,11 +378,6 @@ function conjugate(v){
     te:prefix+"して", ta:prefix+"した", mashita:prefix+"しました", nakatta:prefix+"しなかった", masendeshita:prefix+"しませんでした" };
 }
 
-function sentenceFor(v, showKanji){
-  return showKanji
-    ? { front: v.fraseFront+v.kanji+"。", back: v.fraseBack }
-    : { front: v.fraseFrontKana+v.kana+"。", back: v.fraseBack };
-}
 
 function ptForm(v, past, neg){
   const base = past ? v.ptPast : v.ptPresent;
@@ -548,7 +565,32 @@ function buildQueue(){
     state.reviewEnd = 0;
   }
   state.idx = 0; state.revealed = false; state.writeChecked=false;
+  Frases.reset();
 }
+
+// ===== Modo Frases (lógica comum em ../frases.js) =====
+// A frase do verbo (fraseFront + verbo) com o verbo conjugado na lacuna. Em
+// português troca a palavra destacada (fraseHl ou ptPresent) pelo passado
+// (fraseHlPast ou ptPast) e/ou põe "não" antes.
+function verbBlank(w, key){ const k = conjugate(w)[key]; return {ans: kanjiFormFor(w, k), ansK: k}; }
+Frases.setup({
+  words: VERBS,
+  keys: (v)=> Frases.FUTURE.test(v.fraseFront + v.fraseBack) ? Frases.PRESENT : Frases.KEYS,
+  item(v, key){
+    const b = verbBlank(v, key), F = Frases.FORM[key];
+    const word = v.fraseHl || v.ptPresent;
+    const repl = F.p ? (v.fraseHl ? v.fraseHlPast : v.ptPast) : word;
+    const pt = Frases.ptVerb(v.fraseBack, word, repl || word, !!F.n) || v.fraseBack;
+    return {pre: v.fraseFront, post: "。", preK: v.fraseFrontKana, postK: "。", ans: b.ans, ansK: b.ansK, pt};
+  },
+  blank: (w, key)=> verbBlank(w, key),
+  kind: (w)=> w.group,
+  studied: (w)=> { const e = progress[w.id]; return !!e && e.level >= 2; },
+  score: (v, ok)=> fraseScore(v, ok),
+  next(){ state.idx++; render(); },
+  render: ()=> render(),
+  showKanji: ()=> state.showKanji,
+});
 // Posição da carta atual dentro do lote (ex.: "Card 2/10") ou das revisões
 // da rodada (ex.: "Revendo 1/13"); null fora do modo Cards.
 function deckPosition(){
@@ -633,8 +675,9 @@ function knowIt(){
   render();
 }
 function toggleTestMode(){ state.testMode = !state.testMode; render(); }
-function fraseAnswer(correct){
-  const v = state.queue[state.idx]; const e = getEntry(v.id);
+// Modo Frases: só grava (quem avança é Frases.next()).
+function fraseScore(v, correct){
+  const e = getEntry(v.id);
   if(correct){
     e.fraseHits = Math.min(e.fraseHits+1, 2);
   } else {
@@ -642,7 +685,7 @@ function fraseAnswer(correct){
     // Igual à escrita: nunca derruba o nível a ponto de "desaprender" o verbo.
     e.level = Math.max(e.level-1, 2);
   }
-  saveProgress(progress); state.idx++; state.revealed = false; render();
+  saveProgress(progress);
 }
 function checkWrite(){
   const v = state.queue[state.idx];
@@ -699,13 +742,13 @@ window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && state.sheet) cl
 
 function settingsSummary(){
   const parts = [];
-  if(state.mode!=='escrita') parts.push(DIR_LABEL[direction]);
+  if(state.mode==='cards') parts.push(DIR_LABEL[direction]);
   if(state.mode==='cards'){
     const f = CARD_FILTERS.find(([val])=> val===cardFilterValue());
     if(f && f[0]!=='all') parts.push(f[1]);
     if(state.testMode) parts.push('🧪 teste');
   }
-  if(state.mode==='frases') parts.push(state.showKanji ? '漢字' : 'かな');
+  if(state.mode==='frases') parts.push(state.showKanji ? '漢字' : 'かな', Frases.summary());
   if(state.mode==='escrita'){
     const f = state.writeFilter;
     parts.push(f.shuffle ? '🎲 Embaralhado' : [f.polite==='formal'?'Formal':'Informal', f.past?'Passado':'Presente', f.neg?'Negativo':''].filter(Boolean).join(' · '));
@@ -744,7 +787,7 @@ function setKanji(v){ if(state.showKanji!==v) toggleKanji(); }
 function sheetHtml(){
   const title = {cards:'Ajustes · Cards', frases:'Ajustes · Frases', escrita:'Ajustes · Escrita'}[state.mode];
   let body = '';
-  if(state.mode!=='escrita'){
+  if(state.mode==='cards'){
     body += `<div class="setting"><div class="setting-label">Direção</div>${segHtml([['jp',DIR_LABEL.jp],['pt',DIR_LABEL.pt]], direction, 'setDirection')}
       <div class="setting-note">${direction==='jp' ? 'Vê o japonês e lembra o significado.' : 'Vê o português e lembra como se diz em japonês.'}</div></div>`;
   }
@@ -754,6 +797,7 @@ function sheetHtml(){
   }
   if(state.mode==='frases'){
     body += `<div class="setting"><div class="setting-label">Escrita das frases</div>${segHtml([[true,'漢 Kanji'],[false,'あ Hiragana']], state.showKanji, 'setKanji')}</div>`;
+    body += Frases.settingsHtml(segHtml);
   }
   if(state.mode==='escrita'){
     body += `<div class="setting"><div class="setting-label">Formas para praticar</div>${writePillsHtml()}</div>`;
@@ -792,7 +836,7 @@ function exampleOf(v){
   const pt = i===-1 ? v.fraseBack : v.fraseBack.slice(0,i) + '[' + v.fraseBack.slice(i, i+word.length) + ']' + v.fraseBack.slice(i+word.length);
   return {jp: v.fraseFront + '[' + v.kanji + ']。', kana: v.fraseFrontKana + '[' + v.kana + ']。', pt};
 }
-let currentAnswer = null; // answer (Cards) ou fraseAnswer (Frases)
+let currentAnswer = null; // answer (Cards)
 let animating = false;
 // Vira uma vez só: depois de ver a resposta não dá para voltar à frente.
 function flipCard(){
@@ -921,13 +965,8 @@ function renderInner(){
     } else if(state.mode==="frases"){
       if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
       if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + `<div class="empty">🎉 Fim das frases desta rodada.</div><button class="btn next" style="margin-top:12px;width:100%" onclick="buildQueue();render();">Recomeçar</button>`; return; }
-      const v = state.queue[state.idx]; const s = sentenceFor(v, state.showKanji);
-      const tag = `<div class="tag-row"><span class="group-tag">${state.showKanji ? v.kanji : v.kana} · ${GROUP_NAME[v.group]}</span> <span class="badge nivel-${v.nivel}">${v.nivel}</span></div>`;
-      const jpFront = `${tag}<div class="sentence">${s.front}</div>`;
-      const ptFront = `${tag}<div class="sentence">${s.back}</div><div class="face-sub">Como fica em japonês?</div>`;
-      const back = `${tag}<div class="sentence">${s.front}</div><div class="answer"><div class="meaning">${s.back}</div></div>`;
-      currentAnswer = fraseAnswer;
-      main.innerHTML = statsHtml + flipCardHtml(direction==='pt' ? ptFront : jpFront, back) + flipActionsHtml('Não lembrei', 'Lembrei ✓');
+      main.innerHTML = statsHtml + Frases.html(state.queue[state.idx]);
+      Frases.bind(!!state.sheet);
 
     } else { // escrita
       if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }

@@ -171,12 +171,31 @@ ou **aprendeu**, em ordem aleatória, e **não mexe no progresso** do SRS. O pla
 - Ao adicionar palavras com kanji novos, rode `tools/gerar-padroes.mjs` (instruções
   no próprio arquivo).
 
-## Modo Frases (só verbos)
+## Modo Frases (verbos e adjetivos)
 
-Frases de exemplo com o verbo, para lembrar o significado em contexto
-(alternável entre kanji e hiragana). Cada acerto conta até 2; errar desce um
-nível (sem sair de Praticando). São necessários **2 acertos** em Frases para
-um verbo ficar **Aprendido**.
+Exercício com as palavras em **Praticando** ou **Aprendido**: aparece a frase
+de exemplo em japonês com uma **lacuna** onde vai a palavra **já conjugada**, e
+a tradução em português embaixo (com a parte que muda destacada).
+
+- Etiquetas mostram a forma pedida: **Formal/Informal**, **Presente/Passado**,
+  **Afirmativo/Negativo** (ex.: 友達と＿＿。 "Não falei com o amigo." →
+  話さなかった).
+- **Alternativas** (padrão): 4 opções, teclas 1–4. Uma delas costuma ser a
+  mesma palavra em outra forma (treina a conjugação), as outras são palavras
+  diferentes na mesma forma (nunca com o mesmo significado).
+- **Digitar** (nos Ajustes): escreva a forma em romaji, kana ou kanji.
+- **Conjugação** (nos Ajustes): 🎲 Variada (padrão) ou Só presente.
+- Kanji ou só hiragana nas frases (nos Ajustes).
+- Frases no futuro (明日, 来年) não vão para o passado; nos adjetivos, frases com
+  とても/少し/いつも/一番 não vão para o negativo. Adjetivo no meio da frase
+  (ex.: [小さい]犬) fica sem conjugar.
+- **Verbos**: cada acerto conta até 2; errar desce um nível (sem sair de
+  Praticando). São necessários **2 acertos** em Frases para um verbo ficar
+  **Aprendido**.
+- **Adjetivos**: igual à Escrita (acerto sobe um nível, erro desce sem sair de
+  Praticando).
+- A lógica comum fica em `frases.js`; cada app só informa como conjugar e
+  traduzir as suas frases.
 
 ## 🎮 Jogo de Pares
 

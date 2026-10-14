@@ -187,6 +187,28 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .flip-wrap[data-swipe="left"] .swipe-tag.left,.flip-wrap[data-swipe="right"] .swipe-tag.right{opacity:1}
 .card-hint{text-align:center;font-size:11px;color:var(--sub);margin-top:10px;min-height:14px}
 .flip-actions{transition:opacity .2s ease,transform .2s ease}
+.sentence{font-size:24px;font-weight:600;line-height:1.4}
+/* Modo Frases: lacuna + alternativas */
+.fq-card{gap:10px}
+.fq-jp{font-size:22px}
+.fq-jp mark,.fq-kana mark,.fq-pt mark{background:none;color:var(--accent);font-weight:700}
+.fq-blank{display:inline-block;min-width:3.2em;border-bottom:2px solid var(--accent);color:var(--accent);margin:0 3px;animation:blink 1.4s ease infinite}
+@keyframes blink{50%{opacity:.35}}
+.fq-kana{font-size:14px;color:var(--sub)}
+.fq-pt{font-size:14px;color:var(--sub);line-height:1.45}
+.fq-result{margin-top:4px}
+.fq-result .result-ok{color:#2e9a5c}
+.fq-result .result-no{color:#d9584a}
+.fq-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.fq-opt{position:relative;padding:16px 8px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;font-size:17px;font-weight:600;box-shadow:var(--shadow);cursor:pointer}
+.fq-opt .fq-n{position:absolute;top:5px;left:8px;font-size:10px;color:var(--sub);font-weight:400}
+.fq-opt.ok{background:#d3ecdc;color:#1f5c38;border-color:#7cc49a}
+.fq-opt.no{background:#f5d6d2;color:#8a2c20;border-color:#e09a90;animation:shake .35s ease}
+.fq-opt.dim{opacity:.45}
+.fq-opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.fq-input{margin-top:14px}
+.fq-typed{text-align:center;font-size:13px;color:var(--sub);margin-top:12px}
 /* Exemplo numa frase (verso do card): abre esticando o card para baixo */
 .ex-toggle{margin-top:12px;background:none;border:none;padding:6px 10px;color:var(--accent);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .ex-toggle .label{text-decoration:underline;text-underline-offset:3px}
@@ -242,8 +264,10 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 <div class="modes" id="modes" style="display:none" role="tablist">
   <button type="button" class="mode active" role="tab" aria-selected="true" data-mode="cards">🗂️ Cards</button>
   <button type="button" class="mode" role="tab" aria-selected="false" data-mode="escrita">✏️ Escrita</button>
+  <button type="button" class="mode" role="tab" aria-selected="false" data-mode="frases">💬 Frases</button>
 </div>
 <script src="../sons.js"></script>
+<script src="../frases.js"></script>
 <script src="data.js"></script>
 <main id="main"></main>
 
@@ -286,6 +310,11 @@ function toggleTheme(){
   try{ localStorage.setItem(THEME_KEY, themeMode); }catch(e){}
   applyTheme(themeMode);
 }
+
+const KANJI_KEY = "jpadj-frase-kanji";
+function loadKanjiPref(){ try{ const v = localStorage.getItem(KANJI_KEY); return v===null ? true : v==='1'; }catch(e){ return true; } }
+function saveKanjiPref(v){ try{ localStorage.setItem(KANJI_KEY, v ? '1' : '0'); }catch(e){} }
+function toggleKanji(){ state.showKanji = !state.showKanji; saveKanjiPref(state.showKanji); render(); }
 
 function getEntry(id){ if(!progress[id]) progress[id] = {level:0, due:0}; return progress[id]; }
 function today(){ return Math.floor(Date.now()/86400000); }
@@ -415,7 +444,7 @@ function altKanaForms(kanaForm){
 let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], reviewWrongIds:[], reviewEnd:0, revealed:false, exampleFor:null, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
   search:'', learningSearch:'', groupExpanded:{i:false,na:false}, groupCollapsed:{i:false,na:false}, showInfo:false, showLearningInfo:false,
-  cardTypeFilter:'all', listTypeFilter:'all', nivelFilter:'all'};
+  showKanji: loadKanjiPref(), cardTypeFilter:'all', listTypeFilter:'all', nivelFilter:'all'};
 
 function targetKey(f){
   if(f.polite==='informal'){
@@ -516,7 +545,61 @@ function buildQueue(){
     state.reviewEnd = 0;
   }
   state.idx = 0; state.revealed = false; state.writeChecked=false;
+  Frases.reset();
 }
+
+// ===== Modo Frases (lógica comum em ../frases.js) =====
+// Frases "X は [adjetivo]です。" conjugam (a lacuna leva a forma inteira, com
+// です quando formal); em português o verbo de ligação (é/está/são...) vai para
+// o passado e/ou ganha "não". As outras (adjetivo antes do substantivo, に,
+// の...) ficam na forma da frase, e os distratores imitam essa terminação.
+const ADJ_COP_PAST = {"é":"era","está":"estava","são":"eram","estou":"estava","sou":"era","estão":"estavam"};
+function adjCopula(pt){
+  const b = pt.indexOf("["), re = /(^|\s)(é|está|são|estou|sou|estão)(?=\s)/gi;
+  let m, last = null;
+  while((m = re.exec(pt)) && m.index < b) last = m;
+  return last;
+}
+const ADJ_NO_NEG = /とても|少し|いつも|一番|ので|もらって|なくて/;
+const ADJ_NO_PAST = /今も/;
+function splitBr(s){ const i = s.indexOf("["), j = s.indexOf("]"); return {pre: s.slice(0,i), mid: s.slice(i+1,j), post: s.slice(j+1)}; }
+function adjConjugable(v){ return /\]です。$/.test(v.frase) && /\]です。$/.test(v.fraseKana||"") && !!adjCopula(v.frasePt); }
+Frases.setup({
+  words: ADJS,
+  keys(v){
+    if(!adjConjugable(v)) return ["fixed"];
+    let keys = Frases.FUTURE.test(v.frase + v.frasePt) || ADJ_NO_PAST.test(v.frase) ? Frases.PRESENT : Frases.KEYS;
+    // とても/少し/いつも/一番 com negativo soa errado; causa/efeito (ので, もらって) negado não faz sentido.
+    if(ADJ_NO_NEG.test(v.frase)) keys = keys.filter((k)=> !Frases.FORM[k].n);
+    return keys;
+  },
+  item(v, key){
+    const s = splitBr(v.frase), k = splitBr(v.fraseKana || v.frase);
+    if(key==="fixed") return {pre: s.pre, post: s.post, preK: k.pre, postK: k.post, ans: s.mid, ansK: k.mid, pt: v.frasePt};
+    const c = adjConjugate(v)[key], F = Frases.FORM[key];
+    const m = adjCopula(v.frasePt), start = m.index + m[1].length, cop = m[2];
+    let w = F.p ? ADJ_COP_PAST[cop.toLowerCase()] : cop.toLowerCase();
+    if(F.n) w = "não " + w;
+    if(start===0) w = w.charAt(0).toUpperCase() + w.slice(1);
+    // Destaque vai do verbo de ligação até o adjetivo: "[não era grande]".
+    const pt = v.frasePt.slice(0, start) + "[" + w + v.frasePt.slice(start + cop.length).replace("[", "");
+    return {pre: s.pre, post: "。", preK: k.pre, postK: "。", ans: kanjiFormFor(v, c), ansK: c, pt};
+  },
+  blank(w, key, v){
+    if(key!=="fixed"){ const c = adjConjugate(w)[key]; return {ans: kanjiFormFor(w, c), ansK: c}; }
+    if(w.type!==v.type) return null;
+    const s = splitBr(v.frase), k = splitBr(v.fraseKana || v.frase);
+    if(!s.mid.startsWith(v.kanji) || !k.mid.startsWith(v.kana)) return null;
+    return {ans: w.kanji + s.mid.slice(v.kanji.length), ansK: w.kana + k.mid.slice(v.kana.length)};
+  },
+  kind: (w)=> w.type,
+  studied: (w)=> { const e = progress[w.id]; return !!e && e.level >= 2; },
+  altForms: altKanaForms,
+  score: (v, ok)=> fraseScore(v, ok),
+  next(){ state.idx++; render(); },
+  render: ()=> render(),
+  showKanji: ()=> state.showKanji,
+});
 // Posição da carta atual dentro do lote (ex.: "Card 2/10") ou das revisões
 // da rodada (ex.: "Revendo 1/13"); null fora do modo Cards.
 function deckPosition(){
@@ -621,6 +704,18 @@ function checkWrite(){
   state.writeTargetKanji = kanjiFormFor(v, targetKana);
   state.writeChecked = true; Sons.play('cards', state.writeOk ? 'acerto' : 'erro'); render();
 }
+// Modo Frases: igual à Escrita (acerto sobe um nível, erro desce sem sair de
+// Praticando); só grava, quem avança é Frases.next().
+function fraseScore(v, correct){
+  const e = getEntry(v.id);
+  if(correct){
+    e.level = Math.min(e.level+1, INTERVALS.length-1);
+    e.due = today() + INTERVALS[e.level];
+  } else {
+    e.level = Math.max(e.level-1, 2);
+  }
+  saveProgress(progress);
+}
 function writeNext(correct){
   const v = state.queue[state.idx]; const e = getEntry(v.id);
   if(correct){
@@ -660,13 +755,13 @@ window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && state.sheet) cl
 
 function settingsSummary(){
   const parts = [];
-  if(state.mode!=='escrita') parts.push(DIR_LABEL[direction]);
+  if(state.mode==='cards') parts.push(DIR_LABEL[direction]);
   if(state.mode==='cards'){
     const f = CARD_FILTERS.find(([val])=> val===cardFilterValue());
     if(f && f[0]!=='all') parts.push(f[1]);
     if(state.testMode) parts.push('🧪 teste');
   }
-  if(state.mode==='frases') parts.push(state.showKanji ? '漢字' : 'かな');
+  if(state.mode==='frases') parts.push(state.showKanji ? '漢字' : 'かな', Frases.summary());
   if(state.mode==='escrita'){
     const f = state.writeFilter;
     parts.push(f.shuffle ? '🎲 Embaralhado' : [f.polite==='formal'?'Formal':'Informal', f.past?'Passado':'Presente', f.neg?'Negativo':''].filter(Boolean).join(' · '));
@@ -705,7 +800,7 @@ function setKanji(v){ if(state.showKanji!==v) toggleKanji(); }
 function sheetHtml(){
   const title = {cards:'Ajustes · Cards', frases:'Ajustes · Frases', escrita:'Ajustes · Escrita'}[state.mode];
   let body = '';
-  if(state.mode!=='escrita'){
+  if(state.mode==='cards'){
     body += `<div class="setting"><div class="setting-label">Direção</div>${segHtml([['jp',DIR_LABEL.jp],['pt',DIR_LABEL.pt]], direction, 'setDirection')}
       <div class="setting-note">${direction==='jp' ? 'Vê o japonês e lembra o significado.' : 'Vê o português e lembra como se diz em japonês.'}</div></div>`;
   }
@@ -715,6 +810,7 @@ function sheetHtml(){
   }
   if(state.mode==='frases'){
     body += `<div class="setting"><div class="setting-label">Escrita das frases</div>${segHtml([[true,'漢 Kanji'],[false,'あ Hiragana']], state.showKanji, 'setKanji')}</div>`;
+    body += Frases.settingsHtml(segHtml);
   }
   if(state.mode==='escrita'){
     body += `<div class="setting"><div class="setting-label">Formas para praticar</div>${writePillsHtml()}</div>`;
@@ -871,6 +967,12 @@ function renderInner(){
         + flipCardHtml(direction==='pt' ? ptFaceHtml(v) : jpFaceHtml(v), answerFaceHtml(v))
         + (getStatus(v)==='novo' ? `<button type="button" class="know-btn" onclick="knowIt()">✓ Já sei essa — marcar como aprendida</button>` : '')
         + flipActionsHtml('Praticar mais', 'Sabia');
+
+    } else if(state.mode==="frases"){
+      if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum adjetivo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
+      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + `<div class="empty">🎉 Fim das frases desta rodada.</div><button class="btn next" style="margin-top:12px;width:100%" onclick="buildQueue();render();">Recomeçar</button>`; return; }
+      main.innerHTML = statsHtml + Frases.html(state.queue[state.idx]);
+      Frases.bind(!!state.sheet);
 
     } else { // escrita
       if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum adjetivo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
