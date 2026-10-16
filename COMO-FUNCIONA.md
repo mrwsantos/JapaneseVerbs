@@ -132,7 +132,21 @@ então dá pra editar os valores de `freq` livremente sem perder progresso.
 
 ## Modo Escrita
 
-Prática extra com as palavras em **Praticando** ou **Aprendido**, embaralhadas.
+Prática extra com as palavras em **Praticando** ou **Aprendido**, embaralhadas
+em **decks de 10** ("Deck 3/10" no topo).
+
+- **Romaji vira hiragana enquanto você digita** (taberu → たべる, kka → っか,
+  nn ou n + consoante → ん, "-" → ー). Também dá para digitar kana ou kanji
+  direto. Vale também no Frases (modo Digitar). Lógica em `escrita.js`.
+- **Errou, a palavra volta no fim do deck** até você acertar todas.
+- **No fim de cada deck** aparece a estatística: acertos de primeira, erros por
+  característica da forma (formal/informal, passado/presente,
+  negativo/afirmativo), o tipo de erro (trocou a forma ou errou a conjugação),
+  erros por grupo, as palavras que você errou e uma **sugestão** do que treinar.
+  Com formas variadas, o botão **Próximo deck só com essa forma** fixa a forma
+  em que você mais errou. O histórico geral fica salvo no aparelho.
+- Ao errar, o app mostra o que você escreveu e, se for outra forma da mesma
+  palavra, qual forma era.
 
 - Aparece a frase **em português** já conjugada (ex.: "não comeu", "não era
   grande") e você escreve em japonês — vale romaji, hiragana, katakana ou kanji.

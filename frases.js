@@ -107,6 +107,7 @@ const Frases = (()=>{
     if(!q || q.done) return;
     const el = document.getElementById("fqInput");
     q.typed = el ? el.value : "";
+    if(typeof Romaji!=="undefined") q.typed = Romaji.toKana(q.typed, true);
     const s = q.typed.trim().replace(/[。.]$/, "");
     const kanas = A.altForms ? A.altForms(q.item.ansK) : [q.item.ansK];
     const ok = !!s && (
@@ -162,6 +163,7 @@ const Frases = (()=>{
   function bind(sheetOpen){
     const inp = document.getElementById("fqInput");
     if(inp){
+      if(typeof Romaji!=="undefined") Romaji.bind(inp);
       if(!sheetOpen) inp.focus();
       inp.onkeydown = (e)=>{ if(e.key==="Enter"){ e.preventDefault(); e.stopPropagation(); check(); } };
     }

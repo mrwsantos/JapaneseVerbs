@@ -198,6 +198,23 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .flip-wrap[data-swipe="left"] .swipe-tag.left,.flip-wrap[data-swipe="right"] .swipe-tag.right{opacity:1}
 .card-hint{text-align:center;font-size:11px;color:var(--sub);margin-top:10px;min-height:14px}
 .flip-actions{transition:opacity .2s ease,transform .2s ease}
+/* Escrita: estatística do fim do deck */
+.es-card{align-items:stretch;text-align:left;gap:4px;padding:22px 18px}
+.es-title{font-size:15px;font-weight:700;text-align:center}
+.es-big{font-size:40px;font-weight:700;text-align:center;color:var(--accent);line-height:1.1;margin-top:4px}
+.es-card > .es-hint{text-align:center}
+.es-hint{font-size:12px;color:var(--sub);font-weight:400}
+.es-sec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--sub);margin:14px 0 4px}
+.es-row{display:grid;grid-template-columns:1fr 90px 34px;align-items:center;gap:8px;font-size:13px;padding:3px 0}
+.es-bar{height:8px;border-radius:8px;background:var(--chip);overflow:hidden}
+.es-bar > div{height:100%;background:linear-gradient(90deg,#e0897d,#d9584a);border-radius:8px}
+.es-num{font-size:12px;color:var(--sub);text-align:right}
+.es-words{list-style:none;margin:0;padding:0;font-size:14px}
+.es-words li{padding:4px 0;border-bottom:1px dashed var(--border)}
+.es-words b{float:right;color:#d9584a}
+.es-tip p{margin:4px 0;font-size:13px;line-height:1.5}
+.es-actions{margin-top:10px}
+.write-why{font-size:12px;color:var(--sub);margin-top:6px}
 /* Modo Frases: lacuna + alternativas */
 .fq-card{gap:10px}
 .fq-note{font-size:12px;color:var(--sub);text-align:center;line-height:1.45;margin:2px 4px 10px}
@@ -281,6 +298,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 </div>
 <script src="../sons.js"></script>
 <script src="../frases.js"></script>
+<script src="../escrita.js"></script>
 <script src="data.js"></script>
 <main id="main"></main>
 
@@ -575,6 +593,19 @@ function buildQueue(){
       state.deckWrongIds = [];
       saveDeck();
     }
+  } else if(state.mode==="escrita"){
+    state.writePool = VERBS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }).map(v=>v.id).sort(()=>Math.random()-0.5);
+    state.writeCursor = 0;
+    const ids = state.writePool.slice(0, Escrita.DECK);
+    state.writeCursor = ids.length;
+    state.queue = ids.map((id)=> VERBS[id]);
+    state.writeDeckSize = ids.length;
+    state.writeAttempts = [];
+    state.deckIds = [];
+    state.deckWrongIds = [];
+    state.reviewIds = [];
+    state.reviewWrongIds = [];
+    state.reviewEnd = 0;
   } else {
     state.queue = VERBS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }).sort(()=>Math.random()-0.5);
     state.deckIds = [];
@@ -586,6 +617,42 @@ function buildQueue(){
   state.idx = 0; state.revealed = false; state.writeChecked=false;
   Frases.reset();
 }
+
+// ===== Modo Escrita: decks de 10 + estatística (lógica comum em ../escrita.js) =====
+// As palavras em Praticando/Aprendido são embaralhadas e servidas em decks
+// de Escrita.DECK; errou, a palavra volta no fim do deck até acertar. No fim
+// de cada deck aparece a estatística dos erros (Escrita.summaryHtml).
+function nextWriteDeck(){
+  if(state.writeCursor >= state.writePool.length){ state.writePool.sort(()=>Math.random()-0.5); state.writeCursor = 0; }
+  const ids = state.writePool.slice(state.writeCursor, state.writeCursor + Escrita.DECK);
+  state.writeCursor += ids.length;
+  state.queue = ids.map((id)=> VERBS[id]);
+  state.writeDeckSize = ids.length;
+  state.writeAttempts = [];
+  state.idx = 0; state.writeChecked = false;
+  state.shuffledFilter = state.writeFilter.shuffle ? randomFilter() : null;
+  render();
+}
+// "Próximo deck só com essa forma": fixa as formas da Escrita na que mais errou.
+function trainWriteForm(key){
+  const F = Escrita.FORM[key];
+  state.writeFilter = {polite: F.f ? 'formal' : 'informal', past: !!F.p, neg: !!F.n, shuffle: false};
+  nextWriteDeck();
+}
+Escrita.setup({
+  words: VERBS,
+  statsKey: "jpverbs-write-stats",
+  forms(v){
+    const c = conjugate(v), out = {};
+    for(const k of Object.keys(Escrita.FORM)){
+      const kanas = [c[k]];
+      out[k] = [...kanas, ...kanas.map((x)=> kanjiFormFor(v, x))];
+    }
+    return out;
+  },
+  groupOf: (v)=> ({key: 'g' + v.group, label: GROUP_NAME[v.group]}),
+  hint: (k)=> ({dict:'〜う / 〜る', masu:'〜ます', nai:'〜ない', masen:'〜ません', ta:'〜た / 〜だ', mashita:'〜ました', nakatta:'〜なかった', masendeshita:'〜ませんでした'})[k],
+});
 
 // ===== Modo Frases (lógica comum em ../frases.js) =====
 // Frases do verbo (a principal + frasesExtra), com o verbo conjugado na
@@ -620,6 +687,7 @@ Frases.setup({
 // Posição da carta atual dentro do lote (ex.: "Card 2/10") ou das revisões
 // da rodada (ex.: "Revendo 1/13"); null fora do modo Cards.
 function deckPosition(){
+  if(state.mode==='escrita') return state.idx < state.queue.length ? {label:'Deck', pos: state.idx+1, total: state.queue.length} : null;
   if(state.mode!=='cards') return null;
   const v = state.queue[state.idx];
   if(!v) return null;
@@ -715,13 +783,16 @@ function fraseScore(v, correct){
 }
 function checkWrite(){
   const v = state.queue[state.idx];
-  const input = document.getElementById("writeInput").value;
+  // Romaji que sobrou no fim (ex.: "n") vira kana antes de conferir.
+  const input = Romaji.toKana(document.getElementById("writeInput").value, true);
   const eff = state.writeFilter.shuffle ? state.shuffledFilter : state.writeFilter;
   const key = targetKey(eff);
   const targetKana = conjugate(v)[key];
   const targetRomaji = kanaToRomaji(targetKana);
   const targetKanji = kanjiFormFor(v, targetKana);
   state.writeOk = matchesWrittenAnswer(input, targetKana, targetRomaji, targetKanji);
+  state.writeKey = key; state.writeInputShown = input;
+  state.writeErr = state.writeOk ? null : Escrita.classify(v, key, input);
   state.writeTargetKana = targetKana;
   state.writeTargetRomaji = targetRomaji;
   state.writeTargetKanji = targetKanji;
@@ -729,6 +800,10 @@ function checkWrite(){
 }
 function writeNext(correct){
   const v = state.queue[state.idx]; const e = getEntry(v.id);
+  // Estatística do deck + histórico; errou, volta no fim do deck.
+  state.writeAttempts.push({v, key: state.writeKey, ok: correct, err: state.writeErr});
+  Escrita.record(v, state.writeKey, correct);
+  if(!correct) state.queue.push(v);
   if(correct){
     e.level = Math.min(e.level+1, INTERVALS.length-1);
     e.due = today() + INTERVALS[e.level];
@@ -1001,7 +1076,7 @@ function renderInner(){
 
     } else { // escrita
       if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
-      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + `<div class="empty">🎉 Fim da rodada de escrita.</div><div class="actions"><button class="btn yes" onclick="buildQueue();render();">🔁 Praticar de novo</button></div>`; return; }
+      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + Escrita.summaryHtml(state.writeAttempts, state.writeDeckSize); return; }
       const v = state.queue[state.idx];
       const f = state.writeFilter;
       if(f.shuffle && !state.shuffledFilter) state.shuffledFilter = randomFilter();
@@ -1020,10 +1095,11 @@ function renderInner(){
             <div class="meaning-big">${ptPhrase}</div>
             <div class="subtle">(${v.meaning})</div>
             ${tagsHtml}
-            <input class="write-input" id="writeInput" placeholder="romaji, hiragana, katakana ou kanji" autocapitalize="off" autocomplete="off">
+            <input class="write-input" id="writeInput" lang="ja" placeholder="digite em romaji (vira hiragana) ou kana/kanji" autocapitalize="off" autocomplete="off">
           </div>
           <div class="actions"><button class="btn yes" onclick="checkWrite()">Conferir</button></div>`;
         const inp = document.getElementById("writeInput");
+        Romaji.bind(inp);
         if(!state.sheet) inp.focus();
         inp.onkeydown = (ev)=>{ if(ev.key==="Enter"){ ev.stopPropagation(); checkWrite(); } };
       } else {
@@ -1035,6 +1111,7 @@ function renderInner(){
             ${tagsHtml}
             <div class="answer">
               <div class="${state.writeOk?'result-ok':'result-no'}">${state.writeOk? '✓ Certo!' : '✗ Não foi dessa vez'}</div>
+              ${!state.writeOk ? `<div class="write-why">Você escreveu: <b lang="ja">${(state.writeInputShown||'').replace(/[<>&]/g,'') || '—'}</b>${state.writeErr && state.writeErr.type==='forma' ? ` — essa é a forma <b>${Escrita.formLabel(state.writeErr.got)}</b>` : ''}</div>` : ''}
               <div class="kana" style="margin-top:8px;font-size:20px">${state.writeTargetKanji!==state.writeTargetKana ? state.writeTargetKanji+' · ' : ''}${state.writeTargetKana}</div>
               <div class="romaji">${state.writeTargetRomaji}</div>
               <div class="tags" style="margin-top:6px">dicionário: ${v.kanji} (${v.kana})</div>
