@@ -118,10 +118,23 @@ const Romaji = (()=>{
       }
       paint();
     };
-    input.addEventListener("input", (e)=>{ if(e.isComposing) paint(); else run(); });
-    input.addEventListener("compositionend", ()=> setTimeout(run, 0));
-    input.addEventListener("focus", paint);
+    let composing = false;
+    input.addEventListener("compositionstart", ()=>{ composing = true; });
+    input.addEventListener("compositionend", ()=>{ composing = false; setTimeout(run, 0); });
+    input.addEventListener("input", (e)=>{ if(e.isComposing || composing) paint(); else run(); });
+    // Alguns teclados de celular, ao apagar, mudam o texto sem disparar
+    // "input" (ou no meio da composição): enquanto o campo está em foco,
+    // confere o valor a cada quadro e redesenha se mudou.
+    let last = null, watching = false;
+    const watch = ()=>{
+      if(!input.isConnected || document.activeElement!==input){ last = null; watching = false; paint(); return; }
+      if(input.value!==last){ last = input.value; if(composing) paint(); else run(); }
+      requestAnimationFrame(watch);
+    };
+    const startWatch = ()=>{ if(!watching){ watching = true; requestAnimationFrame(watch); } };
+    input.addEventListener("focus", ()=>{ paint(); startWatch(); });
     input.addEventListener("blur", paint);
+    if(document.activeElement===input) startWatch();
     paint();
   }
   return {toKana, bind};
