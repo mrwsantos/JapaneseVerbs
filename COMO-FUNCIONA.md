@@ -84,7 +84,7 @@ palavras novas**.
 
 - **No máximo 30 revisões por dia**, primeiro as de nível mais baixo e mais
   atrasadas. O resto fica para os próximos dias; no fim aparece "Ainda há N
-  revisões atrasadas" e o botão **+20 revisões agora** para quem quiser mais.
+  revisões atrasadas" e o botão **+15 revisões agora** para quem quiser mais.
 - **Palavras novas pausam** enquanto houver mais de 30 revisões pendentes
   (botão **Estudar novas mesmo assim** para forçar).
 - **Errar uma revisão desce 2 níveis** em vez de zerar (ex.: nível 4 → 2,
