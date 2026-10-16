@@ -77,14 +77,28 @@ O botão no canto (ex.: "JP → PT ⚙️") abre os ajustes do modo atual:
 
 ## Modo Cards (o principal)
 
-A rodada do dia é: **revisões vencidas** + **um lote de até 10 palavras novas**.
+A rodada do dia é: **revisões vencidas** (até 40 por dia) + **um lote de até 10
+palavras novas**.
+
+**Para a pilha não acumular** quando você fica dias sem abrir o app:
+
+- **No máximo 40 revisões por dia**, primeiro as de nível mais baixo e mais
+  atrasadas. O resto fica para os próximos dias; no fim aparece "Ainda há N
+  revisões atrasadas" e o botão **+20 revisões agora** para quem quiser mais.
+- **Palavras novas pausam** enquanto houver mais de 40 revisões pendentes
+  (botão **Estudar novas mesmo assim** para forçar).
+- **Errar uma revisão desce 2 níveis** em vez de zerar (ex.: nível 4 → 2,
+  continua em Praticando). Só a 1ª resposta do dia mexe no nível: repetir a
+  mesma revisão no mesmo dia não sobe nem desce.
+- Constantes em `REVIEW_LIMIT`, `NEW_PAUSE_AT` e `REVIEW_EXTRA` nos apps; o
+  contador do dia fica em `jpverbs-reviews-today` / `jpadj-reviews-today`.
 
 - **Sabia** → sobe um nível e a palavra só volta depois do intervalo. Numa
   revisão (palavra que já passou do lote em dias anteriores), errar guarda
   ela para uma **rodada só das revisões erradas**: no fim das revisões
   ("Revendo 35/35") aparece **Continuar** e você repete só as que errou
   ("Revendo 1/3"), até zerar — só depois entram as palavras novas.
-- **Praticar mais** → volta ao nível 0. Numa palavra do **lote** (nova, vista
+- **Praticar mais** → numa revisão, desce 2 níveis (ver acima). Numa palavra do **lote** (nova, vista
   por 1ª vez hoje), ela não volta na hora: continua no mesmo passe pelas
   outras 9, e só reaparece depois, num lote menor só com as que você errou
   (ver "Lotes de 10" abaixo).

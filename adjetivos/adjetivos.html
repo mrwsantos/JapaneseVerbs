@@ -528,6 +528,23 @@ function saveNewToday(){ try{ localStorage.setItem(NEW_TODAY_KEY, JSON.stringify
 function isNew(v){ const e = progress[v.id]; return !e || e.due===0; }
 function newSlotsLeft(){ const d = touchNewToday(); return newLimit===0 ? Infinity : Math.max(0, newLimit + d.extra - d.count); }
 function moreNew(){ touchNewToday().extra += 10; saveNewToday(); buildQueue(); render(); }
+
+// ===== Revisões por dia (evita a pilha de quem fica dias sem abrir) =====
+// - No máximo REVIEW_LIMIT revisões novas por dia, primeiro as de nível mais
+//   baixo e mais atrasadas; o resto fica para os próximos dias (+20 libera mais).
+// - Com mais de NEW_PAUSE_AT revisões pendentes, o lote de palavras novas
+//   pausa até a pilha baixar (dá para forçar).
+// - Só a 1ª resposta do dia a uma revisão mexe no nível: errou desce 2 níveis
+//   (em vez de zerar); repetições no mesmo dia não sobem nem descem.
+const REVIEW_LIMIT = 40, NEW_PAUSE_AT = 40, REVIEW_EXTRA = 20;
+const REVIEWS_TODAY_KEY = "jpadj-reviews-today";
+function loadReviewsToday(){ try{ const d = JSON.parse(localStorage.getItem(REVIEWS_TODAY_KEY)); if(d && d.day===today() && Array.isArray(d.ids)) return d; }catch(e){} return {day:today(), ids:[], extra:0}; }
+let reviewsToday = loadReviewsToday();
+function touchReviewsToday(){ if(reviewsToday.day!==today()) reviewsToday = {day:today(), ids:[], extra:0}; return reviewsToday; }
+function saveReviewsToday(){ try{ localStorage.setItem(REVIEWS_TODAY_KEY, JSON.stringify(reviewsToday)); }catch(e){} }
+function reviewSlotsLeft(){ const d = touchReviewsToday(); return Math.max(0, REVIEW_LIMIT + d.extra - d.ids.length); }
+function moreReviews(){ touchReviewsToday().extra += REVIEW_EXTRA; saveReviewsToday(); buildQueue(); render(); }
+function forceNewDeck(){ state.forceNew = true; buildQueue(); render(); }
 function cardPool(){ return state.cardTypeFilter==='all' ? ADJS : ADJS.filter(v=>v.type===state.cardTypeFilter); }
 
 // O lote (deckIds/deckWrongIds) fica salvo pra sobreviver a trocar de app
@@ -550,7 +567,16 @@ function buildQueue(){
     // ainda não respondidas neste passe (due===0) ou erradas pendentes,
     // retoma ele em vez de sortear um lote novo.
     const pool = cardPool();
-    const reviews = pool.filter(v=> !isNew(v) && getEntry(v.id).due <= t).sort((a,b)=> getEntry(a.id).due - getEntry(b.id).due);
+    // Revisões: as já respondidas hoje (repetição) não gastam o limite; das
+    // outras entram até reviewSlotsLeft(), nível mais baixo e mais atrasadas primeiro.
+    const rt = touchReviewsToday();
+    const due = pool.filter(v=> !isNew(v) && getEntry(v.id).due <= t);
+    const again = due.filter(v=> rt.ids.includes(v.id));
+    const fresh = due.filter(v=> !rt.ids.includes(v.id))
+      .sort((a,b)=> (getEntry(a.id).level - getEntry(b.id).level) || (getEntry(a.id).due - getEntry(b.id).due));
+    const reviews = again.concat(fresh.slice(0, reviewSlotsLeft()));
+    state.reviewsLeft = fresh.length - (reviews.length - again.length);
+    state.newPaused = !state.forceNew && fresh.length > NEW_PAUSE_AT;
     state.reviewIds = reviews.map(w=>w.id);
     state.reviewWrongIds = [];
     state.reviewEnd = reviews.length; // queue[0..reviewEnd) = passe de revisões
@@ -566,7 +592,7 @@ function buildQueue(){
       if(stillWrong.length !== saved.deckWrongIds.length) saveDeck();
     } else {
       const newsPool = pool.filter(isNew).sort((a,b)=> (a.freq||99) - (b.freq||99));
-      const news = newsPool.slice(0, Math.min(NEW_DECK_SIZE, newSlotsLeft()));
+      const news = state.newPaused ? [] : newsPool.slice(0, Math.min(NEW_DECK_SIZE, newSlotsLeft()));
       state.queue = reviews.concat(news);
       state.deckIds = news.map(w=>w.id);
       state.deckWrongIds = [];
@@ -733,8 +759,20 @@ function answer(correct){
   const v = state.queue[state.idx]; const e = getEntry(v.id);
   const inReview = state.idx < state.reviewEnd;
   if(e.due===0){ touchNewToday().count++; saveNewToday(); }
-  e.level = correct ? Math.min(e.level+1, INTERVALS.length-1) : 0;
-  e.due = state.testMode ? today() : today() + INTERVALS[e.level];
+  const rt = touchReviewsToday();
+  if(inReview && !state.testMode){
+    if(!rt.ids.includes(v.id)){
+      // 1ª resposta do dia: acertou sobe 1; errou desce 2 (não zera).
+      rt.ids.push(v.id); saveReviewsToday();
+      e.level = correct ? Math.min(e.level+1, INTERVALS.length-1) : Math.max(e.level-2, 0);
+      e.due = today() + INTERVALS[e.level];
+    } else if(correct && e.due <= today()){
+      e.due = today() + 1; // repetição certa no mesmo dia: só sai de "hoje"
+    }
+  } else {
+    e.level = correct ? Math.min(e.level+1, INTERVALS.length-1) : 0;
+    e.due = state.testMode ? today() : today() + INTERVALS[e.level];
+  }
   saveProgress(progress); state.idx++; state.revealed = false;
   if(state.testMode) state.queue.push(v);
   else if(!correct){
@@ -1059,11 +1097,21 @@ function renderInner(){
         } else {
           const newLeft = cardPool().filter(isNew).length;
           const capLeft = newSlotsLeft();
-          doneHtml = newLeft>0 && capLeft>0
+          // Revisões além do limite de hoje e lote de novas pausado.
+          const left = state.reviewsLeft || 0;
+          const reviewsHtml = left > 0
+            ? `<div class="empty">📚 Revisões de hoje feitas!<br>Ainda há ${left} ${left===1 ? 'revisão atrasada' : 'revisões atrasadas'}; elas ficam para os próximos dias.</div><button type="button" class="know-btn" onclick="moreReviews()">+${REVIEW_EXTRA} revisões agora</button>`
+            : '';
+          if(state.newPaused && newLeft > 0){
+            doneHtml = (reviewsHtml || `<div class="empty">📚 Revisões de hoje feitas!</div>`)
+              + `<div class="empty" style="padding-top:8px">⏸️ Palavras novas pausadas: há mais de ${NEW_PAUSE_AT} revisões pendentes. Elas voltam quando a pilha baixar.</div><button type="button" class="know-btn" onclick="forceNewDeck()">Estudar novas mesmo assim</button>`;
+          } else {
+            doneHtml = reviewsHtml + (newLeft>0 && capLeft>0
             ? `<div class="empty">🎉 Lote concluído!<br>Ainda há ${newLeft} adjetivos novos disponíveis hoje.</div><button type="button" class="know-btn" onclick="buildQueue();render();">Próximo lote (10 novas)</button>`
             : newLeft>0 && capLeft===0
             ? `<div class="empty">🎉 Rodada de hoje concluída!<br>Ainda faltam ${newLeft} adjetivos novos — quer mais?</div><button type="button" class="know-btn" onclick="moreNew()">+10 novas</button>`
-            : `<div class="empty">🎉 Nada pendente agora.<br>Volte mais tarde ou revise as listas.</div>`;
+            : `<div class="empty">🎉 Nada pendente agora.<br>Volte mais tarde ou revise as listas.</div>`);
+          }
         }
         main.innerHTML = statsHtml + doneHtml; return;
       }
