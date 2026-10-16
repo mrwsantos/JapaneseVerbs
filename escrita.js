@@ -65,11 +65,11 @@ const Romaji = (()=>{
 
   // Liga a conversão num <input>.
   // No celular (Gboard etc.) o teclado "segura" a palavra em composição e
-  // mexer no valor no meio dela duplica letras. Por isso:
-  // - inputmode="email": o teclado do Android costuma não compor nesse tipo,
-  //   então a troca acontece a cada letra;
-  // - se mesmo assim estiver compondo, não mexe no campo: mostra a prévia em
-  //   kana logo abaixo e converte quando a palavra é confirmada.
+  // mexer no valor no meio dela duplica letras. Por isso o campo é desenhado
+  // por uma camada por cima (o kana já convertido), com o texto real
+  // invisível por baixo: o que você vê muda a cada letra em qualquer teclado.
+  // Fora de composição (PC, iPhone) o valor real também é trocado na hora.
+  // Quem muda o valor por código deve chamar input.dispatchEvent(new Event("input")).
   function bind(input){
     if(!input || input.dataset.romaji) return;
     input.dataset.romaji = "1";
@@ -78,14 +78,36 @@ const Romaji = (()=>{
     input.setAttribute("autocomplete", "off");
     input.setAttribute("spellcheck", "false");
     input.setAttribute("inputmode", "email");
-    const preview = document.createElement("div");
-    preview.className = "romaji-preview";
-    preview.setAttribute("lang", "ja");
-    preview.setAttribute("aria-live", "polite");
-    preview.style.cssText = "min-height:22px;margin-top:6px;font-size:18px;font-weight:600;color:var(--accent);text-align:center";
-    input.insertAdjacentElement("afterend", preview);
-    const showPreview = ()=>{
-      preview.textContent = /[a-z]/i.test(input.value) ? "→ " + toKana(input.value, true) : "";
+    const cs = getComputedStyle(input);
+    const wrap = document.createElement("div");
+    wrap.style.cssText = `position:relative;width:100%;margin:${cs.marginTop} 0 ${cs.marginBottom}`;
+    input.style.margin = "0";
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
+    const shown = document.createElement("div");
+    shown.className = "romaji-shown";
+    shown.setAttribute("lang", "ja");
+    shown.setAttribute("aria-hidden", "true");
+    const just = cs.textAlign==="center" ? "center" : (cs.textAlign==="right" || cs.textAlign==="end") ? "flex-end" : "flex-start";
+    shown.style.cssText = `position:absolute;inset:0;display:flex;align-items:center;justify-content:${just};pointer-events:none;white-space:pre;overflow:hidden;`
+      + `padding:${cs.paddingTop} ${cs.paddingRight} ${cs.paddingBottom} ${cs.paddingLeft};border:${cs.borderTopWidth} solid transparent;`
+      + `font:${cs.font};letter-spacing:${cs.letterSpacing};color:${cs.color}`;
+    const text = document.createElement("span");
+    const caret = document.createElement("span");
+    caret.style.cssText = "display:inline-block;width:2px;height:1.15em;margin-left:1px;background:var(--accent);animation:romajiBlink 1s steps(1) infinite";
+    shown.append(text, caret);
+    wrap.appendChild(shown);
+    if(!document.getElementById("romajiBlinkCss")){
+      const st = document.createElement("style");
+      st.id = "romajiBlinkCss";
+      st.textContent = "@keyframes romajiBlink{50%{opacity:0}}";
+      document.head.appendChild(st);
+    }
+    input.style.color = "transparent";
+    input.style.caretColor = "transparent";
+    const paint = ()=>{
+      text.textContent = toKana(input.value, false);
+      caret.style.visibility = document.activeElement===input ? "visible" : "hidden";
     };
     const run = ()=>{
       const pos = input.selectionStart ?? input.value.length;
@@ -95,10 +117,13 @@ const Romaji = (()=>{
         input.value = conv + after;
         try{ input.setSelectionRange(conv.length, conv.length); }catch(e){}
       }
-      showPreview();
+      paint();
     };
-    input.addEventListener("input", (e)=>{ if(e.isComposing) showPreview(); else run(); });
+    input.addEventListener("input", (e)=>{ if(e.isComposing) paint(); else run(); });
     input.addEventListener("compositionend", ()=> setTimeout(run, 0));
+    input.addEventListener("focus", paint);
+    input.addEventListener("blur", paint);
+    paint();
   }
   return {toKana, bind};
 })();
@@ -166,11 +191,12 @@ const Escrita = (()=>{
     }).filter((r)=> r.total);
 
     // Tipo do erro.
-    const kinds = {f: 0, p: 0, n: 0, escrita: 0};
-    wrong.forEach((a)=>{ if(a.err.type==="escrita") kinds.escrita++; else a.err.swapped.forEach((s)=> kinds[s]++); });
+    const kinds = {f: 0, p: 0, n: 0, escrita: 0, desistiu: 0};
+    wrong.forEach((a)=>{ if(a.err.type==="escrita" || a.err.type==="desistiu") kinds[a.err.type]++; else a.err.swapped.forEach((s)=> kinds[s]++); });
     const kindRows = [
       ["Trocou formal/informal", kinds.f], ["Trocou passado/presente", kinds.p],
       ["Trocou afirmativo/negativo", kinds.n], ["Conjugação ou escrita errada", kinds.escrita],
+      ["Desistiu (vai para o próximo deck)", kinds.desistiu],
     ].filter(([, n])=> n);
 
     // Por grupo (verbos: 1/2/3; adjetivos: -i/-na).

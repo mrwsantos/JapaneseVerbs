@@ -628,6 +628,7 @@ function buildQueue(){
     state.queue = ids.map((id)=> VERBS[id]);
     state.writeDeckSize = ids.length;
     state.writeAttempts = [];
+    state.writeCarry = [];
     state.deckIds = [];
     state.deckWrongIds = [];
     state.reviewIds = [];
@@ -653,6 +654,9 @@ function nextWriteDeck(){
   if(state.writeCursor >= state.writePool.length){ state.writePool.sort(()=>Math.random()-0.5); state.writeCursor = 0; }
   const ids = state.writePool.slice(state.writeCursor, state.writeCursor + Escrita.DECK);
   state.writeCursor += ids.length;
+  const carry = (state.writeCarry||[]).filter((id)=> !ids.includes(id));
+  state.writeCarry = [];
+  ids.push(...carry);
   state.queue = ids.map((id)=> VERBS[id]);
   state.writeDeckSize = ids.length;
   state.writeAttempts = [];
@@ -828,10 +832,13 @@ function fraseScore(v, correct){
   }
   saveProgress(progress);
 }
-function checkWrite(){
+// "Desistir": mostra a resposta, conta como erro e a palavra sai deste deck
+// para o fim do próximo (ver writeNext / nextWriteDeck).
+function giveUpWrite(){ checkWrite(true); }
+function checkWrite(giveUp){
   const v = state.queue[state.idx];
   // Romaji que sobrou no fim (ex.: "n") vira kana antes de conferir.
-  const input = Romaji.toKana(document.getElementById("writeInput").value, true);
+  const input = giveUp ? '' : Romaji.toKana(document.getElementById("writeInput").value, true);
   const eff = state.writeFilter.shuffle ? state.shuffledFilter : state.writeFilter;
   const key = targetKey(eff);
   const targetKana = conjugate(v)[key];
@@ -843,6 +850,8 @@ function checkWrite(){
   state.writeTargetKana = targetKana;
   state.writeTargetRomaji = targetRomaji;
   state.writeTargetKanji = targetKanji;
+  if(giveUp) state.writeErr = {type: 'desistiu'};
+  state.writeGaveUp = !!giveUp;
   state.writeChecked = true; Sons.play('cards', state.writeOk ? 'acerto' : 'erro'); render();
 }
 function writeNext(correct){
@@ -850,7 +859,11 @@ function writeNext(correct){
   // Estatística do deck + histórico; errou, volta no fim do deck.
   state.writeAttempts.push({v, key: state.writeKey, ok: correct, err: state.writeErr});
   Escrita.record(v, state.writeKey, correct);
-  if(!correct) state.queue.push(v);
+  if(!correct){
+    if(state.writeGaveUp) state.writeCarry.push(v.id); // desistiu: fim do próximo deck
+    else state.queue.push(v);
+  }
+  state.writeGaveUp = false;
   if(correct){
     e.level = Math.min(e.level+1, INTERVALS.length-1);
     e.due = today() + INTERVALS[e.level];
@@ -1158,7 +1171,7 @@ function renderInner(){
             ${tagsHtml}
             <input class="write-input" id="writeInput" lang="ja" placeholder="digite em romaji (vira hiragana) ou kana/kanji" autocapitalize="off" autocomplete="off">
           </div>
-          <div class="actions"><button class="btn yes" onclick="checkWrite()">Conferir</button></div>`;
+          <div class="actions"><button class="btn no" onclick="giveUpWrite()">Desistir</button><button class="btn yes" onclick="checkWrite()">Conferir</button></div>`;
         const inp = document.getElementById("writeInput");
         Romaji.bind(inp);
         if(!state.sheet) inp.focus();
@@ -1171,8 +1184,8 @@ function renderInner(){
             <div class="tags" style="margin-bottom:6px">(${v.meaning})</div>
             ${tagsHtml}
             <div class="answer">
-              <div class="${state.writeOk?'result-ok':'result-no'}">${state.writeOk? '✓ Certo!' : '✗ Não foi dessa vez'}</div>
-              ${!state.writeOk ? `<div class="write-why">Você escreveu: <b lang="ja">${(state.writeInputShown||'').replace(/[<>&]/g,'') || '—'}</b>${state.writeErr && state.writeErr.type==='forma' ? ` — essa é a forma <b>${Escrita.formLabel(state.writeErr.got)}</b>` : ''}</div>` : ''}
+              <div class="${state.writeOk?'result-ok':'result-no'}">${state.writeOk? '✓ Certo!' : state.writeGaveUp ? '🏳️ Desistiu: ela vai para o fim do próximo deck' : '✗ Não foi dessa vez'}</div>
+              ${!state.writeOk && !state.writeGaveUp ? `<div class="write-why">Você escreveu: <b lang="ja">${(state.writeInputShown||'').replace(/[<>&]/g,'') || '—'}</b>${state.writeErr && state.writeErr.type==='forma' ? ` — essa é a forma <b>${Escrita.formLabel(state.writeErr.got)}</b>` : ''}</div>` : ''}
               <div class="kana" style="margin-top:8px;font-size:20px">${state.writeTargetKanji!==state.writeTargetKana ? state.writeTargetKanji+' · ' : ''}${state.writeTargetKana}</div>
               <div class="romaji">${state.writeTargetRomaji}</div>
               <div class="tags" style="margin-top:6px">dicionário: ${v.kanji} (${v.kana})</div>

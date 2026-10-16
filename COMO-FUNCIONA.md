@@ -153,6 +153,8 @@ em **decks de 10** ("Deck 3/10" no topo).
   nn ou n + consoante → ん, "-" → ー). Também dá para digitar kana ou kanji
   direto. Vale também no Frases (modo Digitar). Lógica em `escrita.js`.
 - **Errou, a palavra volta no fim do deck** até você acertar todas.
+- **Desistir** mostra a resposta, conta como erro e tira a palavra deste deck:
+  ela entra no fim do próximo deck.
 - **No fim de cada deck** aparece a estatística: acertos de primeira, erros por
   característica da forma (formal/informal, passado/presente,
   negativo/afirmativo), o tipo de erro (trocou a forma ou errou a conjugação),
