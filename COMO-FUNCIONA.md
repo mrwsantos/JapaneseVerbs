@@ -77,15 +77,15 @@ O botão no canto (ex.: "JP → PT ⚙️") abre os ajustes do modo atual:
 
 ## Modo Cards (o principal)
 
-A rodada do dia é: **revisões vencidas** (até 40 por dia) + **um lote de até 10
+A rodada do dia é: **revisões vencidas** (até 30 por dia) + **um lote de até 10
 palavras novas**.
 
 **Para a pilha não acumular** quando você fica dias sem abrir o app:
 
-- **No máximo 40 revisões por dia**, primeiro as de nível mais baixo e mais
+- **No máximo 30 revisões por dia**, primeiro as de nível mais baixo e mais
   atrasadas. O resto fica para os próximos dias; no fim aparece "Ainda há N
   revisões atrasadas" e o botão **+20 revisões agora** para quem quiser mais.
-- **Palavras novas pausam** enquanto houver mais de 40 revisões pendentes
+- **Palavras novas pausam** enquanto houver mais de 30 revisões pendentes
   (botão **Estudar novas mesmo assim** para forçar).
 - **Errar uma revisão desce 2 níveis** em vez de zerar (ex.: nível 4 → 2,
   continua em Praticando). Só a 1ª resposta do dia mexe no nível: repetir a

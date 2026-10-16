@@ -558,7 +558,7 @@ function moreNew(){ touchNewToday().extra += 10; saveNewToday(); buildQueue(); r
 //   pausa até a pilha baixar (dá para forçar).
 // - Só a 1ª resposta do dia a uma revisão mexe no nível: errou desce 2 níveis
 //   (em vez de zerar); repetições no mesmo dia não sobem nem descem.
-const REVIEW_LIMIT = 40, NEW_PAUSE_AT = 40, REVIEW_EXTRA = 20;
+const REVIEW_LIMIT = 30, NEW_PAUSE_AT = 30, REVIEW_EXTRA = 20;
 const REVIEWS_TODAY_KEY = "jpverbs-reviews-today";
 function loadReviewsToday(){ try{ const d = JSON.parse(localStorage.getItem(REVIEWS_TODAY_KEY)); if(d && d.day===today() && Array.isArray(d.ids)) return d; }catch(e){} return {day:today(), ids:[], extra:0}; }
 let reviewsToday = loadReviewsToday();
