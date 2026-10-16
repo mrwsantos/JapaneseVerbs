@@ -161,6 +161,9 @@ em **decks de 10** ("Deck 3/10" no topo).
   em que você mais errou. O histórico geral fica salvo no aparelho.
 - Ao errar, o app mostra o que você escreveu e, se for outra forma da mesma
   palavra, qual forma era.
+- **Filtro de grupo** (nos Ajustes): verbos por Grupo 1/2/3, adjetivos por
+  -i/-na. A estatística mostra os erros por grupo e, com grupos misturados,
+  oferece **Próximo deck só com <grupo>** para o que você mais errou.
 
 - Aparece a frase **em português** já conjugada (ex.: "não comeu", "não era
   grande") e você escreve em japonês — vale romaji, hiragana, katakana ou kanji.

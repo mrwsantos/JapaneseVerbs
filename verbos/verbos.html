@@ -483,6 +483,7 @@ function matchesWrittenAnswer(rawInput, targetKana, targetRomaji, targetKanji){
 
 let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], reviewWrongIds:[], reviewEnd:0, revealed:false, exampleFor:null, answerConjFor:null, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
+  writeGroup: 'all',
   search:'', learningSearch:'', groupExpanded:{1:false,2:false,3:false}, showGroupInfo:false, showLearningInfo:false,
   showKanji: loadKanjiPref(), cardGroupFilter:'all', nivelFilter:'all', groupCollapsed:{1:false,2:false,3:false}};
 
@@ -620,7 +621,7 @@ function buildQueue(){
       saveDeck();
     }
   } else if(state.mode==="escrita"){
-    state.writePool = VERBS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }).map(v=>v.id).sort(()=>Math.random()-0.5);
+    state.writePool = VERBS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2 && (state.writeGroup==='all' || v.group===state.writeGroup); }).map(v=>v.id).sort(()=>Math.random()-0.5);
     state.writeCursor = 0;
     const ids = state.writePool.slice(0, Escrita.DECK);
     state.writeCursor = ids.length;
@@ -659,12 +660,20 @@ function nextWriteDeck(){
   state.shuffledFilter = state.writeFilter.shuffle ? randomFilter() : null;
   render();
 }
+// Filtro de grupo da Escrita (salvo no aparelho).
+const WRITE_GROUP_KEY = "jpverbs-write-group";
+const parseWriteGroup = (g)=> g==='all' ? 'all' : Number(g);
+function loadWriteGroup(){ try{ return parseWriteGroup(localStorage.getItem(WRITE_GROUP_KEY) || 'all'); }catch(e){ return 'all'; } }
+function setWriteGroup(g){ state.writeGroup = g; try{ localStorage.setItem(WRITE_GROUP_KEY, String(g)); }catch(e){} buildQueue(); render(); }
+// "Próximo deck só com <grupo>": botão da estatística (chave de groupOf).
+function trainWriteGroup(key){ setWriteGroup(parseWriteGroup(String(key).replace(/^g/, ''))); }
 // "Próximo deck só com essa forma": fixa as formas da Escrita na que mais errou.
 function trainWriteForm(key){
   const F = Escrita.FORM[key];
   state.writeFilter = {polite: F.f ? 'formal' : 'informal', past: !!F.p, neg: !!F.n, shuffle: false};
   nextWriteDeck();
 }
+state.writeGroup = loadWriteGroup();
 Escrita.setup({
   words: VERBS,
   statsKey: "jpverbs-write-stats",
@@ -891,6 +900,7 @@ function settingsSummary(){
   if(state.mode==='escrita'){
     const f = state.writeFilter;
     parts.push(f.shuffle ? '🎲 Embaralhado' : [f.polite==='formal'?'Formal':'Informal', f.past?'Passado':'Presente', f.neg?'Negativo':''].filter(Boolean).join(' · '));
+    if(state.writeGroup!=='all'){ const g = CARD_FILTERS.find(([val])=> val===state.writeGroup); if(g) parts.push(g[1]); }
   }
   return parts.join(' · ');
 }
@@ -940,6 +950,7 @@ function sheetHtml(){
   }
   if(state.mode==='escrita'){
     body += `<div class="setting"><div class="setting-label">Formas para praticar</div>${writePillsHtml()}</div>`;
+    body += `<div class="setting"><div class="setting-label">Grupo dos verbos</div>${segHtml(CARD_FILTERS, state.writeGroup, 'setWriteGroup')}</div>`;
   }
   return `<div class="sheet-backdrop ${state.sheetAnim?'anim':''}" onclick="closeSheet()">
     <div class="sheet" role="dialog" aria-modal="true" aria-label="${title}" onclick="event.stopPropagation()">
@@ -1123,7 +1134,9 @@ function renderInner(){
       Frases.bind(!!state.sheet);
 
     } else { // escrita
-      if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
+      if(state.queue.length===0){ main.innerHTML = statsHtml + (state.writeGroup!=='all'
+        ? `<div class="empty">Nenhum verbo desse grupo em "Praticando" ou "Aprendido".<br>Troque o grupo nos Ajustes (⚙️).</div><button type="button" class="know-btn" onclick="setWriteGroup('all')">Ver todos</button>`
+        : `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`); return; }
       if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + Escrita.summaryHtml(state.writeAttempts, state.writeDeckSize); return; }
       const v = state.queue[state.idx];
       const f = state.writeFilter;

@@ -90,7 +90,8 @@ const Romaji = (()=>{
 // Adaptador (Escrita.setup):
 //   words              todas as palavras do app
 //   forms(v)           {chave: [respostas aceitas (kana e kanji)]} das 8 formas
-//   groupOf(v)         {key, label} do grupo (Grupo 1 / -i ...) para a estatística
+//   groupOf(v)         {key, label} do grupo (Grupo 1 / -i ...) para a estatística;
+//                      a página tem trainWriteGroup(key) para o botão do grupo mais fraco
 //   hint(key)          terminação típica da forma (ex.: "〜なかった")
 //   statsKey           chave do localStorage para o histórico
 const Escrita = (()=>{
@@ -157,7 +158,7 @@ const Escrita = (()=>{
 
     // Por grupo (verbos: 1/2/3; adjetivos: -i/-na).
     const groups = new Map();
-    attempts.forEach((a)=>{ const g = A.groupOf(a.v); const r = groups.get(g.key) || {label: g.label, errs: 0, total: 0}; r.total++; if(!a.ok) r.errs++; groups.set(g.key, r); });
+    attempts.forEach((a)=>{ const g = A.groupOf(a.v); const r = groups.get(g.key) || {key: g.key, label: g.label, errs: 0, total: 0}; r.total++; if(!a.ok) r.errs++; groups.set(g.key, r); });
 
     // Sugestão: forma com mais erros no deck (o histórico desempata).
     const hist = loadHist();
@@ -195,6 +196,7 @@ const Escrita = (()=>{
       ${histTotal ? `<div class="es-hint" style="margin-top:10px">No geral: ${pct(histOk, histTotal)}% de acerto em ${histTotal} respostas na Escrita.</div>` : ""}
     </div>
     <div class="es-actions">
+      ${weakGroup && groups.size > 1 ? `<button type="button" class="know-btn" onclick="trainWriteGroup('${weakGroup.key}')">🎯 Próximo deck só com ${weakGroup.label}</button>` : ""}
       ${weakest && new Set(attempts.map((a)=> a.key)).size > 1 ? `<button type="button" class="know-btn" onclick="trainWriteForm('${weakest[0]}')">🎯 Próximo deck só com essa forma</button>` : ""}
     </div>
     <div class="actions"><button class="btn yes" onclick="nextWriteDeck()">Próximo deck →</button></div>`;
