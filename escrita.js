@@ -63,8 +63,13 @@ const Romaji = (()=>{
     return out;
   }
 
-  // Liga a conversão num <input>. Durante composição de teclado (IME japonês
-  // ou sugestões do Android) espera o texto ser confirmado.
+  // Liga a conversão num <input>.
+  // No celular (Gboard etc.) o teclado "segura" a palavra em composição e
+  // mexer no valor no meio dela duplica letras. Por isso:
+  // - inputmode="email": o teclado do Android costuma não compor nesse tipo,
+  //   então a troca acontece a cada letra;
+  // - se mesmo assim estiver compondo, não mexe no campo: mostra a prévia em
+  //   kana logo abaixo e converte quando a palavra é confirmada.
   function bind(input){
     if(!input || input.dataset.romaji) return;
     input.dataset.romaji = "1";
@@ -72,15 +77,27 @@ const Romaji = (()=>{
     input.setAttribute("autocorrect", "off");
     input.setAttribute("autocomplete", "off");
     input.setAttribute("spellcheck", "false");
+    input.setAttribute("inputmode", "email");
+    const preview = document.createElement("div");
+    preview.className = "romaji-preview";
+    preview.setAttribute("lang", "ja");
+    preview.setAttribute("aria-live", "polite");
+    preview.style.cssText = "min-height:22px;margin-top:6px;font-size:18px;font-weight:600;color:var(--accent);text-align:center";
+    input.insertAdjacentElement("afterend", preview);
+    const showPreview = ()=>{
+      preview.textContent = /[a-z]/i.test(input.value) ? "→ " + toKana(input.value, true) : "";
+    };
     const run = ()=>{
       const pos = input.selectionStart ?? input.value.length;
       const before = input.value.slice(0, pos), after = input.value.slice(pos);
       const conv = toKana(before, false);
-      if(conv===before) return;
-      input.value = conv + after;
-      input.setSelectionRange(conv.length, conv.length);
+      if(conv!==before){
+        input.value = conv + after;
+        try{ input.setSelectionRange(conv.length, conv.length); }catch(e){}
+      }
+      showPreview();
     };
-    input.addEventListener("input", (e)=>{ if(!e.isComposing) run(); });
+    input.addEventListener("input", (e)=>{ if(e.isComposing) showPreview(); else run(); });
     input.addEventListener("compositionend", ()=> setTimeout(run, 0));
   }
   return {toKana, bind};
