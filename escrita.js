@@ -77,7 +77,6 @@ const Romaji = (()=>{
     input.setAttribute("autocorrect", "off");
     input.setAttribute("autocomplete", "off");
     input.setAttribute("spellcheck", "false");
-    input.setAttribute("inputmode", "email");
     const cs = getComputedStyle(input);
     const wrap = document.createElement("div");
     wrap.style.cssText = `position:relative;width:100%;margin:${cs.marginTop} 0 ${cs.marginBottom}`;
