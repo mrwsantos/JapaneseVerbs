@@ -58,7 +58,7 @@ h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.01em;display:flex;ali
 .modes{display:flex;gap:6px;padding:0 16px 10px;max-width:480px;margin:0 auto;width:100%}
 .mode{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;text-align:center;padding:8px 4px;border-radius:20px;border:1px solid var(--border);color:var(--sub);font-size:12px;font-weight:600}
 .mode.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
-main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-width:480px;margin:0 auto;width:100%}
+main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(--kb,0px));max-width:480px;margin:0 auto;width:100%}
 .stats{display:flex;justify-content:space-around;margin:6px 0 16px;font-size:12px;color:var(--sub)}
 .stats b{color:var(--text);font-size:16px;display:block}
 .card{background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:20px;padding:32px 20px;text-align:center;min-height:180px;display:flex;flex-direction:column;justify-content:center;gap:8px;cursor:pointer;width:100%;animation:fadeInUp .3s cubic-bezier(.16,1,.3,1)}
@@ -1443,6 +1443,18 @@ if(window.visualViewport){
   };
   visualViewport.addEventListener('resize', updateKb);
   visualViewport.addEventListener('scroll', updateKb);
+
+  // Teclado abriu com o campo de resposta em foco (Escrita / Frases): rola a
+  // página até o fim para o campo e os botões ficarem acima do teclado.
+  const writing = ()=>{ const a = document.activeElement; return !!a && !!a.closest && !!a.closest('.write-input'); };
+  const toBottom = ()=>{ if(writing()) window.scrollTo({top: document.documentElement.scrollHeight, behavior: 'smooth'}); };
+  let lastH = visualViewport.height;
+  visualViewport.addEventListener('resize', ()=>{
+    const h = visualViewport.height;
+    if(h < lastH - 80) setTimeout(toBottom, 60); // encolheu = teclado abriu
+    lastH = h;
+  });
+  document.addEventListener('focusin', (e)=>{ if(e.target.closest && e.target.closest('.write-input')) setTimeout(toBottom, 350); });
 }
 
 buildQueue();
