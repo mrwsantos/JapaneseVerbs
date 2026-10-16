@@ -156,7 +156,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px));max-wi
 .conj{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:13px}
 .conj-row{display:flex;justify-content:space-between;padding:4px 0}
 .conj-row .lbl{color:var(--sub)}
-.kanji-toggle{text-decoration:underline;text-underline-offset:5px;text-decoration-color:var(--border);cursor:pointer}
+.kanji-toggle{text-decoration:underline;text-underline-offset:7px;text-decoration-color:var(--accent);cursor:pointer}
 .kanji-toggle:hover{text-decoration-color:var(--accent)}
 .reset{display:block;margin:20px auto 0;font-size:12px;color:var(--sub);background:none;border:none;text-decoration:underline;cursor:pointer}
 .session{margin:2px 0 14px}
@@ -731,7 +731,7 @@ Frases.setup({
 // Posição da carta atual dentro do lote (ex.: "Card 2/10") ou das revisões
 // da rodada (ex.: "Revendo 1/13"); null fora do modo Cards.
 function deckPosition(){
-  if(state.mode==='escrita') return state.idx < state.queue.length ? {label:'Deck', pos: state.idx+1, total: state.queue.length} : null;
+  if(state.mode==='escrita') return state.idx < state.queue.length ? {label:'', pos: state.idx+1, total: state.queue.length} : null;
   if(state.mode!=='cards') return null;
   const v = state.queue[state.idx];
   if(!v) return null;
