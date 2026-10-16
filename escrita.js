@@ -91,10 +91,13 @@ const Romaji = (()=>{
     shown.style.cssText = `position:absolute;inset:0;display:flex;align-items:center;justify-content:${just};pointer-events:none;white-space:pre;overflow:hidden;`
       + `padding:${cs.paddingTop} ${cs.paddingRight} ${cs.paddingBottom} ${cs.paddingLeft};border:${cs.borderTopWidth} solid transparent;`
       + `font:${cs.font};letter-spacing:${cs.letterSpacing};color:${cs.color}`;
-    const text = document.createElement("span");
+    // Texto antes do cursor + cursor (largura zero, para não deslocar o texto
+    // centralizado) + texto depois: o cursor desenhado fica onde está o real,
+    // então tocar numa letra do meio e apagar funciona.
+    const textA = document.createElement("span"), textB = document.createElement("span");
     const caret = document.createElement("span");
-    caret.style.cssText = "display:inline-block;width:2px;height:1.15em;margin-left:1px;background:var(--accent);animation:romajiBlink 1s steps(1) infinite";
-    shown.append(text, caret);
+    caret.style.cssText = "display:inline-block;width:0;height:1.15em;border-left:2px solid var(--accent);margin:0 -1px;animation:romajiBlink 1s steps(1) infinite";
+    shown.append(textA, caret, textB);
     wrap.appendChild(shown);
     if(!document.getElementById("romajiBlinkCss")){
       const st = document.createElement("style");
@@ -105,35 +108,40 @@ const Romaji = (()=>{
     input.style.color = "transparent";
     input.style.caretColor = "transparent";
     const paint = ()=>{
-      text.textContent = toKana(input.value, false);
-      caret.style.visibility = document.activeElement===input ? "visible" : "hidden";
+      const v = input.value, focused = document.activeElement===input;
+      const pos = focused ? (input.selectionStart ?? v.length) : v.length;
+      textA.textContent = toKana(v.slice(0, pos), false);
+      textB.textContent = toKana(v.slice(pos), false);
+      caret.style.visibility = focused ? "visible" : "hidden";
     };
+    // Converte os dois lados do cursor e mantém o cursor no mesmo ponto.
     const run = ()=>{
       const pos = input.selectionStart ?? input.value.length;
       const before = input.value.slice(0, pos), after = input.value.slice(pos);
-      const conv = toKana(before, false);
-      if(conv!==before){
-        input.value = conv + after;
-        try{ input.setSelectionRange(conv.length, conv.length); }catch(e){}
+      const a = toKana(before, false), b = toKana(after, false);
+      if(a!==before || b!==after){
+        input.value = a + b;
+        try{ input.setSelectionRange(a.length, a.length); }catch(e){}
       }
       paint();
     };
-    let composing = false;
-    input.addEventListener("compositionstart", ()=>{ composing = true; });
-    input.addEventListener("compositionend", ()=>{ composing = false; setTimeout(run, 0); });
-    input.addEventListener("input", (e)=>{ if(e.isComposing || composing) paint(); else run(); });
+    // Só converte o valor real fora de composição (o próprio evento diz).
+    input.addEventListener("compositionend", ()=> setTimeout(run, 0));
+    input.addEventListener("input", (e)=>{ if(e.isComposing) paint(); else run(); });
     // Alguns teclados de celular, ao apagar, mudam o texto sem disparar
     // "input" (ou no meio da composição): enquanto o campo está em foco,
     // confere o valor a cada quadro e redesenha se mudou.
     let last = null, watching = false;
     const watch = ()=>{
-      if(!input.isConnected || document.activeElement!==input){ last = null; watching = false; paint(); return; }
-      if(input.value!==last){ last = input.value; if(composing) paint(); else run(); }
+      if(!input.isConnected || document.activeElement!==input){ last = null; watching = false; run(); return; }
+      // Valor ou posição do cursor mudou (tocar numa letra move o cursor).
+      const now = input.value + "|" + input.selectionStart + "|" + input.selectionEnd;
+      if(now!==last){ last = now; paint(); }
       requestAnimationFrame(watch);
     };
     const startWatch = ()=>{ if(!watching){ watching = true; requestAnimationFrame(watch); } };
     input.addEventListener("focus", ()=>{ paint(); startWatch(); });
-    input.addEventListener("blur", paint);
+    input.addEventListener("blur", run);
     if(document.activeElement===input) startWatch();
     paint();
   }
