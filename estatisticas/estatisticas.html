@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estatísticas — Japonês SRS</title>
+<meta name="theme-color" content="#6b47ea">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/app-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../icons/app-192.png">
+<script>
+(function(){
+  let mode = 'auto';
+  try{ mode = localStorage.getItem("jp-theme") || 'auto'; }catch(e){}
+  if(mode !== 'auto') document.documentElement.setAttribute('data-theme', mode);
+})();
+</script>
+<style>
+:root{
+  --bg:#f8f7fb; --card:#ffffff; --text:#1c1a24; --sub:#6c6879; --border:#e4e1ec; --chip:#efedf7;
+  --shadow:0 1px 2px rgba(30,20,60,.04), 0 8px 24px rgba(30,20,60,.06);
+  --accent:#6b47ea; --verbos:#6b47ea; --adjetivos:#ea6b47; --ok:#2e9e6a; --warn:#d9822b;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --border:#37334a; --chip:#2a2736; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); --verbos:#8d6ff5; --adjetivos:#f08a6a; --accent:#8d6ff5; } }
+:root[data-theme="dark"]{ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --border:#37334a; --chip:#2a2736; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); --verbos:#8d6ff5; --adjetivos:#f08a6a; --accent:#8d6ff5; }
+*{box-sizing:border-box}
+html,body{margin:0}
+@font-face{font-family:"Roboto Mono";src:url('../fonts/RobotoMono-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:"Roboto Mono";src:url('../fonts/RobotoMono-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+body{background:var(--bg);color:var(--text);font-family:"Roboto Mono",ui-monospace,-apple-system,"Hiragino Sans",sans-serif;-webkit-font-smoothing:antialiased}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important;transition-duration:.001ms !important} }
+header{position:relative;padding:16px 16px 12px;text-align:center;border-bottom:1px solid var(--border)}
+h1{font-size:16px;margin:0;line-height:34px}
+.home-btn{position:absolute;left:14px;top:15px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:var(--chip);color:var(--sub);text-decoration:none}
+.home-btn:hover{background:var(--accent);color:#fff}
+main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-direction:column;gap:14px}
+.box{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:16px;animation:fadeInUp .3s cubic-bezier(.16,1,.3,1) both}
+.box h2{font-size:14px;margin:0 0 12px;display:flex;align-items:center;gap:6px}
+.box h2 .sub{margin-left:auto;font-weight:400;font-size:11px;color:var(--sub)}
+.muted{color:var(--sub);font-size:12px;line-height:1.5}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.tile{background:var(--chip);border-radius:14px;padding:12px}
+.tile b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.tile span{display:block;font-size:11px;color:var(--sub);margin-top:2px;line-height:1.35}
+.tile .delta{display:inline-block;font-size:11px;margin-left:4px;font-weight:700}
+.up{color:var(--ok)} .down{color:var(--warn)}
+.hope{background:linear-gradient(135deg,var(--verbos),var(--adjetivos));color:#fff;border:none}
+.hope h2{color:#fff}
+.hope p{margin:8px 0 0;font-size:13px;line-height:1.55}
+.hope .proj{background:rgba(255,255,255,.16);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:13px;line-height:1.5}
+.hope .proj b{font-size:14px}
+.hope .proj small{display:block;opacity:.85;font-size:11px;margin-top:2px}
+.row{display:grid;grid-template-columns:96px 1fr 62px;align-items:center;gap:8px;margin:9px 0;font-size:12px}
+.row .lbl{line-height:1.25}
+.row .lbl small{display:block;color:var(--sub);font-size:10px}
+.row .num{text-align:right;font-variant-numeric:tabular-nums;color:var(--sub)}
+.row .num b{color:var(--text)}
+.bar{height:12px;border-radius:999px;background:var(--chip);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.bar .a{background:var(--c,var(--accent))}
+.bar .p{background:var(--c,var(--accent));opacity:.38}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--sub);margin-top:4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;background:var(--accent)}
+.legend i.p{opacity:.38}
+.legend i.n{background:var(--chip);border:1px solid var(--border)}
+.verbos{--c:var(--verbos)} .adjetivos{--c:var(--adjetivos)}
+.split{display:flex;gap:6px;margin-bottom:6px}
+.split button{flex:1;padding:8px 4px;border-radius:12px;border:1px solid var(--border);background:none;color:var(--sub);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.split button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.chart{display:flex;align-items:flex-end;gap:4px;height:110px;margin-top:6px}
+.chart .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.chart .stack{width:100%;max-width:22px;display:flex;flex-direction:column-reverse;border-radius:6px;overflow:hidden;min-height:2px;background:var(--chip)}
+.chart .stack i{display:block;width:100%}
+.chart .ok{background:var(--accent)}
+.chart .er{background:var(--warn);opacity:.7}
+.chart .d{font-size:9px;color:var(--sub)}
+.chart .col.today .d{color:var(--text);font-weight:700}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mode{background:var(--chip);border-radius:14px;padding:10px 8px;text-align:center}
+.mode .e{font-size:20px}
+.mode b{display:block;font-size:18px;margin-top:2px}
+.mode span{display:block;font-size:10px;color:var(--sub);line-height:1.35}
+.forecast{display:flex;gap:4px;align-items:flex-end;height:70px;margin-top:4px}
+.forecast .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px;font-size:10px;color:var(--sub)}
+.forecast .col i{display:block;width:100%;max-width:26px;border-radius:6px 6px 3px 3px;background:var(--accent);opacity:.8;min-height:2px}
+.forecast .col b{color:var(--text);font-size:10px}
+.tips{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.tips li{background:var(--chip);border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.5}
+.hard{display:flex;flex-direction:column;gap:6px}
+.hard div{display:flex;align-items:center;gap:8px;font-size:13px}
+.hard .jp{font-size:16px;font-weight:700}
+.hard .pt{color:var(--sub);font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hard .tag{font-size:10px;padding:2px 6px;border-radius:6px;background:var(--chip);color:var(--sub)}
+.hard .er{font-size:11px;color:var(--warn);font-weight:700;white-space:nowrap}
+.foot{text-align:center;font-size:11px;color:var(--sub);line-height:1.5}
+</style>
+</head>
+<body>
+<header>
+  <a class="home-btn" id="backBtn" href="../index.html?home" aria-label="Voltar" title="Voltar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+  <h1>📊 Seu aprendizado</h1>
+</header>
+<main id="main"></main>
+<script src="../verbos/data.js"></script>
+<script src="../adjetivos/data.js"></script>
+<script src="../historico.js"></script>
+<script>
+// Volta para a tela de onde veio (verbos/adjetivos/início); aberto direto, vai ao início.
+document.getElementById("backBtn").onclick = (e)=>{
+  if(document.referrer && document.referrer.startsWith(location.origin) && history.length > 1){ e.preventDefault(); history.back(); }
+};
+
+const T = Historico.today();
+const load = (k, def)=>{ try{ return JSON.parse(localStorage.getItem(k)) || def; }catch(e){ return def; } };
+const PROG = {v: load("jpverbs-progress-v2", {}), a: load("jpadj-progress-v1", {})};
+// Registra o que já estava no progresso antes de existir histórico (não conta como "essa semana").
+Historico.sync("v", PROG.v); Historico.sync("a", PROG.a);
+const H = Historico.load();
+
+const WORDS = [
+  ...VERBS_RAW.map((w, i)=> ({...w, app: "v", id: i, key: "v" + i, grp: "g" + w.group})),
+  ...ADJ_RAW.map((w, i)=> ({...w, app: "a", id: i, key: "a" + i, grp: w.type})),
+];
+WORDS.forEach((w)=>{ w.e = PROG[w.app][w.id]; w.st = Historico.status(w.app, w.e); w.h = H.words[w.key] || {}; });
+const APPS = {v: "Verbos", a: "Adjetivos"};
+const CLS = {v: "verbos", a: "adjetivos"};
+
+const pct = (a, b)=> b ? Math.round(a / b * 100) : 0;
+const esc = (s)=> String(s).replace(/[&<>"]/g, (c)=> ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const inRange = (d, from, to)=> d !== undefined && d >= from && d <= to;
+const count = (arr, f)=> arr.filter(f).length;
+const words = (app)=> app ? WORDS.filter((w)=> w.app===app) : WORDS;
+
+// ===== respostas por dia =====
+function dayTotals(d, app, mode){
+  const day = H.days[d]; if(!day) return [0, 0];
+  let ok = 0, tot = 0;
+  for(const a of app ? [app] : ["v", "a"]){
+    const m = day[a] || {};
+    for(const k of mode ? [mode] : Object.keys(m)){ if(m[k]){ ok += m[k][0]; tot += m[k][1]; } }
+  }
+  return [ok, tot];
+}
+function rangeTotals(from, to, app, mode){
+  let ok = 0, tot = 0;
+  for(let d = from; d <= to; d++){ const [o, t] = dayTotals(d, app, mode); ok += o; tot += t; }
+  return [ok, tot];
+}
+function allTotals(app, mode){
+  let ok = 0, tot = 0;
+  for(const d of Object.keys(H.days)){ const [o, t] = dayTotals(d, app, mode); ok += o; tot += t; }
+  return [ok, tot];
+}
+function streak(){
+  let d = T, n = 0;
+  if(!dayTotals(d)[1]) d--; // hoje ainda não estudou: conta até ontem
+  while(dayTotals(d)[1]){ n++; d--; }
+  return n;
+}
+const activeDays = Object.keys(H.days).filter((d)=> dayTotals(d)[1] > 0).length;
+
+// ===== projeção =====
+// Ritmo = palavras que começaram a ser estudadas por dia nos últimos 14 dias
+// (desde o início do histórico, se for mais recente). Uma palavra nova leva
+// ~12 dias de revisões (1 + 3 + 7 dias...) até chegar em Aprendido.
+const TO_LEARN = 12;
+const histDays = Math.max(1, Math.min(14, T - H.start + 1));
+function rate(app){ return count(words(app), (w)=> inRange(w.h.s, T - histDays + 1, T)) / histDays; }
+const RATE = {v: rate("v"), a: rate("a")};
+const observed = histDays >= 3 && (RATE.v + RATE.a) > 0;
+const PLAN = 10; // novas por dia sugeridas quando ainda não há ritmo medido
+let assumed = false; // eta() usou o ritmo suposto em vez do real
+function eta(list){
+  assumed = false;
+  const left = list.filter((w)=> w.st !== "aprendido");
+  if(!left.length) return 0;
+  const unstarted = {v: 0, a: 0};
+  left.forEach((w)=>{ if(w.h.s === undefined && !(w.e && (w.e.level >= 1 || w.e.due > 0))) unstarted[w.app]++; });
+  let days = 0;
+  for(const app of ["v", "a"]){
+    if(!unstarted[app]) continue;
+    // Sem ritmo medido (ou sem estudar esse app ainda): supõe metade do plano por app.
+    let r = observed ? RATE[app] : 0;
+    if(!r){ r = PLAN / 2; assumed = true; }
+    days = Math.max(days, unstarted[app] / r);
+  }
+  return Math.ceil(days) + TO_LEARN;
+}
+function etaText(days){
+  if(days === Infinity) return null;
+  const when = new Date((T + days) * 86400000).toLocaleDateString("pt-BR", {day: "numeric", month: "short", timeZone: "UTC"});
+  const span = days < 21 ? `~${days} dias` : days < 75 ? `~${Math.round(days / 7)} semanas` : `~${Math.round(days / 30)} meses`;
+  return `${span} <small>por volta de ${when}</small>`;
+}
+
+// ===== blocos =====
+function statusRow(label, sub, list, cls){
+  const a = count(list, (w)=> w.st === "aprendido"), p = count(list, (w)=> w.st === "praticando");
+  return `<div class="row ${cls || ""}"><div class="lbl">${label}${sub ? `<small>${sub}</small>` : ""}</div>
+    <div class="bar"><i class="a" style="width:${a / list.length * 100}%"></i><i class="p" style="width:${p / list.length * 100}%"></i></div>
+    <div class="num"><b>${pct(a, list.length)}%</b> ${a}/${list.length}</div></div>`;
+}
+const LEGEND = `<div class="legend"><span><i></i>Aprendido</span><span><i class="p"></i>Praticando</span><span><i class="n"></i>Novo</span></div>`;
+
+function hopeBox(){
+  const learned = count(WORDS, (w)=> w.st === "aprendido");
+  const studying = count(WORDS, (w)=> w.st !== "novo");
+  const n5 = WORDS.filter((w)=> w.nivel === "N5");
+  const n5v = n5.filter((w)=> w.app === "v"), n5a = n5.filter((w)=> w.app === "a");
+  const goals = [
+    ["Verbos N5", n5v], ["Adjetivos N5", n5a], ["Todo o N5 (verbos + adjetivos)", n5],
+    ["Verbos N4", words("v").filter((w)=> w.nivel === "N4")],
+  ];
+  const projs = goals.map(([name, list])=>{
+    const d = eta(list);
+    if(d === 0) return `<div class="proj">✅ <b>${name}</b>: você já domina todos!</div>`;
+    const t = etaText(d);
+    const note = assumed && observed ? ` <small>começando com ${PLAN / 2} novos por dia</small>` : "";
+    return t ? `<div class="proj">🎯 <b>${name}</b> dominados em ${t}${note}</div>` : "";
+  }).filter(Boolean).slice(0, 3).join("");
+  let head;
+  if(!studying) head = "Todo mundo começa do zero. Faça o primeiro deck nos Cards e esta página começa a contar sua evolução.";
+  else if(learned >= 50) head = `Você já domina <b>${learned} palavras</b>! Isso já dá pra entender muita frase do dia a dia.`;
+  else if(learned) head = `Você já domina <b>${learned} palavras</b> e está praticando outras ${studying - learned}. Cada revisão conta.`;
+  else head = `Você está praticando <b>${studying} palavras</b>. Mais alguns dias de revisão e elas viram Aprendidas.`;
+  const how = observed
+    ? `No seu ritmo atual (≈ ${(RATE.v + RATE.a).toFixed(1).replace(".", ",")} palavras novas por dia, sem pular as revisões):`
+    : `Estudando ${PLAN} palavras novas por dia e fazendo as revisões:`;
+  return `<section class="box hope"><h2>🌱 Continue assim</h2><p>${head}</p>
+    ${projs ? `<p style="margin-top:12px">${how}</p>${projs}` : ""}
+    ${!observed && studying ? `<p style="font-size:11px;opacity:.85">A previsão usa o seu ritmo real depois de uns 3 dias de uso com este histórico.</p>` : ""}</section>`;
+}
+
+function weekBox(){
+  const from = T - 6, pFrom = T - 13, pTo = T - 7;
+  const learnedW = count(WORDS, (w)=> w.st === "aprendido" && inRange(w.h.a, from, T));
+  const learnedP = count(WORDS, (w)=> inRange(w.h.a, pFrom, pTo));
+  const pracW = count(WORDS, (w)=> inRange(w.h.p, from, T));
+  const startW = count(WORDS, (w)=> inRange(w.h.s, from, T));
+  const [ok, tot] = rangeTotals(from, T), [, totP] = rangeTotals(pFrom, pTo);
+  const delta = (now, before)=> (T - H.start < 7 || now === before) ? "" : now > before ? `<span class="delta up">↑${now - before}</span>` : `<span class="delta down">↓${before - now}</span>`;
+  const st = streak();
+  return `<section class="box"><h2>📅 Esta semana<span class="sub">últimos 7 dias</span></h2>
+    <div class="tiles">
+      <div class="tile"><b>${learnedW}${delta(learnedW, learnedP)}</b><span>palavras aprendidas</span></div>
+      <div class="tile"><b>${pracW}</b><span>entraram em Praticando</span></div>
+      <div class="tile"><b>${startW}</b><span>palavras novas começadas</span></div>
+      <div class="tile"><b>${tot}${delta(tot, totP)}</b><span>respostas · ${tot ? pct(ok, tot) + "% de acerto" : "nenhuma ainda"}</span></div>
+      <div class="tile"><b>🔥 ${st}</b><span>${st === 1 ? "dia seguido" : "dias seguidos"} estudando</span></div>
+      <div class="tile"><b>${activeDays}</b><span>${activeDays === 1 ? "dia estudado" : "dias estudados"} no total</span></div>
+    </div></section>`;
+}
+
+function activityBox(){
+  const days = [], WD = ["D", "S", "T", "Q", "Q", "S", "S"];
+  for(let d = T - 13; d <= T; d++) days.push([d, ...dayTotals(d)]);
+  const max = Math.max(5, ...days.map((x)=> x[2]));
+  const cols = days.map(([d, ok, tot])=> `<div class="col${d === T ? " today" : ""}" title="${tot} respostas, ${ok} certas">
+      <div class="stack" style="height:${tot / max * 100}%"><i class="ok" style="height:${tot ? ok / tot * 100 : 0}%"></i><i class="er" style="height:${tot ? (tot - ok) / tot * 100 : 0}%"></i></div>
+      <div class="d">${WD[new Date(d * 86400000).getUTCDay()]}</div></div>`).join("");
+  return `<section class="box"><h2>📈 Atividade<span class="sub">14 dias</span></h2>
+    <div class="chart">${cols}</div>
+    <div class="legend"><span><i></i>Certas</span><span><i style="background:var(--warn);opacity:.7"></i>Erradas</span></div></section>`;
+}
+
+function overviewBox(){
+  const groups = {
+    v: [["g1", "Grupo 1", "Godan"], ["g2", "Grupo 2", "Ichidan"], ["g3", "Grupo 3", "Irregular / する"]],
+    a: [["i", "Adjetivos -i", ""], ["na", "Adjetivos -na", ""]],
+  };
+  let html = `<section class="box"><h2>🗂️ Geral</h2>
+    ${statusRow("Tudo", `${WORDS.length} palavras`, WORDS)}
+    ${statusRow("Verbos", `${words("v").length} palavras`, words("v"), "verbos")}
+    ${statusRow("Adjetivos", `${words("a").length} palavras`, words("a"), "adjetivos")}
+    ${LEGEND}</section>`;
+  for(const app of ["v", "a"]){
+    const rows = groups[app].map(([g, l, s])=> statusRow(l, s, words(app).filter((w)=> w.grp === g), CLS[app])).join("");
+    const counts = {n: count(words(app), (w)=> w.st === "novo"), p: count(words(app), (w)=> w.st === "praticando"), a: count(words(app), (w)=> w.st === "aprendido")};
+    let extra = "";
+    if(app === "v"){
+      const waiting = count(words("v"), (w)=> w.e && w.e.level >= 4 && (w.e.fraseHits || 0) < 2);
+      if(waiting) extra = `<p class="muted">💬 ${waiting} ${waiting === 1 ? "verbo já tem" : "verbos já têm"} nível de Aprendido e só ${waiting === 1 ? "espera" : "esperam"} 2 acertos no modo Frases.</p>`;
+    }
+    html += `<section class="box ${CLS[app]}" style="--accent:var(--c)"><h2>${app === "v" ? "動詞 Verbos" : "形容詞 Adjetivos"}</h2>
+      <p class="muted" style="margin:-6px 0 4px">${counts.a} aprendidos · ${counts.p} praticando · ${counts.n} novos</p>
+      ${rows}${extra}</section>`;
+  }
+  return html;
+}
+
+function jlptBox(){
+  const levels = ["N5", "N4", "N3"].filter((n)=> WORDS.some((w)=> w.nivel === n));
+  const rows = levels.map((n)=>{
+    const all = WORDS.filter((w)=> w.nivel === n);
+    return statusRow(`<b>${n}</b>`, "tudo", all)
+      + statusRow("· verbos", "", all.filter((w)=> w.app === "v"), "verbos")
+      + (all.some((w)=> w.app === "a") ? statusRow("· adjetivos", "", all.filter((w)=> w.app === "a"), "adjetivos") : "");
+  }).join(`<div style="height:6px"></div>`);
+  return `<section class="box"><h2>🎌 Domínio por nível JLPT</h2>${rows}${LEGEND}
+    <p class="muted">% = palavras em Aprendido. Conta as palavras do app em cada nível (o N5 oficial tem mais vocabulário que verbos e adjetivos).</p></section>`;
+}
+
+function modesBox(){
+  return `<section class="box"><h2>🧩 Por modo<span class="sub">acerto nos últimos 30 dias</span></h2>
+    <div class="split" id="modeSplit"><button class="on" data-app="">Tudo</button><button data-app="v">Verbos</button><button data-app="a">Adjetivos</button></div>
+    <div class="modes" id="modeCells">${modeCells("")}</div>
+    ${writeBox()}</section>`;
+}
+// Escrita: forma mais errada (histórico de escrita.js).
+const FORM_LABEL = {dict: "Informal · presente", masu: "Formal · presente", nai: "Informal · negativo", masen: "Formal · negativo",
+  ta: "Informal · passado", mashita: "Formal · passado", nakatta: "Informal · passado negativo", masendeshita: "Formal · passado negativo"};
+function weakestForm(){
+  let worst = null;
+  for(const [app, key] of [["v", "jpverbs-write-stats"], ["a", "jpadj-write-stats"]]){
+    const forms = (load(key, {}).forms) || {};
+    for(const [f, r] of Object.entries(forms)){
+      if(r.total < 5 || !FORM_LABEL[f]) continue;
+      const acc = r.ok / r.total;
+      if(!worst || acc < worst.acc) worst = {app, f, acc, ...r};
+    }
+  }
+  return worst;
+}
+function writeBox(){
+  const w = weakestForm();
+  if(!w) return "";
+  return `<p class="muted" style="margin-top:10px">✏️ Na Escrita, a forma em que você mais erra é <b>${FORM_LABEL[w.f]}</b> (${APPS[w.app].toLowerCase()}): ${pct(w.ok, w.total)}% de acerto em ${w.total} tentativas.</p>`;
+}
+
+function reviewsBox(){
+  const studied = WORDS.filter((w)=> w.e && w.e.due > 0);
+  const late = count(studied, (w)=> w.e.due < T), todayN = count(studied, (w)=> w.e.due === T);
+  const next = [];
+  for(let d = T + 1; d <= T + 7; d++) next.push([d, count(studied, (w)=> w.e.due === d)]);
+  const max = Math.max(5, ...next.map((x)=> x[1]));
+  const WD = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+  return `<section class="box"><h2>🔁 Revisões</h2>
+    <div class="tiles"><div class="tile"><b>${late + todayN}</b><span>para hoje${late ? ` (${late} atrasadas)` : ""}</span></div>
+    <div class="tile"><b>${next.reduce((s, x)=> s + x[1], 0)}</b><span>nos próximos 7 dias</span></div></div>
+    <div class="forecast">${next.map(([d, n])=> `<div class="col"><b>${n || ""}</b><i style="height:${n / max * 100}%"></i>${WD[new Date(d * 86400000).getUTCDay()]}</div>`).join("")}</div></section>`;
+}
+
+function hardWords(){
+  return WORDS.filter((w)=> (w.h.err || 0) >= 2 && w.st !== "novo" || (w.h.err || 0) >= 3)
+    .map((w)=> ({w, ratio: w.h.err / ((w.h.ok || 0) + w.h.err)}))
+    .filter((x)=> x.ratio >= .25)
+    .sort((a, b)=> b.ratio - a.ratio || b.w.h.err - a.w.h.err).slice(0, 6);
+}
+function hardBox(){
+  const list = hardWords();
+  if(!list.length) return "";
+  return `<section class="box"><h2>🧗 Palavras que mais travam</h2><div class="hard">
+    ${list.map(({w})=> `<div><span class="jp" lang="ja">${esc(w.kanji)}</span><span class="pt">${esc(w.kana)} · ${esc(w.meaning)}</span><span class="tag">${APPS[w.app]}</span><span class="er">✗${w.h.err}</span></div>`).join("")}
+    </div><p class="muted">Erros somando Cards, Frases e Escrita. Elas voltam mais vezes nas revisões; vale ler a frase de exemplo no verso do card.</p></section>`;
+}
+
+function tipsBox(){
+  const tips = [];
+  const pending = count(WORDS, (w)=> w.e && w.e.due > 0 && w.e.due <= T);
+  const st = streak(), studiedToday = dayTotals(T)[1] > 0;
+  const studying = count(WORDS, (w)=> w.st !== "novo");
+  if(pending > 30) tips.push(`📚 Você tem <b>${pending} revisões</b> pendentes. Priorize elas antes de palavras novas: revisar na hora certa é o que fixa a memória.`);
+  if(!studiedToday && st > 0) tips.push(`🔥 Você ainda não estudou hoje. Uma rodada rápida de Cards mantém a sequência de <b>${st} ${st === 1 ? "dia" : "dias"}</b>.`);
+  const waiting = count(words("v"), (w)=> w.e && w.e.level >= 4 && (w.e.fraseHits || 0) < 2);
+  if(waiting >= 3) tips.push(`💬 <b>${waiting} verbos</b> só precisam de acertos no modo <b>Frases</b> para virar Aprendidos. É o jeito mais rápido de subir sua porcentagem.`);
+  const w = weakestForm();
+  if(w && w.acc < .75) tips.push(`✏️ Treine <b>${FORM_LABEL[w.f]}</b> na Escrita (${pct(w.ok, w.total)}% de acerto). Nos Ajustes da Escrita dá pra escolher só essa forma.`);
+  for(const [app, key, names] of [["v", "jpverbs-write-stats", {g1: "Grupo 1", g2: "Grupo 2", g3: "Grupo 3"}], ["a", "jpadj-write-stats", {i: "adjetivos -i", na: "adjetivos -na"}]]){
+    const g = Object.entries((load(key, {}).groups) || {}).filter(([k, r])=> r.total >= 8 && names[k]).sort((x, y)=> x[1].ok / x[1].total - y[1].ok / y[1].total)[0];
+    if(g && g[1].ok / g[1].total < .7) tips.push(`🎯 Na Escrita você acerta só ${pct(g[1].ok, g[1].total)}% em <b>${names[g[0]]}</b>. Use o filtro de grupo nos Ajustes da Escrita para focar neles.`);
+  }
+  const [fok, ftot] = rangeTotals(T - 29, T, "", "frases");
+  if(ftot >= 10 && fok / ftot < .7) tips.push(`⚠️ Nas Frases você acerta ${pct(fok, ftot)}%. Olhe as etiquetas (formal/informal, passado, negativo) e a tradução antes de escolher.`);
+  const [cok, ctot] = rangeTotals(T - 6, T, "", "cards");
+  if(ctot >= 30 && cok / ctot >= .9 && pending <= 15) tips.push(`🚀 ${pct(cok, ctot)}% de acerto nos Cards esta semana! Você aguenta mais: no fim da rodada use <b>+10 novas</b>.`);
+  if(ctot >= 20 && cok / ctot < .6) tips.push(`🐢 Acerto de ${pct(cok, ctot)}% nos Cards esta semana. Tudo bem ir devagar: pegue menos novas por uns dias e foque nas revisões.`);
+  if(studying >= 3){
+    for(const [m, name] of [["escrita", "Escrita"], ["frases", "Frases"]]){
+      if(!rangeTotals(T - 13, T, "", m)[1]) tips.push(`🧩 Você não usou o modo <b>${name}</b> nas últimas 2 semanas. Variar o tipo de treino ajuda a lembrar a palavra em contextos diferentes.`);
+    }
+  }
+  const hard = hardWords()[0];
+  if(hard) tips.push(`🧗 <b lang="ja">${esc(hard.w.kanji)}</b> (${esc(hard.w.meaning)}) é a palavra que mais te trava: tente criar uma frase sua com ela.`);
+  if(tips.length < 3) tips.push("⏱️ 10 minutos todo dia valem mais que 1 hora num dia só: o SRS foi feito pra revisões curtas e frequentes.");
+  if(tips.length < 3) tips.push("🔊 Leia as palavras em voz alta quando virar o card: falar ajuda a fixar a leitura em kana.");
+  return `<section class="box"><h2>💡 Dicas para melhorar</h2><ul class="tips">${tips.slice(0, 6).map((t)=> `<li>${t}</li>`).join("")}</ul></section>`;
+}
+
+function render(){
+  const best = parseInt(localStorage.getItem("jp-game-best"), 10) || 0;
+  const since = new Date(H.start * 86400000).toLocaleDateString("pt-BR", {day: "numeric", month: "short", year: "numeric", timeZone: "UTC"});
+  document.getElementById("main").innerHTML = hopeBox() + weekBox() + activityBox() + jlptBox() + overviewBox()
+    + modesBox() + reviewsBox() + hardBox() + tipsBox()
+    + (best ? `<section class="box"><h2>🎮 Jogo de Pares</h2><p class="muted" style="margin:0">Seu recorde: <b style="color:var(--text);font-size:16px">${best}</b> pares.</p></section>` : "")
+    + `<p class="foot">Respostas e datas contam a partir de ${since}, quando esta página foi criada.<br>Tudo fica salvo só neste aparelho.</p>`;
+  document.getElementById("modeSplit").onclick = (e)=>{
+    const b = e.target.closest("button"); if(!b) return;
+    document.querySelectorAll("#modeSplit button").forEach((x)=> x.classList.toggle("on", x === b));
+    document.getElementById("modeCells").innerHTML = modeCells(b.dataset.app);
+  };
+}
+// Células do "Por modo" (filtro Tudo/Verbos/Adjetivos).
+function modeCells(app){
+  const from = T - 29;
+  return [["cards", "🗂️", "Cards"], ["frases", "💬", "Frases"], ["escrita", "✏️", "Escrita"]].map(([m, e, l])=>{
+    const [ok, tot] = rangeTotals(from, T, app, m), [, atot] = allTotals(app, m);
+    return `<div class="mode"><div class="e">${e}</div><b>${tot ? pct(ok, tot) + "%" : "—"}</b><span>${l}<br>${tot} resp. em 30 dias${atot !== tot ? `<br>${atot} no total` : ""}</span></div>`;
+  }).join("");
+}
+render();
+</script>
+</body>
+</html>

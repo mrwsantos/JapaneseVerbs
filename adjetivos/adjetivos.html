@@ -43,11 +43,13 @@ h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.01em;display:flex;ali
 .logo-icon{width:20px;height:20px;border-radius:5px;vertical-align:-5px}
 :root[data-theme="dark"] .logo-icon{filter:invert(1) hue-rotate(180deg)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .logo-icon{filter:invert(1) hue-rotate(180deg)}}
-.theme-btn{position:absolute;right:14px;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px}
+.theme-btn{position:absolute;right:54px;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px}
 .theme-btn:hover{background:var(--chip)}
 .home-btn{position:absolute;left:14px;top:calc(15px + env(safe-area-inset-top,0px));width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:var(--chip);color:var(--sub);text-decoration:none;transition:background-color .15s ease,color .15s ease,transform .18s cubic-bezier(.34,1.56,.64,1)}
 .home-btn:hover{background:var(--accent);color:#fff}
 .home-btn:active{transform:scale(.92)}
+.stats-btn{left:auto;right:14px}
+@media (max-width:380px){ header .app-switch a{padding:6px 9px} }
 .app-switch{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:var(--chip)}
 .app-switch a{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;color:var(--sub);text-decoration:none;transition:background-color .15s ease,color .15s ease}
 .app-switch a .jp{font-weight:600;opacity:.85}
@@ -274,6 +276,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 <body>
 <header>
   <button type="button" class="theme-btn" id="themeBtn" aria-label="Alternar tema"></button>
+  <a class="home-btn stats-btn" href="../estatisticas/estatisticas.html" aria-label="Estatísticas" title="Estatísticas"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-5"/><path d="M12 16V6"/><path d="M17 16v-8"/></svg></a>
   <a class="home-btn" href="../index.html?home" aria-label="Início" title="Início"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M10 20.5V15h4v5.5"/></svg></a>
   <h1><nav class="app-switch" aria-label="Modo"><a href="../verbos/verbos.html">VERBOS</a><a href="../adjetivos/adjetivos.html" class="active" aria-current="page">ADJETIVOS</a></nav></h1>
 </header>
@@ -289,6 +292,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
   <button type="button" class="mode" role="tab" aria-selected="false" data-mode="frases">💬 Frases</button>
 </div>
 <script src="../sons.js"></script>
+<script src="../historico.js"></script>
 <script src="../frases.js"></script>
 <script src="../escrita.js"></script>
 <script src="data.js"></script>
@@ -311,7 +315,8 @@ try{ localStorage.setItem("jp-last-app", "adjetivos"); }catch(e){}
 const KEY = "jpadj-progress-v1";
 
 function loadProgress(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
-function saveProgress(p){ try{ localStorage.setItem(KEY, JSON.stringify(p)); }catch(e){} }
+// old=true: progresso importado (o histórico não conta como "aprendido hoje").
+function saveProgress(p, old){ try{ localStorage.setItem(KEY, JSON.stringify(p)); }catch(e){} Historico.sync("a", p, old); }
 let progress = loadProgress();
 
 const THEME_KEY = "jp-theme";
@@ -357,13 +362,14 @@ function applyDefaultSeed(){
       progress[v.id] = {level:4, due: today()+14};
     }
   });
-  saveProgress(progress);
+  saveProgress(progress, true); // palavras iniciais não contam como "aprendidas hoje"
 }
 const SEED_FLAG = "jpadj-seeded-v1";
 if(!localStorage.getItem(SEED_FLAG)){
   applyDefaultSeed();
   localStorage.setItem(SEED_FLAG, "1");
 }
+Historico.sync("a", progress);
 
 // ---- Conjugação de adjetivos (apenas formas em kana; o kanji é derivado abaixo) ----
 function adjConjugate(v){
@@ -787,6 +793,7 @@ function answer(correct){
     e.due = state.testMode ? today() : today() + INTERVALS[e.level];
   }
   saveProgress(progress); state.idx++; state.revealed = false;
+  if(!state.testMode) Historico.log("a", "cards", v.id, correct);
   if(state.testMode) state.queue.push(v);
   else if(!correct){
     // Errou: se é revisão, entra na rodada de revisões erradas (logo depois
@@ -860,6 +867,7 @@ function checkWrite(giveUp){
 // Modo Frases: igual à Escrita (acerto sobe um nível, erro desce sem sair de
 // Praticando); só grava, quem avança é Frases.next().
 function fraseScore(v, correct){
+  Historico.log("a", "frases", v.id, correct);
   const e = getEntry(v.id);
   if(correct){
     e.level = Math.min(e.level+1, INTERVALS.length-1);
@@ -874,6 +882,7 @@ function writeNext(correct){
   // Estatística do deck + histórico; errou, volta no fim do deck.
   state.writeAttempts.push({v, key: state.writeKey, ok: correct, err: state.writeErr});
   Escrita.record(v, state.writeKey, correct);
+  Historico.log("a", "escrita", v.id, correct);
   if(!correct){
     if(state.writeGaveUp) state.writeCarry.push(v.id); // desistiu: fim do próximo deck
     else state.queue.push(v);
@@ -1440,7 +1449,7 @@ function importProgress(file){
       if(typeof imported !== 'object' || imported===null || Array.isArray(imported)) throw new Error('formato inválido');
       if(!confirm('Substituir o progresso atual de adjetivos pelo do arquivo?')) return;
       progress = imported;
-      saveProgress(progress);
+      saveProgress(progress, true);
       try{ localStorage.removeItem(DECK_KEY); }catch(e){}
       buildQueue();
       render();

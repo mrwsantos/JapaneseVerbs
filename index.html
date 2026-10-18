@@ -63,6 +63,8 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
 .choice.locked{opacity:.62}
 .choice.locked .game-icon{filter:grayscale(.7)}
 .choice .game-icon{width:56px;height:56px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;font-size:28px;background:linear-gradient(135deg,#6b47ea,#ea6b47)}
+.stats-btn{position:absolute;right:14px;top:calc(15px + env(safe-area-inset-top,0px));width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:var(--chip);color:var(--sub);text-decoration:none;--accent:#6b47ea}
+.stats-btn:hover{background:var(--accent);color:#fff}
 .hint{text-align:center;color:var(--sub);font-size:12px;margin-top:10px}
 .guide{margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);font-size:14px;line-height:1.55}
 .guide summary{cursor:pointer;padding:16px 18px;font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center}
@@ -83,6 +85,7 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
 </style>
 </head>
 <body>
+<a class="stats-btn" href="estatisticas/estatisticas.html" aria-label="Estatísticas" title="Estatísticas"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-5"/><path d="M12 16V6"/><path d="M17 16v-8"/></svg></a>
 <main>
   <div class="hero">
     <img src="icons/app-192.png" alt="">
@@ -165,6 +168,9 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
 
       <h3>🔒 Jogo e Desenhar</h3>
       <p>Liberam quando você tiver pelo menos <b>3 palavras</b> em Praticando ou Aprendido (verbos e adjetivos somados).</p>
+
+      <h3>📊 Estatísticas</h3>
+      <p>O botão de gráfico no canto de cima (direita) abre o seu aprendizado: palavras aprendidas na semana, sequência de dias, % do N5/N4 dominado, acerto por modo, revisões dos próximos dias, palavras que mais travam, dicas e uma previsão de quando você domina cada nível no seu ritmo. As respostas começam a contar a partir da criação da página.</p>
 
       <h3>💾 Seu progresso</h3>
       <p>Fica salvo <b>no navegador deste aparelho</b>. Desinstalar o app ou limpar os dados do site apaga tudo — use <b>⬇ Exportar progresso</b> (no fim das abas "Todos os verbos" e "Todos os Adjetivos", um arquivo por modo) para ter um backup.</p>

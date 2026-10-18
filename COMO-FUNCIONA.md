@@ -13,6 +13,8 @@ verbos/verbos.html      app de verbos      (dados em verbos/data.js)
 adjetivos/adjetivos.html app de adjetivos  (dados em adjetivos/data.js)
 jogo/jogo.html          jogo de pares (usa os dados dos dois apps)
 desenho/desenho.html    treino de escrita à mão (não mexe no progresso)
+estatisticas/estatisticas.html  página de estatísticas (botão de gráfico no topo)
+historico.js            histórico de respostas e datas para as estatísticas
 sons.js                 sons gerados no navegador (sem arquivos de áudio)
 desenho.js              área de desenho + reconhecimento usados pela página Desenhar
 estudadas.js            palavras em Praticando/Aprendido (libera Jogo e Desenhar)
@@ -255,6 +257,26 @@ outro, 5 pares por vez:
 - Sons de acerto, erro, fim e recorde, e tic-tac nos últimos 3 segundos
   (cada vez mais rápido). O botão 🔊/🔇 no topo liga e desliga.
 - O jogo não mexe no seu progresso do SRS.
+
+## 📊 Estatísticas
+
+O botão de **gráfico** no canto de cima à direita (tela inicial, verbos e
+adjetivos) abre a página do seu aprendizado:
+
+- **Continue assim**: quantas palavras você domina e uma previsão de quando
+  domina os verbos N5, os adjetivos N5 e o N5 todo. Usa o seu ritmo real
+  (palavras novas começadas por dia nos últimos 14 dias) + ~12 dias de
+  revisões até Aprendido; antes de 3 dias de histórico, supõe 10 novas por dia.
+- **Esta semana**: aprendidas, entraram em Praticando, novas começadas,
+  respostas e % de acerto (com ↑/↓ contra a semana anterior), sequência de dias.
+- **Atividade** dos últimos 14 dias, **domínio por nível JLPT**, **Geral**
+  (verbos/adjetivos e por grupo: G1/G2/G3, -i/-na), **acerto por modo**
+  (Cards, Frases, Escrita), **revisões** de hoje e dos próximos 7 dias,
+  **palavras que mais travam** e **dicas** geradas pelos seus números.
+
+O histórico (`jp-historico-v1`, em `historico.js`) começa a contar quando a
+página foi criada: o que já estava no progresso antes entra como "antes" e não
+conta como "essa semana". Progresso importado também não.
 
 ## Listas
 
