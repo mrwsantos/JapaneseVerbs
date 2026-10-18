@@ -97,6 +97,9 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
 .hard .pt{color:var(--sub);font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hard .tag{font-size:10px;padding:2px 6px;border-radius:6px;background:var(--chip);color:var(--sub)}
 .hard .er{font-size:11px;color:var(--warn);font-weight:700;white-space:nowrap}
+.tabs{position:sticky;top:0;z-index:5;display:flex;gap:6px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);max-width:480px;margin:0 auto}
+.tab{flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--chip);color:var(--sub);font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background-color .15s ease,color .15s ease}
+.tab.on{background:var(--accent);color:#fff}
 .foot{text-align:center;font-size:11px;color:var(--sub);line-height:1.5}
 </style>
 </head>
@@ -105,6 +108,12 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
   <a class="home-btn" id="backBtn" href="../index.html?home" aria-label="Voltar" title="Voltar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
   <h1>📊 Seu aprendizado</h1>
 </header>
+<nav class="tabs" id="tabs" role="tablist">
+  <button type="button" class="tab" role="tab" data-tab="resumo">Resumo</button>
+  <button type="button" class="tab" role="tab" data-tab="dominio">Domínio</button>
+  <button type="button" class="tab" role="tab" data-tab="treino">Treino</button>
+  <button type="button" class="tab" role="tab" data-tab="dicas">Dicas</button>
+</nav>
 <main id="main"></main>
 <script src="../verbos/data.js"></script>
 <script src="../adjetivos/data.js"></script>
@@ -391,14 +400,34 @@ function tipsBox(){
   return `<section class="box"><h2>💡 Dicas para melhorar</h2><ul class="tips">${tips.slice(0, 6).map((t)=> `<li>${t}</li>`).join("")}</ul></section>`;
 }
 
+// Abas: Resumo (previsão, semana, atividade) · Domínio (JLPT, geral, grupos) ·
+// Treino (modos, revisões, palavras difíceis, jogo) · Dicas. A aba fica salva.
+const TAB_KEY = "jp-stats-tab";
+const TABS = {
+  resumo: ()=> hopeBox() + weekBox() + activityBox(),
+  dominio: ()=> jlptBox() + overviewBox(),
+  treino: ()=>{
+    const best = parseInt(localStorage.getItem("jp-game-best"), 10) || 0;
+    return modesBox() + reviewsBox() + hardBox()
+      + (best ? `<section class="box"><h2>🎮 Jogo de Pares</h2><p class="muted" style="margin:0">Seu recorde: <b style="color:var(--text);font-size:16px">${best}</b> pares.</p></section>` : "");
+  },
+  dicas: ()=> tipsBox(),
+};
+let tab = "resumo";
+try{ const t = localStorage.getItem(TAB_KEY); if(TABS[t]) tab = t; }catch(e){}
+document.getElementById("tabs").onclick = (e)=>{
+  const b = e.target.closest(".tab"); if(!b || b.dataset.tab === tab) return;
+  tab = b.dataset.tab;
+  try{ localStorage.setItem(TAB_KEY, tab); }catch(e){}
+  render(); window.scrollTo(0, 0);
+};
 function render(){
-  const best = parseInt(localStorage.getItem("jp-game-best"), 10) || 0;
   const since = new Date(H.start * 86400000).toLocaleDateString("pt-BR", {day: "numeric", month: "short", year: "numeric", timeZone: "UTC"});
-  document.getElementById("main").innerHTML = hopeBox() + weekBox() + activityBox() + jlptBox() + overviewBox()
-    + modesBox() + reviewsBox() + hardBox() + tipsBox()
-    + (best ? `<section class="box"><h2>🎮 Jogo de Pares</h2><p class="muted" style="margin:0">Seu recorde: <b style="color:var(--text);font-size:16px">${best}</b> pares.</p></section>` : "")
+  document.querySelectorAll("#tabs .tab").forEach((b)=>{ const on = b.dataset.tab === tab; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
+  document.getElementById("main").innerHTML = TABS[tab]()
     + `<p class="foot">Respostas e datas contam a partir de ${since}, quando esta página foi criada.<br>Tudo fica salvo só neste aparelho.</p>`;
-  document.getElementById("modeSplit").onclick = (e)=>{
+  const split = document.getElementById("modeSplit");
+  if(split) split.onclick = (e)=>{
     const b = e.target.closest("button"); if(!b) return;
     document.querySelectorAll("#modeSplit button").forEach((x)=> x.classList.toggle("on", x === b));
     document.getElementById("modeCells").innerHTML = modeCells(b.dataset.app);
