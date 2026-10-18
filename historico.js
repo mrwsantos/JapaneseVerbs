@@ -5,7 +5,7 @@
 //
 //   Historico.log(app, mode, id, ok)   app "v"|"a", mode "cards"|"frases"|"escrita"
 //   Historico.sync(app, progress, old) chamado a cada saveProgress; old=true
-//                                      (importar backup) marca as mudanças como
+//                                      (importar progresso) marca as mudanças como
 //                                      "antes do histórico" em vez de hoje.
 //
 // Formato em localStorage (KEY):

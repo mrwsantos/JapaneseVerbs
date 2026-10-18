@@ -43,12 +43,12 @@ h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.01em;display:flex;ali
 .logo-icon{width:20px;height:20px;border-radius:5px;vertical-align:-5px}
 :root[data-theme="dark"] .logo-icon{filter:invert(1) hue-rotate(180deg)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .logo-icon{filter:invert(1) hue-rotate(180deg)}}
-.theme-btn{position:absolute;right:54px;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px}
+.theme-btn{position:absolute;right:14px;top:calc(14px + env(safe-area-inset-top,0px));font-size:16px;padding:4px 8px;border-radius:8px}
 .theme-btn:hover{background:var(--chip)}
 .home-btn{position:absolute;left:14px;top:calc(15px + env(safe-area-inset-top,0px));width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:var(--chip);color:var(--sub);text-decoration:none;transition:background-color .15s ease,color .15s ease,transform .18s cubic-bezier(.34,1.56,.64,1)}
 .home-btn:hover{background:var(--accent);color:#fff}
 .home-btn:active{transform:scale(.92)}
-.stats-btn{left:auto;right:14px}
+.stats-btn{left:auto;right:54px}
 @media (max-width:380px){ header .app-switch a{padding:6px 9px} }
 .app-switch{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:var(--chip)}
 .app-switch a{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;color:var(--sub);text-decoration:none;transition:background-color .15s ease,color .15s ease}

@@ -27,7 +27,7 @@ icons/, fonts/
 
 - O botão de **casinha 🏠** no topo volta para a tela inicial; **動詞 Verbos | 形容詞 Adjetivos** troca de modo.
 - A **engrenagem ⚙️** no topo (direita) abre as configurações: tema
-  **Claro/Escuro** e **Baixar progresso / Importar backup** (`config.js`).
+  **Claro/Escuro** e **Baixar progresso / Importar progresso** (`config.js`).
   Até escolher um tema, o app segue o do sistema.
 - O app lembra o último modo aberto e o tema.
 - Todo o progresso fica salvo **no navegador do aparelho** (`localStorage`).
@@ -36,7 +36,7 @@ icons/, fonts/
   (`backup.js`) com todas as chaves do app (`jp-*`, `jpverbs-*`, `jpadj-*`):
   progresso de verbos e adjetivos, histórico das estatísticas, estatística da
   Escrita, decks em andamento, recorde do jogo e preferências.
-  **Importar backup** substitui tudo e recarrega o app; também
+  **Importar progresso** substitui tudo e recarrega o app; também
   aceita os backups antigos de um modo só (só troca o progresso daquele modo).
 
 ## Níveis e intervalos
