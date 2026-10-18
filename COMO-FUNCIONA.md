@@ -269,8 +269,9 @@ outro, 5 pares por vez:
 ## 📊 Estatísticas
 
 O botão de **gráfico** no canto de cima à direita (tela inicial, verbos e
-adjetivos) abre a página do seu aprendizado, em 4 abas: **Resumo**, **Domínio**,
-**Treino** e **Dicas**:
+adjetivos) abre a página do seu aprendizado, em 3 abas: **Resumo**, **Domínio**
+e **Treino**. No topo do Resumo, "Continue assim" e "Dicas para melhorar" são
+2 slides no mesmo espaço (botão → ou arrastar):
 
 - **Continue assim**: quantas palavras você domina e uma previsão de quando
   domina os verbos N5, os adjetivos N5 e o N5 todo. Usa o seu ritmo real

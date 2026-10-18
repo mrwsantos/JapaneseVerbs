@@ -100,6 +100,19 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
 .tabs{position:sticky;top:0;z-index:5;display:flex;gap:6px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);max-width:480px;margin:0 auto}
 .tab{flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--chip);color:var(--sub);font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background-color .15s ease,color .15s ease}
 .tab.on{background:var(--accent);color:#fff}
+.slides{overflow:hidden;border-radius:20px;transition:height .35s cubic-bezier(.16,1,.3,1);flex:none}
+.slides .track{display:flex;align-items:flex-start;transition:transform .45s cubic-bezier(.16,1,.3,1)}
+.slides .slide{flex:0 0 100%;min-width:0}
+.slides .box{animation:none;box-shadow:none}
+.slide-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+.slide-btn{border:none;border-radius:999px;padding:9px 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+.slide-btn:active{transform:scale(.95)}
+.hope .slide-btn{background:rgba(255,255,255,.22);color:#fff}
+.dots{display:flex;gap:6px}
+.dots i{width:7px;height:7px;border-radius:999px;background:var(--sub);opacity:.35;transition:width .3s ease,opacity .3s ease}
+.dots i.on{width:18px;opacity:1;background:var(--accent)}
+.hope .dots i{background:#fff}
+@media (prefers-reduced-motion: reduce){ .slides,.slides .track{transition:none} }
 .foot{text-align:center;font-size:11px;color:var(--sub);line-height:1.5}
 </style>
 </head>
@@ -113,7 +126,6 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
   <button type="button" class="tab" role="tab" data-tab="resumo">Resumo</button>
   <button type="button" class="tab" role="tab" data-tab="dominio">Domínio</button>
   <button type="button" class="tab" role="tab" data-tab="treino">Treino</button>
-  <button type="button" class="tab" role="tab" data-tab="dicas">Dicas</button>
 </nav>
 <main id="main"></main>
 <script src="../verbos/data.js"></script>
@@ -219,7 +231,7 @@ function statusRow(label, sub, list, cls){
 }
 const LEGEND = `<div class="legend"><span><i></i>Aprendido</span><span><i class="p"></i>Praticando</span><span><i class="n"></i>Novo</span></div>`;
 
-function hopeBox(){
+function hopeBox(nav){
   const learned = count(WORDS, (w)=> w.st === "aprendido");
   const studying = count(WORDS, (w)=> w.st !== "novo");
   const n5 = WORDS.filter((w)=> w.nivel === "N5");
@@ -245,7 +257,7 @@ function hopeBox(){
     : `Estudando ${PLAN} palavras novas por dia e fazendo as revisões:`;
   return `<section class="box hope"><h2>🌱 Continue assim</h2><p>${head}</p>
     ${projs ? `<p style="margin-top:12px">${how}</p>${projs}` : ""}
-    ${!observed && studying ? `<p style="font-size:11px;opacity:.85">A previsão usa o seu ritmo real depois de uns 3 dias de uso com este histórico.</p>` : ""}</section>`;
+    ${!observed && studying ? `<p style="font-size:11px;opacity:.85">A previsão usa o seu ritmo real depois de uns 3 dias de uso com este histórico.</p>` : ""}${nav || ""}</section>`;
 }
 
 function weekBox(){
@@ -371,7 +383,7 @@ function hardBox(){
     </div><p class="muted">Erros somando Cards, Frases e Escrita. Elas voltam mais vezes nas revisões; vale ler a frase de exemplo no verso do card.</p></section>`;
 }
 
-function tipsBox(){
+function tipsBox(nav){
   const tips = [];
   const pending = count(WORDS, (w)=> w.e && w.e.due > 0 && w.e.due <= T);
   const st = streak(), studiedToday = dayTotals(T)[1] > 0;
@@ -400,22 +412,48 @@ function tipsBox(){
   if(hard) tips.push(`🧗 <b lang="ja">${esc(hard.w.kanji)}</b> (${esc(hard.w.meaning)}) é a palavra que mais te trava: tente criar uma frase sua com ela.`);
   if(tips.length < 3) tips.push("⏱️ 10 minutos todo dia valem mais que 1 hora num dia só: o SRS foi feito pra revisões curtas e frequentes.");
   if(tips.length < 3) tips.push("🔊 Leia as palavras em voz alta quando virar o card: falar ajuda a fixar a leitura em kana.");
-  return `<section class="box"><h2>💡 Dicas para melhorar</h2><ul class="tips">${tips.slice(0, 6).map((t)=> `<li>${t}</li>`).join("")}</ul></section>`;
+  return `<section class="box"><h2>💡 Dicas para melhorar</h2><ul class="tips">${tips.slice(0, 6).map((t)=> `<li>${t}</li>`).join("")}</ul>${nav || ""}</section>`;
 }
 
 // Abas: Resumo (previsão, semana, atividade) · Domínio (JLPT, geral, grupos) ·
-// Treino (modos, revisões, palavras difíceis, jogo) · Dicas. A aba fica salva.
+// Treino (modos, revisões, palavras difíceis, jogo). A aba fica salva.
 const TAB_KEY = "jp-stats-tab";
 const TABS = {
-  resumo: ()=> hopeBox() + weekBox() + activityBox(),
+  resumo: ()=> slidesHtml() + weekBox() + activityBox(),
   dominio: ()=> jlptBox() + overviewBox(),
   treino: ()=>{
     const best = parseInt(localStorage.getItem("jp-game-best"), 10) || 0;
     return modesBox() + reviewsBox() + hardBox()
       + (best ? `<section class="box"><h2>🎮 Jogo de Pares</h2><p class="muted" style="margin:0">Seu recorde: <b style="color:var(--text);font-size:16px">${best}</b> pares.</p></section>` : "");
   },
-  dicas: ()=> tipsBox(),
 };
+// Topo do Resumo: 2 slides no mesmo espaço, "Continue assim" → "Dicas para melhorar".
+const dots = (n)=> `<span class="dots" aria-hidden="true"><i${n === 0 ? ' class="on"' : ""}></i><i${n === 1 ? ' class="on"' : ""}></i></span>`;
+function slidesHtml(){
+  return `<div class="slides" id="slides" aria-roledescription="carrossel"><div class="track">
+    <div class="slide">${hopeBox(`<div class="slide-nav">${dots(0)}<button type="button" class="slide-btn" data-go="1">Dicas para melhorar →</button></div>`)}</div>
+    <div class="slide">${tipsBox(`<div class="slide-nav"><button type="button" class="slide-btn" data-go="0">← Continue assim</button>${dots(1)}</div>`)}</div>
+  </div></div>`;
+}
+function setupSlides(){
+  const box = document.getElementById("slides"); if(!box) return;
+  const track = box.querySelector(".track"), slides = [...box.querySelectorAll(".slide")];
+  let cur = 0;
+  const fit = ()=>{ box.style.height = slides[cur].offsetHeight + "px"; };
+  const go = (n)=>{
+    cur = Math.max(0, Math.min(slides.length - 1, n));
+    track.style.transform = `translateX(${-cur * 100}%)`;
+    slides.forEach((s, i)=>{ s.inert = i !== cur; s.setAttribute("aria-hidden", i !== cur); });
+    fit();
+  };
+  box.onclick = (e)=>{ const b = e.target.closest("[data-go]"); if(b) go(+b.dataset.go); };
+  // arrastar para o lado também troca
+  let x0 = null;
+  box.addEventListener("touchstart", (e)=>{ x0 = e.touches[0].clientX; }, {passive: true});
+  box.addEventListener("touchend", (e)=>{ if(x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if(Math.abs(dx) > 50) go(cur + (dx < 0 ? 1 : -1)); });
+  addEventListener("resize", fit);
+  go(0);
+}
 let tab = "resumo";
 try{ const t = localStorage.getItem(TAB_KEY); if(TABS[t]) tab = t; }catch(e){}
 document.getElementById("tabs").onclick = (e)=>{
@@ -429,6 +467,7 @@ function render(){
   document.querySelectorAll("#tabs .tab").forEach((b)=>{ const on = b.dataset.tab === tab; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
   document.getElementById("main").innerHTML = TABS[tab]()
     + `<p class="foot">Respostas e datas contam a partir de ${since}, quando esta página foi criada.<br>Tudo fica salvo só neste aparelho.</p>`;
+  setupSlides();
   const split = document.getElementById("modeSplit");
   if(split) split.onclick = (e)=>{
     const b = e.target.closest("button"); if(!b) return;
