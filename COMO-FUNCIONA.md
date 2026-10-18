@@ -16,6 +16,7 @@ desenho/desenho.html    treino de escrita à mão (não mexe no progresso)
 estatisticas/estatisticas.html  página de estatísticas (botão de gráfico no topo)
 historico.js            histórico de respostas e datas para as estatísticas
 backup.js               exportar/importar o app inteiro num arquivo só
+config.js               botão de configurações (tema + backup) no topo das páginas
 sons.js                 sons gerados no navegador (sem arquivos de áudio)
 desenho.js              área de desenho + reconhecimento usados pela página Desenhar
 estudadas.js            palavras em Praticando/Aprendido (libera Jogo e Desenhar)
@@ -25,15 +26,17 @@ icons/, fonts/
 ```
 
 - O botão de **casinha 🏠** no topo volta para a tela inicial; **動詞 Verbos | 形容詞 Adjetivos** troca de modo.
-- O app lembra o último modo aberto e o tema (claro/escuro/automático).
+- A **engrenagem ⚙️** no topo (direita) abre as configurações: tema
+  **Claro/Escuro** e **Baixar progresso / Importar backup** (`config.js`).
+  Até escolher um tema, o app segue o do sistema.
+- O app lembra o último modo aberto e o tema.
 - Todo o progresso fica salvo **no navegador do aparelho** (`localStorage`).
   Desinstalar o app ou limpar os dados do site apaga o progresso — use
-  **⬇ Exportar backup (tudo)** para ter uma cópia. É **um arquivo só**
+  **Baixar progresso** (na engrenagem ⚙️) para ter uma cópia. É **um arquivo só**
   (`backup.js`) com todas as chaves do app (`jp-*`, `jpverbs-*`, `jpadj-*`):
   progresso de verbos e adjetivos, histórico das estatísticas, estatística da
-  Escrita, decks em andamento, recorde do jogo e preferências. Fica no fim das
-  abas "Todos os verbos" e "Todos os Adjetivos" e na aba Dicas das
-  Estatísticas. **⬆ Importar backup** substitui tudo e recarrega o app; também
+  Escrita, decks em andamento, recorde do jogo e preferências.
+  **Importar backup** substitui tudo e recarrega o app; também
   aceita os backups antigos de um modo só (só troca o progresso daquele modo).
 
 ## Níveis e intervalos

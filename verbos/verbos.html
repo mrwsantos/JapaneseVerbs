@@ -283,7 +283,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 </head>
 <body>
 <header>
-  <button type="button" class="theme-btn" id="themeBtn" aria-label="Alternar tema"></button>
+  <button type="button" class="theme-btn" id="settingsBtn" aria-label="Configurações"></button>
   <a class="home-btn stats-btn" href="../estatisticas/estatisticas.html" aria-label="Estatísticas" title="Estatísticas"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-5"/><path d="M12 16V6"/><path d="M17 16v-8"/></svg></a>
   <a class="home-btn" href="../index.html?home" aria-label="Início" title="Início"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M10 20.5V15h4v5.5"/></svg></a>
   <h1><nav class="app-switch" aria-label="Modo"><a href="verbos.html" class="active" aria-current="page">VERBOS</a><a href="../adjetivos/adjetivos.html">ADJETIVOS</a></nav></h1>
@@ -302,6 +302,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 <script src="../sons.js"></script>
 <script src="../historico.js"></script>
 <script src="../backup.js"></script>
+<script src="../config.js"></script>
 <script src="../frases.js"></script>
 <script src="../escrita.js"></script>
 <script src="data.js"></script>
@@ -327,19 +328,10 @@ function applyTheme(mode){
   if(mode==='light') document.documentElement.setAttribute('data-theme','light');
   else if(mode==='dark') document.documentElement.setAttribute('data-theme','dark');
   else document.documentElement.removeAttribute('data-theme');
-  const btn = document.getElementById('themeBtn');
-  if(btn){
-    btn.textContent = mode==='light' ? '☀️' : mode==='dark' ? '🌙' : '🔄';
-    btn.title = 'Tema: ' + (mode==='light'?'claro':mode==='dark'?'escuro':'automático');
-  }
 }
 let themeMode = loadTheme();
 applyTheme(themeMode);
-function toggleTheme(){
-  themeMode = themeMode==='auto' ? 'light' : themeMode==='light' ? 'dark' : 'auto';
-  try{ localStorage.setItem(THEME_KEY, themeMode); }catch(e){}
-  applyTheme(themeMode);
-}
+// Trocar o tema e o backup ficam no botão de configurações (../config.js).
 
 // Frases: começa só em hiragana; o botão no card (ou os Ajustes) liga o kanji.
 // Vale para verbos e adjetivos.
@@ -1208,11 +1200,7 @@ function renderInner(){
     return;
   }
 
-  const footerHtml = `<div class="pillrow" style="margin-top:16px">
-    ${Backup.buttonsHtml('reset')}
-  </div>
-  <p style="text-align:center;font-size:11px;color:var(--sub);margin:6px 0 0">Um arquivo só com tudo: verbos, adjetivos, estatísticas e preferências.</p>
-  <button type="button" class="reset" onclick="applyDefaultSeed();render();">Restaurar verbos padrão (iku, taberu, nomu = aprendido)</button>
+  const footerHtml = `  <button type="button" class="reset" onclick="applyDefaultSeed();render();">Restaurar verbos padrão (iku, taberu, nomu = aprendido)</button>
   <button type="button" class="reset" onclick="resetProgress()">Zerar todo o progresso</button>`;
 
   if(state.tab==="all"){
@@ -1403,7 +1391,7 @@ function resetProgress(){ if(confirm("Zerar todo o progresso salvo?")){ progress
 
 // Exportar/importar: backup único do app inteiro em ../backup.js.
 
-document.getElementById("themeBtn").onclick = toggleTheme;
+Config.init();
 document.querySelectorAll(".tab").forEach(t=>{ t.onclick = ()=>{ state.tab = t.dataset.tab; state.expanded=null; if(state.tab==="study") buildQueue(); render(); }; });
 document.querySelectorAll(".mode").forEach(m=>{ m.onclick = ()=>{ state.mode = m.dataset.mode; buildQueue(); render(); }; });
 

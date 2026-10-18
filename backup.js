@@ -1,7 +1,8 @@
 // Backup único do app inteiro: um arquivo com TUDO que o app guarda no
 // aparelho (progresso de verbos e adjetivos, histórico das estatísticas,
 // estatística da Escrita, decks em andamento, recorde do jogo, preferências).
-// Importar substitui tudo e recarrega a página.
+// Importar substitui tudo e recarrega a página. Os botões ficam nas
+// configurações (engrenagem no topo, ver config.js).
 // Também aceita os backups antigos de um modo só ({app:"verbos", progress}).
 const Backup = (()=>{
   const PREFIXES = ["jp-", "jpverbs-", "jpadj-"]; // todas as chaves do app começam assim
@@ -58,13 +59,5 @@ const Backup = (()=>{
     r.onload = ()=> apply(r.result);
     r.readAsText(file);
   }
-  // Botões prontos (+ input escondido); cls = classe dos botões na página.
-  let n = 0;
-  function buttonsHtml(cls){
-    const id = "backupFile" + (++n);
-    return `<button type="button" class="${cls}" onclick="Backup.exportAll()">⬇ Exportar backup (tudo)</button>
-      <button type="button" class="${cls}" onclick="document.getElementById('${id}').click()">⬆ Importar backup</button>
-      <input type="file" id="${id}" accept="application/json,.json" style="display:none" onchange="Backup.importFile(this.files[0]); this.value=''">`;
-  }
-  return {exportAll, importFile, apply, buttonsHtml};
+  return {exportAll, importFile, apply};
 })();

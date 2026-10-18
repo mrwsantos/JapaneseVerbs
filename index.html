@@ -85,6 +85,7 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
 </style>
 </head>
 <body>
+<button type="button" id="settingsBtn" style="position:absolute;right:54px;top:calc(15px + env(safe-area-inset-top,0px))" aria-label="Configurações"></button>
 <a class="stats-btn" href="estatisticas/estatisticas.html" aria-label="Estatísticas" title="Estatísticas"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-5"/><path d="M12 16V6"/><path d="M17 16v-8"/></svg></a>
 <main>
   <div class="hero">
@@ -173,11 +174,13 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
       <p>O botão de gráfico no canto de cima (direita) abre o seu aprendizado, em 4 abas (Resumo, Domínio, Treino, Dicas): palavras aprendidas na semana, sequência de dias, % do N5/N4 dominado, acerto por modo, revisões dos próximos dias, palavras que mais travam, dicas e uma previsão de quando você domina cada nível no seu ritmo. As respostas começam a contar a partir da criação da página.</p>
 
       <h3>💾 Seu progresso</h3>
-      <p>Fica salvo <b>no navegador deste aparelho</b>. Desinstalar o app ou limpar os dados do site apaga tudo — use <b>⬇ Exportar backup (tudo)</b> para ter uma cópia: é <b>um arquivo só</b> com verbos, adjetivos, estatísticas e preferências. Fica no fim das abas "Todos os verbos" e "Todos os Adjetivos" e na aba Dicas das 📊 Estatísticas. <b>⬆ Importar backup</b> restaura tudo (também aceita os backups antigos de um modo só).</p>
+      <p>Fica salvo <b>no navegador deste aparelho</b>. Desinstalar o app ou limpar os dados do site apaga tudo — use <b>Baixar progresso</b> para ter uma cópia: é <b>um arquivo só</b> com verbos, adjetivos, estatísticas e preferências. Fica no botão de <b>⚙️ configurações</b> (engrenagem no topo, à direita), junto com o tema claro/escuro. <b>Importar backup</b> restaura tudo (também aceita os backups antigos de um modo só).</p>
     </div>
   </details>
 </main>
 <script src="estudadas.js"></script>
+<script src="backup.js"></script>
+<script src="config.js"></script>
 <script>
 // Jogo e Desenhar só liberam com Estudadas.MIN palavras em Praticando/Aprendido.
 (function(){
@@ -188,6 +191,7 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
     a.querySelector('span').textContent = `🔒 Libera com ${Estudadas.MIN} palavras estudadas (${have}/${Estudadas.MIN})`;
   });
 })();
+Config.init();
 if("serviceWorker" in navigator){
   window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); });
 }

@@ -111,11 +111,13 @@ body.hard .tile .kana{opacity:0;max-height:0;margin:0}
   <a class="home-btn" href="../index.html?home" aria-label="Início" title="Início"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M10 20.5V15h4v5.5"/></svg></a>
   <h1>🎮 Jogo de Pares</h1>
   <button type="button" class="sound-btn" id="soundBtn"></button>
-  <button type="button" class="theme-btn" id="themeBtn" aria-label="Alternar tema"></button>
+  <button type="button" class="theme-btn" id="settingsBtn" aria-label="Configurações"></button>
 </header>
 <main id="main"></main>
 
 <script src="../sons.js"></script>
+<script src="../backup.js"></script>
+<script src="../config.js"></script>
 <script src="../estudadas.js"></script>
 <script src="../verbos/data.js"></script>
 <script src="../adjetivos/data.js"></script>
@@ -136,16 +138,10 @@ try{ themeMode = localStorage.getItem(THEME_KEY) || 'auto'; }catch(e){}
 function applyTheme(mode){
   if(mode==='light' || mode==='dark') document.documentElement.setAttribute('data-theme', mode);
   else document.documentElement.removeAttribute('data-theme');
-  const btn = document.getElementById('themeBtn');
-  btn.textContent = mode==='light' ? '☀️' : mode==='dark' ? '🌙' : '🔄';
-  btn.title = 'Tema: ' + (mode==='light'?'claro':mode==='dark'?'escuro':'automático');
 }
 applyTheme(themeMode);
-document.getElementById('themeBtn').onclick = ()=>{
-  themeMode = themeMode==='auto' ? 'light' : themeMode==='light' ? 'dark' : 'auto';
-  try{ localStorage.setItem(THEME_KEY, themeMode); }catch(e){}
-  applyTheme(themeMode);
-};
+// Tema e backup: botão de configurações (../config.js).
+Config.init();
 
 function showSound(){
   const on = Sons.enabled('jogo'), btn = document.getElementById('soundBtn');
