@@ -26,7 +26,7 @@ const Config = (()=>{
 .cfg-btn:hover{background:var(--chip)}
 .cfg-btn .cfg-i{width:30px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;border-radius:9px;background:var(--chip);font-size:15px}
 .cfg-btn small{display:block;font-size:11px;font-weight:400;color:var(--sub);margin-top:1px}
-.settings-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;border-radius:11px;background:var(--chip);color:var(--sub)}
+.settings-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;border:none;cursor:pointer;border-radius:11px;background:var(--chip);color:var(--sub)}
 .settings-btn svg{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
 .settings-btn[aria-expanded="true"]{background:var(--accent,#6b47ea);color:#fff}
 .settings-btn[aria-expanded="true"] svg{transform:rotate(60deg)}
