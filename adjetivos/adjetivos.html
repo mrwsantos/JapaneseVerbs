@@ -293,6 +293,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 </div>
 <script src="../sons.js"></script>
 <script src="../historico.js"></script>
+<script src="../backup.js"></script>
 <script src="../frases.js"></script>
 <script src="../escrita.js"></script>
 <script src="data.js"></script>
@@ -1214,10 +1215,9 @@ function renderInner(){
   }
 
   const footerHtml = `<div class="pillrow" style="margin-top:16px">
-    <button type="button" class="reset" onclick="exportProgress()">⬇ Exportar progresso</button>
-    <button type="button" class="reset" onclick="document.getElementById('importFile').click()">⬆ Importar progresso</button>
+    ${Backup.buttonsHtml('reset')}
   </div>
-  <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importProgress(this.files[0])">
+  <p style="text-align:center;font-size:11px;color:var(--sub);margin:6px 0 0">Um arquivo só com tudo: verbos, adjetivos, estatísticas e preferências.</p>
   <button type="button" class="reset" onclick="applyDefaultSeed();render();">Restaurar adjetivos padrão (ookii, chiisai, samui, atsui = aprendido)</button>
   <button type="button" class="reset" onclick="resetProgress()">Zerar todo o progresso</button>`;
 
@@ -1424,40 +1424,7 @@ function learningInfoModal(){
 function toggleExpand(id){ state.expanded = (state.expanded===id) ? null : id; render(); }
 function resetProgress(){ if(confirm("Zerar todo o progresso salvo?")){ progress = {}; saveProgress(progress); try{ localStorage.removeItem(DECK_KEY); }catch(e){} buildQueue(); render(); } }
 
-function exportProgress(){
-  try{
-    // Marca o app no arquivo para não importar o backup de um app no outro.
-    const data = JSON.stringify({app:"adjetivos", progress}, null, 2);
-    const blob = new Blob([data], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'jpadj-progresso.json';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }catch(e){ alert('Não foi possível exportar o progresso.'); }
-}
-function importProgress(file){
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    try{
-      const data = JSON.parse(reader.result);
-      if(typeof data !== 'object' || data===null || Array.isArray(data)) throw new Error('formato inválido');
-      if(data.app && data.app !== "adjetivos"){ alert('Esse arquivo é o progresso de '+data.app+'. Importe ele no modo '+data.app+'.'); return; }
-      // Backups antigos eram só o objeto de progresso, sem o campo "app".
-      const imported = data.app ? data.progress : data;
-      if(typeof imported !== 'object' || imported===null || Array.isArray(imported)) throw new Error('formato inválido');
-      if(!confirm('Substituir o progresso atual de adjetivos pelo do arquivo?')) return;
-      progress = imported;
-      saveProgress(progress, true);
-      try{ localStorage.removeItem(DECK_KEY); }catch(e){}
-      buildQueue();
-      render();
-      alert('Progresso importado com sucesso!');
-    }catch(e){ alert('Arquivo inválido.'); }
-  };
-  reader.readAsText(file);
-}
+// Exportar/importar: backup único do app inteiro em ../backup.js.
 
 document.getElementById("themeBtn").onclick = toggleTheme;
 document.querySelectorAll(".tab").forEach(t=>{ t.onclick = ()=>{ state.tab = t.dataset.tab; state.expanded=null; if(state.tab==="study") buildQueue(); render(); }; });

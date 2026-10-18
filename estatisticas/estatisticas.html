@@ -100,6 +100,8 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
 .tabs{position:sticky;top:0;z-index:5;display:flex;gap:6px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);max-width:480px;margin:0 auto}
 .tab{flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--chip);color:var(--sub);font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background-color .15s ease,color .15s ease}
 .tab.on{background:var(--accent);color:#fff}
+.backup{display:flex;gap:8px}
+.backup .tab{padding:10px 6px}
 .foot{text-align:center;font-size:11px;color:var(--sub);line-height:1.5}
 </style>
 </head>
@@ -118,6 +120,7 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
 <script src="../verbos/data.js"></script>
 <script src="../adjetivos/data.js"></script>
 <script src="../historico.js"></script>
+<script src="../backup.js"></script>
 <script>
 // Volta para a tela de onde veio (verbos/adjetivos/início); aberto direto, vai ao início.
 document.getElementById("backBtn").onclick = (e)=>{
@@ -411,7 +414,9 @@ const TABS = {
     return modesBox() + reviewsBox() + hardBox()
       + (best ? `<section class="box"><h2>🎮 Jogo de Pares</h2><p class="muted" style="margin:0">Seu recorde: <b style="color:var(--text);font-size:16px">${best}</b> pares.</p></section>` : "");
   },
-  dicas: ()=> tipsBox(),
+  dicas: ()=> tipsBox() + `<section class="box"><h2>💾 Backup</h2>
+    <p class="muted" style="margin:0 0 10px">Tudo fica salvo só neste aparelho. Exporte de vez em quando: é <b>um arquivo só</b> com verbos, adjetivos, estatísticas e preferências. Para trocar de celular, importe ele no novo.</p>
+    <div class="backup">${Backup.buttonsHtml("tab")}</div></section>`,
 };
 let tab = "resumo";
 try{ const t = localStorage.getItem(TAB_KEY); if(TABS[t]) tab = t; }catch(e){}
