@@ -104,18 +104,19 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
 .slides .track{display:flex;align-items:flex-start;transition:transform .45s cubic-bezier(.16,1,.3,1)}
 .slides .slide{flex:0 0 100%;min-width:0}
 .slides .box{animation:none;box-shadow:none}
-.slide-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+.slide-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:-4px}
 .slide-btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:999px;padding:12px 18px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(107,71,234,.4);transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
 .slide-btn:active{transform:scale(.95)}
 .slide-btn .arr{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:rgba(255,255,255,.25);font-size:14px;line-height:1}
-.hope .slide-btn{background:#fff;color:#6b47ea;box-shadow:0 6px 18px rgba(40,10,90,.3)}
-.hope .slide-btn .arr{background:#6b47ea;color:#fff;animation:nudge 1.6s ease-in-out infinite}
+.slide-btn{background:linear-gradient(135deg,var(--verbos),var(--adjetivos));box-shadow:0 6px 18px rgba(107,71,234,.35)}
+.slide-btn:not(.back) .arr{animation:nudge 1.6s ease-in-out infinite}
+.slide-btn.back{background:var(--card);color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow)}
+.slide-btn.back .arr{background:var(--chip)}
 @keyframes nudge{0%,60%,100%{transform:translateX(0)}30%{transform:translateX(4px)}}
 .dots{display:flex;gap:6px}
 .dots i{width:7px;height:7px;border-radius:999px;background:var(--sub);opacity:.35;transition:width .3s ease,opacity .3s ease}
 .dots i.on{width:18px;opacity:1;background:var(--accent)}
-.hope .dots i{background:#fff}
-@media (prefers-reduced-motion: reduce){ .slides,.slides .track{transition:none} .hope .slide-btn .arr{animation:none} }
+@media (prefers-reduced-motion: reduce){ .slides,.slides .track{transition:none} .slide-btn .arr{animation:none !important} }
 .foot{text-align:center;font-size:11px;color:var(--sub);line-height:1.5}
 </style>
 </head>
@@ -234,7 +235,7 @@ function statusRow(label, sub, list, cls){
 }
 const LEGEND = `<div class="legend"><span><i></i>Aprendido</span><span><i class="p"></i>Praticando</span><span><i class="n"></i>Novo</span></div>`;
 
-function hopeBox(nav){
+function hopeBox(){
   const learned = count(WORDS, (w)=> w.st === "aprendido");
   const studying = count(WORDS, (w)=> w.st !== "novo");
   const n5 = WORDS.filter((w)=> w.nivel === "N5");
@@ -260,7 +261,7 @@ function hopeBox(nav){
     : `Estudando ${PLAN} palavras novas por dia e fazendo as revisões:`;
   return `<section class="box hope"><h2>🌱 Continue assim</h2><p>${head}</p>
     ${projs ? `<p style="margin-top:12px">${how}</p>${projs}` : ""}
-    ${!observed && studying ? `<p style="font-size:11px;opacity:.85">A previsão usa o seu ritmo real depois de uns 3 dias de uso com este histórico.</p>` : ""}${nav || ""}</section>`;
+    ${!observed && studying ? `<p style="font-size:11px;opacity:.85">A previsão usa o seu ritmo real depois de uns 3 dias de uso com este histórico.</p>` : ""}</section>`;
 }
 
 function weekBox(){
@@ -386,7 +387,7 @@ function hardBox(){
     </div><p class="muted">Erros somando Cards, Frases e Escrita. Elas voltam mais vezes nas revisões; vale ler a frase de exemplo no verso do card.</p></section>`;
 }
 
-function tipsBox(nav){
+function tipsBox(){
   const tips = [];
   const pending = count(WORDS, (w)=> w.e && w.e.due > 0 && w.e.due <= T);
   const st = streak(), studiedToday = dayTotals(T)[1] > 0;
@@ -415,7 +416,7 @@ function tipsBox(nav){
   if(hard) tips.push(`🧗 <b lang="ja">${esc(hard.w.kanji)}</b> (${esc(hard.w.meaning)}) é a palavra que mais te trava: tente criar uma frase sua com ela.`);
   if(tips.length < 3) tips.push("⏱️ 10 minutos todo dia valem mais que 1 hora num dia só: o SRS foi feito pra revisões curtas e frequentes.");
   if(tips.length < 3) tips.push("🔊 Leia as palavras em voz alta quando virar o card: falar ajuda a fixar a leitura em kana.");
-  return `<section class="box"><h2>💡 Dicas para melhorar</h2><ul class="tips">${tips.slice(0, 6).map((t)=> `<li>${t}</li>`).join("")}</ul>${nav || ""}</section>`;
+  return `<section class="box"><h2>Dicas para melhorar</h2><ul class="tips">${tips.slice(0, 6).map((t)=> `<li>${t}</li>`).join("")}</ul></section>`;
 }
 
 // Abas: Resumo (previsão, semana, atividade) · Domínio (JLPT, geral, grupos) ·
@@ -431,30 +432,43 @@ const TABS = {
   },
 };
 // Topo do Resumo: 2 slides no mesmo espaço, "Continue assim" → "Dicas para melhorar".
-const dots = (n)=> `<span class="dots" aria-hidden="true"><i${n === 0 ? ' class="on"' : ""}></i><i${n === 1 ? ' class="on"' : ""}></i></span>`;
 function slidesHtml(){
   return `<div class="slides" id="slides" aria-roledescription="carrossel"><div class="track">
-    <div class="slide">${hopeBox(`<div class="slide-nav">${dots(0)}<button type="button" class="slide-btn" data-go="1">💡 Dicas para melhorar <span class="arr" aria-hidden="true">→</span></button></div>`)}</div>
-    <div class="slide">${tipsBox(`<div class="slide-nav"><button type="button" class="slide-btn" data-go="0"><span class="arr" aria-hidden="true">←</span> Continue assim</button>${dots(1)}</div>`)}</div>
-  </div></div>`;
+    <div class="slide">${hopeBox()}</div>
+    <div class="slide">${tipsBox()}</div>
+  </div></div>
+  <div class="slide-nav" id="slideNav"><span class="dots" aria-hidden="true"><i class="on"></i><i></i></span>
+    <button type="button" class="slide-btn" id="slideBtn"></button></div>`;
 }
+const SLIDE_BTN = [
+  `Dicas para melhorar <span class="arr" aria-hidden="true">→</span>`,
+  `<span class="arr" aria-hidden="true">←</span> 🌱 Continue assim`,
+];
 function setupSlides(){
   const box = document.getElementById("slides"); if(!box) return;
   const track = box.querySelector(".track"), slides = [...box.querySelectorAll(".slide")];
+  const btn = document.getElementById("slideBtn"), dots = [...document.querySelectorAll("#slideNav .dots i")];
   let cur = 0;
+  // A altura segue o slide visível (e o texto dele, se a fonte terminar de carregar
+  // depois ou a tela girar), para nunca cortar o conteúdo.
   const fit = ()=>{ box.style.height = slides[cur].offsetHeight + "px"; };
   const go = (n)=>{
-    cur = Math.max(0, Math.min(slides.length - 1, n));
+    cur = (n + slides.length) % slides.length;
     track.style.transform = `translateX(${-cur * 100}%)`;
     slides.forEach((s, i)=>{ s.inert = i !== cur; s.setAttribute("aria-hidden", i !== cur); });
+    dots.forEach((d, i)=> d.classList.toggle("on", i === cur));
+    btn.innerHTML = SLIDE_BTN[cur];
+    btn.classList.toggle("back", cur === 1);
     fit();
   };
-  box.onclick = (e)=>{ const b = e.target.closest("[data-go]"); if(b) go(+b.dataset.go); };
+  btn.onclick = ()=> go(cur + 1);
+  if("ResizeObserver" in window) new ResizeObserver(fit).observe(track);
+  if(document.fonts) document.fonts.ready.then(fit);
+  addEventListener("resize", fit);
   // arrastar para o lado também troca
   let x0 = null;
   box.addEventListener("touchstart", (e)=>{ x0 = e.touches[0].clientX; }, {passive: true});
-  box.addEventListener("touchend", (e)=>{ if(x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if(Math.abs(dx) > 50) go(cur + (dx < 0 ? 1 : -1)); });
-  addEventListener("resize", fit);
+  box.addEventListener("touchend", (e)=>{ if(x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if(Math.abs(dx) > 50 && (dx < 0) === (cur === 0)) go(cur + 1); });
   go(0);
 }
 let tab = "resumo";
