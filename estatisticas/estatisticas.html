@@ -105,14 +105,17 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
 .slides .slide{flex:0 0 100%;min-width:0}
 .slides .box{animation:none;box-shadow:none}
 .slide-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
-.slide-btn{border:none;border-radius:999px;padding:9px 14px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+.slide-btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:999px;padding:12px 18px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(107,71,234,.4);transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
 .slide-btn:active{transform:scale(.95)}
-.hope .slide-btn{background:rgba(255,255,255,.22);color:#fff}
+.slide-btn .arr{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:rgba(255,255,255,.25);font-size:14px;line-height:1}
+.hope .slide-btn{background:#fff;color:#6b47ea;box-shadow:0 6px 18px rgba(40,10,90,.3)}
+.hope .slide-btn .arr{background:#6b47ea;color:#fff;animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{0%,60%,100%{transform:translateX(0)}30%{transform:translateX(4px)}}
 .dots{display:flex;gap:6px}
 .dots i{width:7px;height:7px;border-radius:999px;background:var(--sub);opacity:.35;transition:width .3s ease,opacity .3s ease}
 .dots i.on{width:18px;opacity:1;background:var(--accent)}
 .hope .dots i{background:#fff}
-@media (prefers-reduced-motion: reduce){ .slides,.slides .track{transition:none} }
+@media (prefers-reduced-motion: reduce){ .slides,.slides .track{transition:none} .hope .slide-btn .arr{animation:none} }
 .foot{text-align:center;font-size:11px;color:var(--sub);line-height:1.5}
 </style>
 </head>
@@ -431,8 +434,8 @@ const TABS = {
 const dots = (n)=> `<span class="dots" aria-hidden="true"><i${n === 0 ? ' class="on"' : ""}></i><i${n === 1 ? ' class="on"' : ""}></i></span>`;
 function slidesHtml(){
   return `<div class="slides" id="slides" aria-roledescription="carrossel"><div class="track">
-    <div class="slide">${hopeBox(`<div class="slide-nav">${dots(0)}<button type="button" class="slide-btn" data-go="1">Dicas para melhorar →</button></div>`)}</div>
-    <div class="slide">${tipsBox(`<div class="slide-nav"><button type="button" class="slide-btn" data-go="0">← Continue assim</button>${dots(1)}</div>`)}</div>
+    <div class="slide">${hopeBox(`<div class="slide-nav">${dots(0)}<button type="button" class="slide-btn" data-go="1">💡 Dicas para melhorar <span class="arr" aria-hidden="true">→</span></button></div>`)}</div>
+    <div class="slide">${tipsBox(`<div class="slide-nav"><button type="button" class="slide-btn" data-go="0"><span class="arr" aria-hidden="true">←</span> Continue assim</button>${dots(1)}</div>`)}</div>
   </div></div>`;
 }
 function setupSlides(){
