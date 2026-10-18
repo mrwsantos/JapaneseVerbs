@@ -575,6 +575,9 @@ const DECK_KEY = "jpverbs-deck";
 function loadDeck(){ try{ const d = JSON.parse(localStorage.getItem(DECK_KEY)); if(d && Array.isArray(d.deckIds) && Array.isArray(d.deckWrongIds)) return d; }catch(e){} return {deckIds:[], deckWrongIds:[]}; }
 function saveDeck(){ try{ localStorage.setItem(DECK_KEY, JSON.stringify({deckIds: state.deckIds, deckWrongIds: state.deckWrongIds})); }catch(e){} }
 
+// Embaralha (Fisher-Yates): a escolha das palavras segue a prioridade, mas a
+// ordem em que aparecem muda a cada rodada.
+function shuffled(arr){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function buildQueue(){
   const t = today();
   if(state.mode==="cards"){
@@ -595,7 +598,7 @@ function buildQueue(){
     const again = due.filter(v=> rt.ids.includes(v.id));
     const fresh = due.filter(v=> !rt.ids.includes(v.id))
       .sort((a,b)=> (getEntry(a.id).level - getEntry(b.id).level) || (getEntry(a.id).due - getEntry(b.id).due));
-    const reviews = again.concat(fresh.slice(0, reviewSlotsLeft()));
+    const reviews = shuffled(again.concat(fresh.slice(0, reviewSlotsLeft())));
     state.reviewsLeft = fresh.length - (reviews.length - again.length);
     state.newPaused = !state.forceNew && fresh.length > NEW_PAUSE_AT;
     state.reviewIds = reviews.map(w=>w.id);
@@ -612,8 +615,9 @@ function buildQueue(){
       state.queue = reviews.concat(savedPending.map(id=>VERBS[id]));
       if(stillWrong.length !== saved.deckWrongIds.length) saveDeck();
     } else {
-      const newsPool = pool.filter(isNew).sort((a,b)=> (a.freq||99) - (b.freq||99));
-      const news = state.newPaused ? [] : newsPool.slice(0, Math.min(NEW_DECK_SIZE, newSlotsLeft()));
+      // Mais comuns primeiro; entre as de mesma popularidade, sorteia.
+      const newsPool = shuffled(pool.filter(isNew)).sort((a,b)=> (a.freq||99) - (b.freq||99));
+      const news = state.newPaused ? [] : shuffled(newsPool.slice(0, Math.min(NEW_DECK_SIZE, newSlotsLeft())));
       state.queue = reviews.concat(news);
       state.deckIds = news.map(w=>w.id);
       state.deckWrongIds = [];
@@ -737,7 +741,7 @@ function deckPosition(){
 // Revisões erradas também formam uma rodada menor só com elas, logo depois
 // do passe de revisões e antes das novas, até zerar os erros.
 function continueReviews(){
-  const ids = state.reviewWrongIds;
+  const ids = shuffled(state.reviewWrongIds);
   state.reviewWrongIds = [];
   state.reviewIds = ids.slice();
   state.queue.splice(state.idx, 0, ...ids.map(id=>VERBS[id]));
@@ -748,7 +752,7 @@ function continueReviews(){
 // Depois de passar por todo o lote, um novo lote (menor) com só as palavras
 // erradas, até zerar os erros.
 function continueDeck(){
-  state.deckIds = state.deckWrongIds.slice();
+  state.deckIds = shuffled(state.deckWrongIds);
   state.deckWrongIds = [];
   state.queue = state.deckIds.map(id=>VERBS[id]);
   state.reviewEnd = 0;
