@@ -946,7 +946,7 @@ function sessionBar(c){
   return `<div class="session">
     <div class="session-top">
       <div class="progress" role="progressbar" aria-label="Progresso da rodada" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><div class="progress-bar" style="width:${pct}%"></div></div>
-      <button type="button" class="settings-btn" onclick="openSheet()" aria-label="Ajustes"><span>${settingsSummary()}</span><span aria-hidden="true">⚙️</span></button>
+      <button type="button" class="settings-btn" onclick="openSheet()" aria-label="Ajustes"><span>${settingsSummary()}</span></button>
     </div>
     <div class="session-sub">
       <div class="counts"><span><i class="dot new"></i><b>${c.novo}</b> novos</span><span><i class="dot learning"></i><b>${c.praticando}</b> praticando</span><span><i class="dot learned"></i><b>${c.aprendido}</b> aprendidos</span></div>
