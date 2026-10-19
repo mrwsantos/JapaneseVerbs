@@ -1022,7 +1022,7 @@ function flipCardHtml(front, back){
 function flipActionsHtml(noLabel, yesLabel){
   return `<div class="actions flip-actions ${state.revealed?'show':''}" id="flipActions"><button class="btn no" onclick="answerAnimated(false)">${noLabel}</button><button class="btn yes" onclick="answerAnimated(true)">${yesLabel}</button></div>`;
 }
-function jpFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div><div class="kana">${v.kana}</div>`; }
+function jpFaceHtml(v){ return `${cardTag(v)}<div class="kanji-row"><div class="kanji">${v.kanji}</div>${TTS.btnHtml(v.kanji)}</div><div class="kana">${v.kana}</div>`; }
 function ptFaceHtml(v){ return `${cardTag(v)}<div class="meaning-big">${v.meaning}</div><div class="face-sub">Como se diz em japonês?</div>`; }
 function answerFaceHtml(v){
   const conjOpen = state.answerConjFor===v.id;
