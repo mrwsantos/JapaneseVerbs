@@ -1091,7 +1091,7 @@ function setupCardGestures(){
     if(Math.abs(dx) > 8) moved = true;
     const shown = state.revealed ? dx : dx * 0.2; // sem resposta à vista, só "balança"
     wrap.style.transform = `translateX(${shown}px) rotate(${shown/22}deg)`;
-    wrap.dataset.swipe = state.revealed && dx > 50 ? 'right' : state.revealed && dx < -50 ? 'left' : '';
+    wrap.dataset.swipe = state.revealed && dx > 24 ? 'right' : state.revealed && dx < -24 ? 'left' : '';
   });
   const end = ()=>{
     if(!dragging) return;
