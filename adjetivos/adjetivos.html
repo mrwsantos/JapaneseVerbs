@@ -741,6 +741,7 @@ Frases.setup({
     if(!s.mid.startsWith(v.kanji) || !k.mid.startsWith(v.kana)) return null;
     return {ans: w.kanji + s.mid.slice(v.kanji.length), ansK: w.kana + k.mid.slice(v.kana.length)};
   },
+  conjugate: adjConjugate,
   kind: (w)=> w.type,
   studied: (w)=> { const e = progress[w.id]; return !!e && e.level >= 2; },
   altForms: altKanaForms,

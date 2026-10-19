@@ -89,8 +89,10 @@ const Frases = (()=>{
     const cands = shuffle(A.words.filter((w)=> w!==v && !senses(w).some((s)=> vs.includes(s))))
       .sort((a, b)=> score(b) - score(a));
     for(const w of cands){ if(opts.length>=4) break; add(A.blank(w, key, v, s)); }
-    q = {v, key, item, opts: shuffle(opts), chosen: -1, typed: "", done: false, ok: false};
+    q = {v, key, item, opts: shuffle(opts), chosen: -1, typed: "", done: false, ok: false, conjOpen: false};
   }
+
+  function toggleConj(){ if(!q) return; q.conjOpen = !q.conjOpen; A.render(); }
 
   function finish(ok){
     q.done = true; q.ok = ok;
@@ -134,7 +136,9 @@ const Frases = (()=>{
     if(!q || q.v!==v) makeQuestion(v);
     const kanji = A.showKanji(), it = q.item;
     const [pre, post, ans] = kanji ? [it.pre, it.post, it.ans] : [it.preK, it.postK, it.ansK];
-    const blank = q.done ? `<mark>${ans}</mark>` : `<span class="fq-blank" aria-label="lacuna">？</span>`;
+    const blank = !q.done ? `<span class="fq-blank" aria-label="lacuna">？</span>`
+      : !A.conjugate ? `<mark>${ans}</mark>`
+      : `<mark class="kanji-toggle" role="button" tabindex="0" aria-expanded="${!!q.conjOpen}" aria-controls="fqConj" onclick="event.stopPropagation(); Frases.toggleConj()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();Frases.toggleConj()}">${ans}</mark>`;
     // Aviso só quando a forma importa (frase conjugável).
     let h = q.key!=="fixed" ? `<div class="fq-note">⚠️ Atenção ao <b>tempo verbal</b> e à <b>formalidade</b>: veja as etiquetas e a tradução.</div>` : "";
     h += `<div class="card nohand fq-card">
@@ -144,6 +148,7 @@ const Frases = (()=>{
       <div class="fq-pt">${markHl(it.pt)}</div>
       <button type="button" class="fq-script" onclick="${A.toggleKanji}()" aria-pressed="${kanji}">${kanji ? "Ver em hiragana" : "Ver em kanji"}</button>
       ${q.done ? `<div class="fq-result"><span class="${q.ok?'result-ok':'result-no'}">${q.ok ? '✓ Certo!' : '✗ Não foi dessa vez'}</span></div>` : ""}
+      ${q.done && q.conjOpen && A.conjugate ? `<div class="conj" id="fqConj">${conjRowsHtml(A.conjugate(q.v))}</div>` : ""}
     </div>`;
     if(input==="opcoes"){
       h += `<div class="fq-opts">${q.opts.map((o, i)=>{
@@ -188,7 +193,7 @@ const Frases = (()=>{
   return {
     FORM, KEYS, PRESENT, FUTURE, ptVerb,
     setup(adapter){ A = adapter; },
-    html, bind, choose, check, next, reset, settingsHtml, summary, setInput, setForms,
+    html, bind, choose, check, next, reset, settingsHtml, summary, setInput, setForms, toggleConj,
     _q: ()=> q,
   };
 })();

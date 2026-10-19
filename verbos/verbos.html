@@ -733,6 +733,7 @@ Frases.setup({
     return {pre: s.f, post: "。", preK: s.k, postK: "。", ans: b.ans, ansK: b.ansK, pt};
   },
   blank: (w, key)=> verbBlank(w, key),
+  conjugate: conjugate,
   kind: (w)=> w.group,
   studied: (w)=> { const e = progress[w.id]; return !!e && e.level >= 2; },
   // Errou: a palavra volta no fim da rodada (com outra frase/forma sorteada).
