@@ -134,13 +134,15 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .newlimit select{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:3px 6px}
 .know-btn{display:block;margin:12px auto 0;padding:8px 14px;border-radius:20px;border:1px solid var(--border);color:var(--sub);font-size:13px;font-weight:600}
 .know-btn:hover{background:var(--chip);color:var(--text)}
-.list-item{display:block;width:100%;text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);font-size:14px;animation:fadeIn .3s ease both}
+.list-item{display:block;width:100%;text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);font-size:14px;animation:fadeIn .3s ease both;cursor:pointer}
 .group-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s cubic-bezier(.4,0,.2,1)}
 .group-body.collapsed{grid-template-rows:0fr}
 .group-body-inner{overflow:hidden;min-height:0}
 .list-item .row{display:flex;justify-content:space-between;align-items:center}
+.list-item .l-kanji-row{display:flex;align-items:center;gap:6px}
 .list-item .l-kanji{font-size:17px}
 .list-item .l-meaning{color:var(--sub);font-size:12px}
+.tts-btn-sm{width:22px;height:22px;font-size:11px}
 .badges{display:flex;gap:6px;align-items:center}
 .badge{font-size:11px;padding:2px 8px;border-radius:20px;white-space:nowrap}
 .badge.g1{background:#e4ecf7;color:#2a5599}
@@ -1313,11 +1315,14 @@ function renderListItem(v, idx){
   if(state.expanded===v.id){
     conjHtml = `<div class="conj">${conjRowsHtml(conjugate(v))}</div>`;
   }
-  return `<button type="button" class="list-item" style="animation-delay:${delay}ms" aria-expanded="${state.expanded===v.id}" onclick="toggleExpand(${v.id})">
-    <div class="row"><div><div class="l-kanji">${v.kanji} <span style="color:var(--sub);font-size:12px">${v.kana}</span></div><div class="l-meaning">${v.meaning}</div></div>
+  // Precisa ser <div role="button">, não <button>: o botão 🔊 fica dentro
+  // dela, e HTML não permite <button> aninhado em <button> (o navegador
+  // fecharia o de fora na hora e quebraria o layout da linha).
+  return `<div class="list-item" style="animation-delay:${delay}ms" role="button" tabindex="0" aria-expanded="${state.expanded===v.id}" onclick="toggleExpand(${v.id})" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('.tts-btn')){event.preventDefault();toggleExpand(${v.id})}">
+    <div class="row"><div><div class="l-kanji-row"><div class="l-kanji">${v.kanji} <span style="color:var(--sub);font-size:12px">${v.kana}</span></div>${TTS.btnHtml(v.kanji, 'tts-btn-sm')}</div><div class="l-meaning">${v.meaning}</div></div>
     <div class="badges"><span class="badge nivel-${v.nivel}">${v.nivel}</span><span class="badge g${v.group}">${GROUP_BADGE[v.group]}</span><span class="badge ${badge}">${label}</span></div></div>
     ${conjHtml}
-  </button>`;
+  </div>`;
 }
 
 function expandGroup(g){ state.groupExpanded[g] = true; render(); }
