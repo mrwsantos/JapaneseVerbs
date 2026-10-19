@@ -1063,7 +1063,7 @@ function setupCardGestures(){
   if(!card || !wrap) return;
   let sx = 0, dx = 0, dragging = false, moved = false;
   card.addEventListener('pointerdown', (e)=>{
-    if(e.button!==0 || animating || e.target.closest('.ex-toggle') || e.target.closest('.kanji-toggle')) return;
+    if(e.button!==0 || animating || e.target.closest('.ex-toggle') || e.target.closest('.kanji-toggle') || e.target.closest('.tts-btn')) return;
     sx = e.clientX; dx = 0; dragging = true; moved = false;
     card.setPointerCapture(e.pointerId); wrap.classList.add('dragging');
   });
