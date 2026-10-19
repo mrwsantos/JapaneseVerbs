@@ -53,7 +53,7 @@ const TTS = (()=>{
   // ligar onclick um por um. stopPropagation para não virar o card / escolher
   // uma alternativa quando o botão está dentro de outro elemento clicável.
   document.addEventListener("click", (e)=>{
-    const btn = e.target.closest(".tts-btn");
+    const btn = e.target.closest("[data-tts]");
     if(!btn) return;
     e.stopPropagation();
     speak(btn.dataset.tts);

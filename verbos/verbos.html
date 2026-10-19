@@ -169,6 +169,9 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .conj{width: 100%;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:13px}
 .conj-row{display:flex;justify-content:space-between;padding:4px 0}
 .conj-row .lbl{color:var(--sub)}
+.conj-speak{text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:3px;cursor:pointer}
+.conj-speak:hover{text-decoration-color:var(--sub)}
+.conj-speak:active{opacity:.7}
 .kanji-toggle{text-decoration:underline;text-underline-offset:7px;text-decoration-color:var(--accent);cursor:pointer}
 .kanji-toggle:hover{text-decoration-color:var(--accent)}
 .kanji-row{display:flex;align-items:center;justify-content:center;position:relative}
@@ -413,16 +416,19 @@ function conjugate(v){
 }
 
 
+function conjSpeakHtml(text){
+  return TTS.available() ? `<span class="conj-speak" data-tts="${escapeAttr(text)}">${text}</span>` : `<span>${text}</span>`;
+}
 function conjRowsHtml(c){
-  return `<div class="conj-row"><span class="lbl">Informal (dic.)</span><span>${c.dict}</span></div>
-    <div class="conj-row"><span class="lbl">Formal</span><span>${c.masu}</span></div>
-    <div class="conj-row"><span class="lbl">Forma Te</span><span>${c.te}</span></div>
-    <div class="conj-row"><span class="lbl">Negativo informal</span><span>${c.nai}</span></div>
-    <div class="conj-row"><span class="lbl">Negativo formal</span><span>${c.masen}</span></div>
-    <div class="conj-row"><span class="lbl">Passado informal</span><span>${c.ta}</span></div>
-    <div class="conj-row"><span class="lbl">Passado formal</span><span>${c.mashita}</span></div>
-    <div class="conj-row"><span class="lbl">Passado neg. informal</span><span>${c.nakatta}</span></div>
-    <div class="conj-row"><span class="lbl">Passado neg. formal</span><span>${c.masendeshita}</span></div>`;
+  return `<div class="conj-row"><span class="lbl">Informal (dic.)</span>${conjSpeakHtml(c.dict)}</div>
+    <div class="conj-row"><span class="lbl">Formal</span>${conjSpeakHtml(c.masu)}</div>
+    <div class="conj-row"><span class="lbl">Forma Te</span>${conjSpeakHtml(c.te)}</div>
+    <div class="conj-row"><span class="lbl">Negativo informal</span>${conjSpeakHtml(c.nai)}</div>
+    <div class="conj-row"><span class="lbl">Negativo formal</span>${conjSpeakHtml(c.masen)}</div>
+    <div class="conj-row"><span class="lbl">Passado informal</span>${conjSpeakHtml(c.ta)}</div>
+    <div class="conj-row"><span class="lbl">Passado formal</span>${conjSpeakHtml(c.mashita)}</div>
+    <div class="conj-row"><span class="lbl">Passado neg. informal</span>${conjSpeakHtml(c.nakatta)}</div>
+    <div class="conj-row"><span class="lbl">Passado neg. formal</span>${conjSpeakHtml(c.masendeshita)}</div>`;
 }
 
 function ptForm(v, past, neg){
