@@ -169,6 +169,11 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .conj-row .lbl{color:var(--sub)}
 .kanji-toggle{text-decoration:underline;text-underline-offset:7px;text-decoration-color:var(--accent);cursor:pointer}
 .kanji-toggle:hover{text-decoration-color:var(--accent)}
+.kanji-row{display:flex;align-items:center;justify-content:center;gap:8px}
+.tts-btn{flex:none;width:30px;height:30px;padding:0;border:none;border-radius:50%;background:var(--chip);color:var(--sub);font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.tts-btn:hover{background:var(--accent);color:#fff}
+.tts-btn:active{transform:scale(.92)}
+.fq-sentence-row{display:flex;align-items:center;justify-content:center;gap:8px}
 .reset{display:block;margin:20px auto 0;font-size:12px;color:var(--sub);background:none;border:none;text-decoration:underline;cursor:pointer}
 .session{margin:2px 0 14px}
 .session-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -300,6 +305,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
   <button type="button" class="mode" role="tab" aria-selected="false" data-mode="frases">💬 Frases</button>
 </div>
 <script src="../sons.js"></script>
+<script src="../tts.js"></script>
 <script src="../historico.js"></script>
 <script src="../backup.js"></script>
 <script src="../config.js"></script>
@@ -996,7 +1002,7 @@ function jpFaceHtml(v){ return `${cardTag(v)}<div class="kanji">${v.kanji}</div>
 function ptFaceHtml(v){ return `${cardTag(v)}<div class="meaning-big">${v.meaning}</div><div class="face-sub">Como se diz em japonês?</div>`; }
 function answerFaceHtml(v){
   const conjOpen = state.answerConjFor===v.id;
-  return `${cardTag(v)}<button type="button" class="kanji kanji-toggle" aria-expanded="${conjOpen}" aria-controls="answerConj" onclick="event.stopPropagation(); toggleAnswerConj(${v.id})">${v.kanji}</button><div class="kana">${v.kana}</div><div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>${conjOpen ? `<div class="conj" id="answerConj">${conjRowsHtml(conjugate(v))}</div>` : ''}${exampleHtml(v)}`;
+  return `${cardTag(v)}<div class="kanji-row"><button type="button" class="kanji kanji-toggle" aria-expanded="${conjOpen}" aria-controls="answerConj" onclick="event.stopPropagation(); toggleAnswerConj(${v.id})">${v.kanji}</button>${TTS.btnHtml(v.kanji)}</div><div class="kana">${v.kana}</div><div class="answer"><div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div></div>${conjOpen ? `<div class="conj" id="answerConj">${conjRowsHtml(conjugate(v))}</div>` : ''}${exampleHtml(v)}`;
 }
 
 // Exemplo do verso: a frase do modo Frases com o verbo em destaque. Em
@@ -1427,6 +1433,7 @@ if(window.visualViewport){
 
 buildQueue();
 render();
+TTS.onReady(render); // vozes carregam depois: refaz o render pro botão 🔊 aparecer
 
 if("serviceWorker" in navigator){
   window.addEventListener("load", ()=>{ navigator.serviceWorker.register("../sw.js").catch(()=>{}); });

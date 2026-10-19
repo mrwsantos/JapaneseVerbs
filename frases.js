@@ -139,7 +139,7 @@ const Frases = (()=>{
     let h = q.key!=="fixed" ? `<div class="fq-note">⚠️ Atenção ao <b>tempo verbal</b> e à <b>formalidade</b>: veja as etiquetas e a tradução.</div>` : "";
     h += `<div class="card nohand fq-card">
       ${tagsHtml(q.key)}
-      <div class="sentence fq-jp" lang="ja">${pre}${blank}${post}</div>
+      <div class="fq-sentence-row"><div class="sentence fq-jp" lang="ja">${pre}${blank}${post}</div>${q.done ? TTS.btnHtml(pre + ans + post) : ""}</div>
       ${q.done && kanji && (it.pre+it.ans+it.post)!==(it.preK+it.ansK+it.postK) ? `<div class="fq-kana" lang="ja">${it.preK}<mark>${it.ansK}</mark>${it.postK}</div>` : ""}
       <div class="fq-pt">${markHl(it.pt)}</div>
       <button type="button" class="fq-script" onclick="${A.toggleKanji}()" aria-pressed="${kanji}">${kanji ? "Ver em hiragana" : "Ver em kanji"}</button>

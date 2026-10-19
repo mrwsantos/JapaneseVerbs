@@ -71,6 +71,11 @@ Funciona como no Anki/Quizlet:
   a esquerda** = Praticar mais / Não lembrei. Os botões embaixo fazem o mesmo.
 - No teclado: **1** ou **←** = praticar, **2** ou **→** = sabia.
 - A barra no topo mostra o progresso da rodada e quantas palavras faltam.
+- **🔊 Pronúncia**: no verso do card, ao lado da palavra, toca a pronúncia
+  (voz do navegador, sem arquivo de áudio). No modo Frases aparece ao lado da
+  frase depois de responder, falando a frase inteira. Só aparece quando o
+  navegador tem alguma voz japonesa instalada — some sozinho se não tiver, em
+  vez de tentar falar e falhar. Lógica em `tts.js`.
 
 ## ⚙️ Ajustes
 
