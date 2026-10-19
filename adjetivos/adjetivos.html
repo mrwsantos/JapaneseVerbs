@@ -162,7 +162,8 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .conj-row .lbl{color:var(--sub)}
 .kanji-toggle{text-decoration:underline;text-underline-offset:7px;text-decoration-color:var(--accent);cursor:pointer}
 .kanji-toggle:hover{text-decoration-color:var(--accent)}
-.kanji-row{display:flex;align-items:center;justify-content:center;gap:8px}
+.kanji-row{display:flex;align-items:center;justify-content:center;position:relative}
+.kanji-row .tts-btn{position:absolute;left:100%;top:50%;margin-left:8px;transform:translateY(-50%)}
 .tts-btn{flex:none;width:30px;height:30px;padding:0;border:none;border-radius:50%;background:var(--chip);color:var(--sub);font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .tts-btn:hover{background:var(--accent);color:#fff}
 .tts-btn:active{transform:scale(.92)}
@@ -174,10 +175,10 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .counts b{color:var(--text);font-weight:700}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
 .dot.new{background:#8aa4f0}.dot.learning{background:#e8b04a}.dot.learned{background:#4fb57a}
-.settings-btn{display:flex;align-items:center;gap:6px;padding:6px 10px 6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12px;font-weight:600;color:var(--sub);max-width:62%;white-space:nowrap}
+.settings-btn{display:flex;align-items:center;gap:6px;padding:6px 10px 6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12px;font-weight:600;color:var(--sub);flex:0 0 auto;white-space:nowrap}
 .settings-btn span:first-child{overflow:hidden;text-overflow:ellipsis}
 .settings-btn:hover{color:var(--text)}
-.progress{flex:1;height:6px;border-radius:99px;background:var(--chip);overflow:hidden}
+.progress{flex:1;min-width:28px;height:6px;border-radius:99px;background:var(--chip);overflow:hidden}
 .progress-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .35s cubic-bezier(.16,1,.3,1)}
 .session-sub{font-size:11px;color:var(--sub);margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .deck-pos{font-weight:600;color:var(--accent);font-size:24px}
@@ -1051,8 +1052,9 @@ function exampleHtml(v){
   const ex = exampleOf(v);
   if(!ex) return '';
   const open = state.revealed && state.exampleFor===v.id;
+  const plainJp = ex.jp.replace(/[\[\]]/g, '');
   return `<button type="button" class="ex-toggle" id="exToggle" aria-expanded="${open}" aria-controls="example" onclick="toggleExample(${v.id})"><span class="label">${open ? 'Esconder frase' : 'Ver numa frase'}</span> <span class="chev" aria-hidden="true">▾</span></button>
-    <div class="example ${open?'open':''}" id="example"><div><div class="example-in"><div class="ex-jp" lang="ja">${markHl(ex.jp)}</div>${ex.kana ? `<div class="ex-kana" lang="ja">${markHl(ex.kana)}</div>` : ''}<div class="ex-pt">${markHl(ex.pt)}</div></div></div></div>`;
+    <div class="example ${open?'open':''}" id="example"><div><div class="example-in"><div class="fq-sentence-row"><div class="ex-jp" lang="ja">${markHl(ex.jp)}</div>${TTS.btnHtml(plainJp)}</div>${ex.kana ? `<div class="ex-kana" lang="ja">${markHl(ex.kana)}</div>` : ''}<div class="ex-pt">${markHl(ex.pt)}</div></div></div></div>`;
 }
 function answerAnimated(correct){
   const wrap = document.getElementById('flipWrap');
