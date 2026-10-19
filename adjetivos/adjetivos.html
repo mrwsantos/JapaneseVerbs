@@ -179,9 +179,9 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .counts b{color:var(--text);font-weight:700}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;vertical-align:1px}
 .dot.new{background:#8aa4f0}.dot.learning{background:#e8b04a}.dot.learned{background:#4fb57a}
-.settings-btn{display:flex;align-items:center;gap:6px;padding:6px 10px 6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12px;font-weight:600;color:var(--sub);flex:0 0 auto;min-width:150px;white-space:nowrap}
-.settings-btn span:first-child{overflow:hidden;text-overflow:ellipsis}
-.settings-btn:hover{color:var(--text)}
+.sess-settings-btn{display:flex;align-items:center;gap:6px;padding:6px 10px 6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:12px;font-weight:600;color:var(--sub);flex:0 0 auto;min-width:150px;white-space:nowrap}
+.sess-settings-btn span:first-child{overflow:hidden;text-overflow:ellipsis}
+.sess-settings-btn:hover{color:var(--text)}
 .progress{flex:1;min-width:28px;height:6px;border-radius:99px;background:var(--chip);overflow:hidden}
 .progress-bar{height:100%;background:var(--accent);border-radius:99px;transition:width .35s cubic-bezier(.16,1,.3,1)}
 .session-sub{font-size:11px;color:var(--sub);margin-top:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
@@ -960,7 +960,7 @@ function sessionBar(c){
   return `<div class="session">
     <div class="session-top">
       <div class="progress" role="progressbar" aria-label="Progresso da rodada" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><div class="progress-bar" style="width:${pct}%"></div></div>
-      <button type="button" class="settings-btn" onclick="openSheet()" aria-label="Ajustes"><span>${settingsSummary()}</span></button>
+      <button type="button" class="sess-settings-btn" onclick="openSheet()" aria-label="Ajustes"><span>${settingsSummary()}</span></button>
     </div>
     <div class="session-sub">
       <div class="counts"><span><i class="dot new"></i><b>${c.novo}</b> novos</span><span><i class="dot learning"></i><b>${c.praticando}</b> praticando</span><span><i class="dot learned"></i><b>${c.aprendido}</b> aprendidos</span></div>
