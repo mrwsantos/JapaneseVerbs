@@ -130,7 +130,10 @@ const BONUS_SECONDS = 2;
 const PAIRS = 5; // pares na tela (menos, se o vocabulário for pequeno)
 const BEST_KEY = "jp-game-best";
 const HARD_STREAK = 10; // acertos seguidos para entrar no modo HARD
-const HARD_BONUS_SECONDS = 4; // tempo extra ao entrar no modo HARD (além dos +2s do par)
+const HARD_BONUS_SECONDS = 5; // tempo extra ao entrar no modo HARD (além dos +2s do par)
+const MILESTONE_STREAK = 10; // a cada N acertos seguidos depois do HARD (20, 30, 40...)
+const MILESTONE_BONUS_SECONDS = 3; // bônus desses marcos extras
+const PREP_SECONDS = 3; // contagem "prepare-se" antes de (re)começar, tabuleiro fora da tela
 
 const THEME_KEY = "jp-theme";
 let themeMode = 'auto';
@@ -189,6 +192,27 @@ function drawWord(){
     game.deck = shuffle(game.skipped.concat(game.used)); game.skipped = []; game.used = [];
   }
   return game.pool.find(ok) || game.pool[0];
+}
+
+// "Prepare-se" de 3s antes de (re)começar: tabuleiro nem chega a ir pra tela,
+// então não dá pra espiar as palavras antes do relógio rodar de verdade.
+function prepareAndStart(){
+  let n = PREP_SECONDS, tickTac = false;
+  const show = ()=>{
+    document.getElementById('main').innerHTML = `
+      <div class="panel">
+        <div class="big-emoji">🎮</div>
+        <h2>Prepare-se…</h2>
+        <div class="score-big" style="animation:popIn .3s cubic-bezier(.34,1.56,.64,1)">${n}</div>
+      </div>`;
+  };
+  show();
+  const iv = setInterval(()=>{
+    n--;
+    if(n <= 0){ clearInterval(iv); startGame(); return; }
+    Sons.play('jogo', tickTac ? 'tac' : 'tic'); tickTac = !tickTac;
+    show();
+  }, 1000);
 }
 
 function startGame(){
@@ -280,6 +304,12 @@ function matched(li, ri, L, R){
     setHard(true); Sons.play('jogo', 'hard'); vibrate([40,30,80]);
     game.endAt += HARD_BONUS_SECONDS*1000; bonus += HARD_BONUS_SECONDS;
     showBanner(`Acertou ${HARD_STREAK}! 🔥`, `MODO HARD · +${HARD_BONUS_SECONDS}s`);
+  } else if(game.streak > HARD_STREAK && game.streak % MILESTONE_STREAK === 0){
+    // Depois do HARD, cada +10 na sequência ainda rende um bônus menor — senão
+    // a recompensa "achata" e só compensa entrar no HARD uma vez.
+    vibrate(30);
+    game.endAt += MILESTONE_BONUS_SECONDS*1000; bonus += MILESTONE_BONUS_SECONDS;
+    showBanner(`Acertou ${game.streak}! 🔥`, `+${MILESTONE_BONUS_SECONDS}s`, true);
   }
   updateStreak();
   const plus = document.createElement('span'); plus.className = 'bonus'; plus.textContent = `+${bonus}s`;
@@ -351,7 +381,7 @@ function endGame(){
       <p>${game.score===1 ? 'par certo' : 'pares certos'} · maior sequência <b>${game.bestStreak}</b></p>
       ${record ? `<span class="record">🏆 Novo recorde!</span>` : `<p>Recorde: <b>${best}</b></p>`}
       <div style="height:22px"></div>
-      <button type="button" class="cta" onclick="startGame()">Jogar de novo</button>
+      <button type="button" class="cta" onclick="prepareAndStart()">Jogar de novo</button>
       <button type="button" class="ghost" onclick="showStart()">Voltar</button>
     </div>`;
 }
@@ -373,10 +403,11 @@ function showStart(){
         <div class="rule"><b>⏱️</b><span>Você começa com <strong>${START_SECONDS} segundos</strong>.</span></div>
         <div class="rule"><b>✅</b><span>Cada par certo dá <strong>+${BONUS_SECONDS}s</strong> e traz palavras novas.</span></div>
         <div class="rule"><b>🔥</b><span><strong>${HARD_STREAK} acertos seguidos</strong> = modo HARD: ganha <strong>+${HARD_BONUS_SECONDS}s</strong> extras, some o kana e fica só o kanji. Errou, volta ao normal e a contagem recomeça.</span></div>
+        <div class="rule"><b>🚀</b><span>Depois disso, a cada <strong>${MILESTONE_STREAK}</strong> na sequência (20, 30...) ganha mais <strong>+${MILESTONE_BONUS_SECONDS}s</strong>.</span></div>
         <div class="rule"><b>📚</b><span>Só entram palavras que você já está <strong>praticando</strong> ou <strong>aprendeu</strong>.</span></div>
       </div>
       <p class="pool">Seu vocabulário: <b>${verbs}</b> verbos + <b>${adjs}</b> adjetivos${best ? ` · recorde <b>${best}</b>` : ''}</p>
-      <button type="button" class="cta" onclick="startGame()">Começar</button>
+      <button type="button" class="cta" onclick="prepareAndStart()">Começar</button>
     </div>`;
 }
 

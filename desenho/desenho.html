@@ -17,11 +17,12 @@
   --bg:#f8f7fb; --card:#ffffff; --text:#1c1a24; --sub:#6c6879;
   --accent:#6b47ea; --accent2:#ea6b47; --border:#e4e1ec; --chip:#efedf7;
   --ok:#2f8f57; --ok-bg:#d3ecdc; --no:#c0503f; --no-bg:#f5d6d2;
+  --gold:#9c7a1f; --gold-bg:#f6ecc9;
   --shadow:0 1px 2px rgba(30,20,60,.04), 0 8px 24px rgba(30,20,60,.06);
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#9a7bff; --accent2:#ff9472; --border:#37334a; --chip:#2a2736; --ok:#9fe0b8; --ok-bg:#20402c; --no:#f5b8ae; --no-bg:#4a2621; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); } }
-:root[data-theme="dark"]{ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#9a7bff; --accent2:#ff9472; --border:#37334a; --chip:#2a2736; --ok:#9fe0b8; --ok-bg:#20402c; --no:#f5b8ae; --no-bg:#4a2621; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#9a7bff; --accent2:#ff9472; --border:#37334a; --chip:#2a2736; --ok:#9fe0b8; --ok-bg:#20402c; --no:#f5b8ae; --no-bg:#4a2621; --gold:#e8c966; --gold-bg:#473c19; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); } }
+:root[data-theme="dark"]{ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --accent:#9a7bff; --accent2:#ff9472; --border:#37334a; --chip:#2a2736; --ok:#9fe0b8; --ok-bg:#20402c; --no:#f5b8ae; --no-bg:#4a2621; --gold:#e8c966; --gold-bg:#473c19; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 @font-face{font-family:"Roboto Mono";src:url('../fonts/RobotoMono-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
@@ -63,10 +64,10 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:12px 16px 24px;disp
 .card{background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:20px;padding:12px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;animation:fadeInUp .3s cubic-bezier(.16,1,.3,1)}
 .card.result{padding:22px 16px}
 .prompt-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
-.meaning-big{font-size:21px;font-weight:700}
+.meaning-big{font-size:24px;font-weight:400}
 .face-sub{font-size:12px;color:var(--sub)}
 .badge{font-size:11px;padding:2px 8px;border-radius:20px;white-space:nowrap;background:var(--chip);color:var(--sub)}
-.kanji{font-size:34px;font-weight:600}
+.kanji{font-size:34px;font-weight:400}
 .kana{font-size:16px;color:var(--sub)}
 .romaji{font-size:15px;color:var(--sub)}
 .answer{width:100%;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
@@ -78,6 +79,40 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:12px 16px 24px;disp
 .know-btn{display:block;margin:12px auto 0;padding:8px 14px;border-radius:20px;border:1px solid var(--border);color:var(--sub);font-size:13px;font-weight:600}
 .next-row{display:flex;margin-top:12px}
 .empty{text-align:center;color:var(--sub);padding:40px 10px}
+.tab-row{display:flex;gap:6px;margin-bottom:14px;background:var(--chip);border-radius:14px;padding:4px}
+.tab-btn{flex:1;padding:10px 0;border-radius:11px;font-size:14px;font-weight:600;color:var(--sub)}
+.tab-btn.active{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.mode-desc{color:var(--accent);font-size:13px;line-height:1.45;margin:0 2px 14px}
+.k-list{display:flex;flex-direction:column;gap:8px}
+.k-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow)}
+.k-row.mastered{border-color:var(--gold);background:var(--gold-bg)}
+.k-row-char{font-size:28px;flex:none;width:40px;text-align:center}
+.k-row-info{flex:1;min-width:0}
+.k-row-word{font-size:16px;color:var(--accent)}
+.k-row-kana{color:var(--sub);font-size:16px;font-weight:400}
+.k-row-meaning{font-size:13px;color:var(--text);margin-top:1px}
+.k-row-stat{font-size:12px;color:var(--sub);margin-top:2px}
+.k-row-stat .hits{color:var(--ok);font-weight:600}
+.k-row-stat .mastered-tag{color:var(--gold);font-weight:600}
+.k-row-btn{flex:none;padding:8px 14px;border-radius:10px;background:var(--chip);color:var(--text);font-size:13px;font-weight:600}
+.k-row.mastered .k-row-btn{background:var(--card)}
+.k-row-actions{display:flex;align-items:center;gap:6px;flex:none}
+.tts-btn{flex:none;width:30px;height:30px;padding:0;border:none;border-radius:50%;background:var(--chip);color:var(--sub);font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.tts-btn:hover{background:var(--accent);color:#fff}
+.tts-btn:active{transform:scale(.92)}
+.tts-btn-sm{width:28px;height:28px;font-size:12px}
+.k-row.mastered .tts-btn{background:var(--card)}
+.k-filters{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--chip);color:var(--sub);font-size:12px;cursor:pointer}
+.pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.k-controls{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.search-box{position:relative;flex:1;min-width:0}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px}
+.search-input{width:100%;padding:9px 10px 9px 29px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px}
+.search-input:focus{outline:none;border-color:var(--accent)}
+.k-sort-sel{flex:none;max-width:112px;padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:12px;font-family:inherit}
+.k-sort-dir{flex:none;width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--chip);color:var(--sub);font-size:16px}
+.k-back{color:var(--sub);font-size:12px;font-weight:600}
 </style>
 </head>
 <body>
@@ -87,9 +122,14 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:12px 16px 24px;disp
   <button type="button" class="sound-btn" id="soundBtn"></button>
   <button type="button" class="theme-btn" id="settingsBtn" aria-label="Configurações"></button>
 </header>
-<main id="main"></main>
+<main>
+  <div id="tabs"></div>
+  <p class="mode-desc" id="modeDesc"></p>
+  <div id="view"></div>
+</main>
 
 <script src="../sons.js"></script>
+<script src="../tts.js"></script>
 <script src="../backup.js"></script>
 <script src="../config.js"></script>
 <script src="../estudadas.js"></script>
@@ -100,6 +140,12 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:12px 16px 24px;disp
 // Treino de escrita à mão com as palavras em Praticando/Aprendido. Fica fora
 // dos apps de verbos e adjetivos de propósito: só LÊ o progresso e NUNCA o
 // altera. Bloqueado até existirem Estudadas.MIN palavras.
+//
+// Duas abas: Livre (escreve a palavra inteira, como sempre) e Kanji (treina
+// o traçado de cada kanji das palavras estudadas, com demonstração animada
+// antes do treino). As duas reaproveitam Desenho.mount; a Dica (💡, esmaece a
+// letra esperada no canvas) é parte do próprio Desenho.mount, então vale nas
+// duas abas sem código extra aqui.
 
 const THEME_KEY = "jp-theme";
 let themeMode = 'auto';
@@ -130,6 +176,39 @@ let drawCtl = null;
 
 function newRound(){ state.queue = shuffle(WORDS.slice()); state.idx = 0; state.checked = false; }
 
+// Abas: Livre (de sempre) | Kanji (nova). Lembra a última aberta, como jp-last-app/jp-theme.
+const TAB_KEY = "jp-desenho-tab";
+let tab = 'palavra';
+try{ tab = localStorage.getItem(TAB_KEY) || 'palavra'; }catch(e){}
+
+const MODE_DESC = {
+  palavra: 'Você escreve a palavra inteira como lembra dela — kanji, kana, tanto faz — e o app reconhece sozinho.',
+  kanji: 'Aprenda a desenhar o kanji de cada palavra que você vem estudando: veja a demonstração do traçado e pratique até sair automático.',
+};
+function renderShell(){
+  const tabsEl = document.getElementById('tabs'), descEl = document.getElementById('modeDesc');
+  if(WORDS.length < Estudadas.MIN){
+    tabsEl.innerHTML = ''; descEl.textContent = '';
+    document.getElementById('view').innerHTML = Estudadas.lockedHtml('✍️', 'Desenhar', WORDS.length);
+    return;
+  }
+  tabsEl.innerHTML = `<div class="tab-row">
+    <button type="button" class="tab-btn${tab==='palavra' ? ' active' : ''}" data-tab="palavra">Modo Livre</button>
+    <button type="button" class="tab-btn${tab==='kanji' ? ' active' : ''}" data-tab="kanji">Aprender Kanji</button>
+  </div>`;
+  descEl.textContent = MODE_DESC[tab];
+  tabsEl.onclick = (e)=>{
+    const b = e.target.closest('[data-tab]'); if(!b || b.dataset.tab === tab) return;
+    if(drawCtl){ drawCtl.destroy(); drawCtl = null; }
+    if(kDrawCtl){ kDrawCtl.destroy(); kDrawCtl = null; }
+    if(kDemoCtl){ kDemoCtl.destroy(); kDemoCtl = null; }
+    tab = b.dataset.tab;
+    try{ localStorage.setItem(TAB_KEY, tab); }catch(e){}
+    renderShell();
+  };
+  if(tab === 'kanji') renderKanji(); else render();
+}
+
 function headerHtml(){
   return `<div class="score-row"><span>Acertos: <b>${state.hits}</b> de <b>${state.total}</b>${state.streak>1 ? ` · 🔥 ${state.streak} seguidos` : ''}</span><span>${state.queue.length ? `${state.queue.length - state.idx} ${state.queue.length - state.idx === 1 ? 'palavra' : 'palavras'}` : ''}</span></div>`;
 }
@@ -147,12 +226,8 @@ function next(){ state.idx++; state.checked = false; if(state.idx >= state.queue
 
 function render(){
   if(drawCtl){ drawCtl.destroy(); drawCtl = null; }
-  const main = document.getElementById('main');
+  const main = document.getElementById('view');
   document.onkeydown = null;
-  if(WORDS.length < Estudadas.MIN){
-    main.innerHTML = Estudadas.lockedHtml('✍️', 'Desenhar', WORDS.length);
-    return;
-  }
   const v = state.queue[state.idx];
   if(!state.checked){
     main.innerHTML = headerHtml() + `
@@ -185,8 +260,275 @@ function render(){
   }
 }
 
+// ---------------------------------------------------------------------------
+// Aba Kanji: uma lista (como "Todos" em Verbos/Adjetivos) de cada kanji das
+// palavras estudadas, com tentativas/acertos já feitos, e um botão pra
+// praticar um kanji específico. A prática mostra uma demonstração animada
+// (traços na ordem certa, reaproveitando os padrões que o reconhecimento já
+// usa em lib/kanjicanvas/padroes.js — nenhum dado novo) e depois um treino
+// com Desenho.mount de um caractere só, até 5 acertos seguidos (ou um teto
+// de 10 tentativas, pra não travar num kanji difícil); nas 2 últimas
+// tentativas antes de bater a meta, some o kanji e sobra só a tradução —
+// força lembrar de cabeça, não só copiar a forma.
+const K_STREAK_GOAL = 5;
+const K_MAX_ATTEMPTS = 10;
+const K_MASTER_HITS = 20;   // kanji "dominado": pelo menos 20 acertos...
+const K_MASTER_RATIO = .85; // ...e pelo menos 85% de acerto (hits/tentativas)
+const K_STATS_KEY = "jp-desenho-kanji-stats-v1"; // {char: {attempts, hits, last}} — entra no backup (prefixo jp-)
+
+let kStats = {};
+try{ kStats = JSON.parse(localStorage.getItem(K_STATS_KEY)) || {}; }catch(e){}
+function saveKanjiStats(){ try{ localStorage.setItem(K_STATS_KEY, JSON.stringify(kStats)); }catch(e){} }
+function bumpKanjiStat(char, ok){
+  const s = kStats[char] || {attempts: 0, hits: 0};
+  s.attempts++; if(ok) s.hits++;
+  s.last = Date.now();
+  kStats[char] = s;
+  saveKanjiStats();
+}
+function kanjiMastered(char){
+  const s = kStats[char];
+  return !!s && s.hits >= K_MASTER_HITS && s.hits / s.attempts >= K_MASTER_RATIO;
+}
+
+let kList = null;            // [{char, freq, word, kana, meaning, words}], construída uma vez ao abrir a aba
+let kView = 'list';          // 'list' | 'practice'
+let kActive = null;          // entrada de kList em prática no momento
+let kPhase = 'demo', kAttempts = 0, kStreak = 0, kPeek = false;
+let kLastOk = false, kLastWritten = '', kDrawCtl = null, kDemoCtl = null;
+
+function buildKanjiList(){
+  const isKanji = (c)=> /\p{Script=Han}/u.test(c);
+  const byChar = new Map();
+  for(const w of WORDS){
+    for(const c of w.kanji){
+      if(!isKanji(c) || !Desenho.strokesFor(c)) continue;
+      if(!byChar.has(c)) byChar.set(c, {char: c, freq: w.freq, word: w.kanji, kana: w.kana, meaning: w.meaning, words: [w.meaning]});
+      else{
+        const e = byChar.get(c);
+        if(w.freq < e.freq){ e.freq = w.freq; e.word = w.kanji; e.kana = w.kana; e.meaning = w.meaning; }
+        if(!e.words.includes(w.meaning)) e.words.push(w.meaning);
+      }
+    }
+  }
+  return [...byChar.values()].sort((a, b)=> a.freq - b.freq);
+}
+function destroyKanjiMounts(){
+  if(kDrawCtl){ kDrawCtl.destroy(); kDrawCtl = null; }
+  if(kDemoCtl){ kDemoCtl.destroy(); kDemoCtl = null; }
+}
+function kDoneWithEntry(){ return kStreak >= K_STREAK_GOAL || kAttempts >= K_MAX_ATTEMPTS; }
+// Nas últimas 2 tentativas antes da meta, esconde o kanji (só tradução).
+function kHideChar(){ return kStreak >= K_STREAK_GOAL - 2 && kStreak < K_STREAK_GOAL; }
+
+function startKanjiPractice(char){
+  const entry = kList.find((e)=> e.char === char); if(!entry) return;
+  kActive = entry; kView = 'practice'; kPhase = 'demo'; kAttempts = 0; kStreak = 0; kPeek = false;
+  renderKanji();
+}
+function backToKanjiList(){
+  destroyKanjiMounts();
+  kView = 'list'; kActive = null;
+  renderKanji();
+}
+
+function demoCardHtml(entry, withPeekBack){
+  return `<div class="card" style="gap:10px">
+      <div class="kanji" style="font-size:54px">${entry.char}</div>
+      <div style="font-size:36px;font-weight:400;color:var(--accent)">${entry.word}</div>
+      ${withPeekBack ? '' : `<div class="face-sub">de: ${entry.words.slice(0, 3).join(', ')}</div>`}
+      <div class="dw-pad" id="demoPad"><canvas aria-label="Demonstração do traçado"></canvas></div>
+      <div class="dw-tools" style="margin-top:4px">
+        <button type="button" class="dw-tool" id="replayDemo" title="Ver de novo" aria-label="Ver a demonstração de novo">▶</button>
+        <button type="button" class="btn yes" id="demoGo">${withPeekBack ? '✍️ Voltar a desenhar' : '✍️ Praticar'}</button>
+      </div>
+    </div>`;
+}
+function mountDemo(entry){
+  if(kDemoCtl){ kDemoCtl.destroy(); kDemoCtl = null; }
+  const canvas = document.querySelector('#demoPad canvas');
+  if(canvas) kDemoCtl = Desenho.playDemo(canvas, entry.char);
+  document.getElementById('replayDemo').onclick = ()=> kDemoCtl && kDemoCtl.replay();
+}
+function practiceHeaderHtml(){
+  return `<div class="score-row"><button type="button" class="k-back" id="kBack">← Lista</button>
+    ${kPhase === 'drill' ? `<span>Tentativa ${kAttempts + 1}/${K_MAX_ATTEMPTS}${kStreak > 0 ? ` · 🔥 ${kStreak} seguidos` : ''}</span>` : ''}</div>`;
+}
+function attachHeaderBack(){ document.getElementById('kBack').onclick = backToKanjiList; }
+
+function renderKanji(){
+  destroyKanjiMounts();
+  const view = document.getElementById('view');
+  document.onkeydown = null;
+  if(!kList){
+    view.innerHTML = `<div class="empty">Carregando reconhecimento…</div>`;
+    Desenho.load('../').then(()=>{
+      if(tab !== 'kanji') return;
+      kList = buildKanjiList();
+      renderKanji();
+    }).catch(()=>{
+      view.innerHTML = `<div class="empty">Não consegui carregar o reconhecimento de escrita.<br>Confira a conexão e tente de novo.</div>`;
+    });
+    return;
+  }
+  if(!kList.length){
+    view.innerHTML = `<div class="empty">Nenhum kanji pra praticar ainda — as palavras que você estuda são só em kana, ou os kanji ainda não têm reconhecimento.</div>`;
+    return;
+  }
+  if(kView === 'list') return renderKanjiList(view);
+  if(kPhase === 'demo') return renderDemoPhase(view, false);
+  if(kPhase === 'drill' && kPeek) return renderDemoPhase(view, true);
+  if(kPhase === 'drill') return renderDrillPhase(view);
+  renderResultPhase(view);
+}
+
+function kanjiRowHtml(entry){
+  const s = kStats[entry.char];
+  const mastered = kanjiMastered(entry.char);
+  const statHtml = s && s.attempts
+    ? `<span class="hits">${s.hits} certa${s.hits === 1 ? '' : 's'}</span> de ${s.attempts} tentativa${s.attempts === 1 ? '' : 's'}`
+    : 'ainda não praticado';
+  return `<div class="k-row${mastered ? ' mastered' : ''}">
+    <div class="k-row-char">${entry.char}</div>
+    <div class="k-row-info">
+      <div class="k-row-word">${entry.word} <span class="k-row-kana"> · ${entry.kana}</span></div>
+      <div class="k-row-meaning">${entry.meaning}</div>
+      <div class="k-row-stat">${mastered ? '<span class="mastered-tag">🏆 Dominado</span> · ' : ''}${statHtml}</div>
+    </div>
+    <div class="k-row-actions">
+      ${TTS.btnHtml(entry.word, 'tts-btn-sm')}
+      <button type="button" class="k-row-btn" data-practice="${entry.char}">Praticar</button>
+    </div>
+  </div>`;
+}
+const K_FILTERS = [['todos', 'Todos'], ['praticando', 'Praticando'], ['dominados', 'Dominados']];
+// Cada critério devolve um número; ASC/DESC (kSortDir) inverte a comparação.
+const K_SORTS = {
+  freq: {label: 'Frequência', key: (e)=> e.freq},
+  last: {label: 'Último treino', key: (e)=> (kStats[e.char] && kStats[e.char].last) || 0},
+  ratio: {label: '% de acerto', key: (e)=> { const s = kStats[e.char]; return s && s.attempts ? s.hits / s.attempts : -1; }},
+  attempts: {label: 'Tentativas', key: (e)=> (kStats[e.char] && kStats[e.char].attempts) || 0},
+  hits: {label: 'Acertos', key: (e)=> (kStats[e.char] && kStats[e.char].hits) || 0},
+};
+let kFilter = 'todos', kSearch = '', kSortBy = 'freq', kSortDir = 'asc';
+function kanjiFilterPred(entry){
+  const s = kStats[entry.char];
+  if(kFilter === 'praticando') return !!s && s.attempts > 0 && !kanjiMastered(entry.char);
+  if(kFilter === 'dominados') return kanjiMastered(entry.char);
+  return true;
+}
+function escapeAttr(s){ return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
+function visibleKanjiList(){
+  const raw = kSearch.trim(), q = raw.toLowerCase();
+  let list = kList.filter(kanjiFilterPred);
+  if(raw) list = list.filter((e)=> e.char.includes(raw) || e.word.includes(raw) || e.kana.includes(raw) || e.meaning.toLowerCase().includes(q));
+  const key = K_SORTS[kSortBy].key, dir = kSortDir === 'asc' ? 1 : -1;
+  return [...list].sort((a, b)=> (key(a) - key(b)) * dir);
+}
+function renderKanjiList(view){
+  const filtered = visibleKanjiList();
+  // Ordenação (select + ↑/↓) comentada por enquanto — a lógica (K_SORTS,
+  // kSortBy/kSortDir, uso em visibleKanjiList) continua ativa, só a UI pra
+  // trocar sumiu; fica fixo em Frequência/ASC (igual antes de existir o
+  // controle). Pra reabilitar, volta o bloco comentado logo abaixo pro
+  // template e descomenta os dois onclick/onchange no fim da função.
+  view.innerHTML = `
+    <div class="k-controls">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="kSearchInput" placeholder="Buscar por kanji, kana ou significado" value="${escapeAttr(kSearch)}">
+      </div>
+      <!--
+      <select class="k-sort-sel" id="kSortSel" aria-label="Ordenar por">
+        ${Object.entries(K_SORTS).map(([id, s])=> `<option value="${id}"${kSortBy === id ? ' selected' : ''}>${s.label}</option>`).join('')}
+      </select>
+      <button type="button" class="k-sort-dir" id="kSortDir" title="${kSortDir === 'asc' ? 'Crescente' : 'Decrescente'}" aria-label="Inverter ordem">${kSortDir === 'asc' ? '↑' : '↓'}</button>
+      -->
+    </div>
+    <div class="k-filters">${K_FILTERS.map(([id, label])=>
+      `<button type="button" class="pill${kFilter === id ? ' active' : ''}" data-filter="${id}">${label}</button>`).join('')}</div>
+    <div class="k-list">${filtered.length ? filtered.map(kanjiRowHtml).join('') : '<div class="empty">Nenhum kanji encontrado.</div>'}</div>`;
+  view.querySelectorAll('[data-filter]').forEach((btn)=>{ btn.onclick = ()=>{ kFilter = btn.dataset.filter; renderKanjiList(view); }; });
+  view.querySelectorAll('[data-practice]').forEach((btn)=>{ btn.onclick = ()=> startKanjiPractice(btn.dataset.practice); });
+  const searchInp = document.getElementById('kSearchInput');
+  searchInp.oninput = function(){
+    const pos = this.selectionStart;
+    kSearch = this.value;
+    renderKanjiList(view);
+    const inp = document.getElementById('kSearchInput');
+    if(inp){ inp.focus(); try{ inp.setSelectionRange(pos, pos); }catch(e){} }
+  };
+  // document.getElementById('kSortSel').onchange = function(){ kSortBy = this.value; renderKanjiList(view); };
+  // document.getElementById('kSortDir').onclick = ()=>{ kSortDir = kSortDir === 'asc' ? 'desc' : 'asc'; renderKanjiList(view); };
+}
+
+function renderDemoPhase(view, isPeek){
+  view.innerHTML = practiceHeaderHtml() + demoCardHtml(kActive, isPeek);
+  attachHeaderBack();
+  mountDemo(kActive);
+  document.getElementById('demoGo').onclick = ()=>{
+    if(isPeek) kPeek = false; else { kPhase = 'drill'; kAttempts = 0; kStreak = 0; }
+    renderKanji();
+  };
+}
+function renderDrillPhase(view){
+  const hide = kHideChar();
+  view.innerHTML = practiceHeaderHtml() + `
+    <div class="card"><div class="prompt-row"><span class="${hide ? 'meaning-big' : 'kanji'}" style="${hide ? '' : 'font-size:54px'}">${hide ? kActive.words[0] : kActive.char}</span></div>
+      <div class="face-sub">${hide ? 'Lembre o kanji e desenhe' : 'Desenhe este kanji'}</div></div>
+    <div id="kanjiDraw"></div>
+    ${hide ? '' : `<div style="text-align:center;margin-top:8px">
+      <button type="button" class="dw-tool" id="peekBtn" title="Ver de novo" aria-label="Ver a demonstração de novo">👁</button>
+    </div>`}`;
+  attachHeaderBack();
+  kDrawCtl = Desenho.mount(document.getElementById('kanjiDraw'), {answers: [kActive.char], onDone: onKanjiDone});
+  const peekBtn = document.getElementById('peekBtn');
+  if(peekBtn) peekBtn.onclick = ()=>{
+    if(kDrawCtl){ kDrawCtl.destroy(); kDrawCtl = null; }
+    kPeek = true; renderKanji();
+  };
+}
+function renderResultPhase(view){
+  const willFinish = kDoneWithEntry();
+  view.innerHTML = practiceHeaderHtml() + `
+    <div class="card result">
+      <div class="kanji">${kActive.char}</div>
+      <div class="answer">
+        <div class="${kLastOk ? 'result-ok' : 'result-no'}">${kLastOk ? '✓ Certo!' : '✗ Não foi dessa vez'}</div>
+        ${kLastWritten ? `<div class="face-sub" style="margin-top:10px">você escreveu</div><div class="kana" style="font-size:24px;color:var(--text)">${kLastWritten}</div>` : ''}
+      </div>
+    </div>
+    ${!kLastOk && kLastWritten ? `<button type="button" class="know-btn" id="fixKanji">✓ Eu escrevi certo — o reconhecimento errou</button>` : ''}
+    <div class="next-row"><button type="button" class="btn next" id="nextAttempt">${willFinish ? '✓ Concluído — voltar à lista' : 'Continuar →'}</button></div>`;
+  attachHeaderBack();
+  document.getElementById('nextAttempt').onclick = ()=>{
+    finalizeKanjiAttempt();
+    if(kDoneWithEntry()) backToKanjiList(); else { kPhase = 'drill'; renderKanji(); }
+  };
+  const fixBtn = document.getElementById('fixKanji');
+  if(fixBtn) fixBtn.onclick = ()=>{
+    kLastOk = true; kStreak++;
+    Sons.play('desenho', 'acerto');
+    finalizeKanjiAttempt();
+    if(kDoneWithEntry()) backToKanjiList(); else { kPhase = 'drill'; renderKanji(); }
+  };
+}
+// Registra a tentativa (certa ou errada) nas estatísticas persistidas — uma vez só,
+// já com a correção do "eu escrevi certo" se for o caso (kLastOk já reflete isso).
+function finalizeKanjiAttempt(){ bumpKanjiStat(kActive.char, kLastOk); }
+
+function onKanjiDone(ok, written){
+  if(kDrawCtl){ kDrawCtl.destroy(); kDrawCtl = null; }
+  kAttempts++;
+  if(ok){ kStreak++; Sons.play('desenho', 'acerto'); } else { kStreak = 0; Sons.play('desenho', 'erro'); }
+  kLastOk = ok; kLastWritten = written;
+  kPhase = 'result';
+  renderKanji();
+}
+
 newRound();
-render();
+renderShell();
+TTS.onReady(renderShell); // vozes carregam depois: refaz o render pro botão 🔊 aparecer
 
 if("serviceWorker" in navigator){
   window.addEventListener("load", ()=>{ navigator.serviceWorker.register("../sw.js").catch(()=>{}); });

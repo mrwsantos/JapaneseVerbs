@@ -61,6 +61,20 @@ const Desenho = (()=>{
     return cands.length ? {char: cands[0], fits: false, cand: cands[0]} : null;
   }
 
+  // Letra esperada na próxima posição, sem depender do reconhecedor (usado pela Dica).
+  function expected(answers, written){
+    const pos = written.length;
+    for(const a of answers){ if(a.startsWith(written) && a.length > pos) return a[pos]; }
+    return null;
+  }
+
+  // Traços de referência de um caractere (ordem certa), ou null se não houver padrão.
+  function strokesFor(char){
+    if(!window.KanjiCanvas || !KanjiCanvas.refPatterns) return null;
+    const entry = KanjiCanvas.refPatterns.find((p)=> p[0] === char);
+    return entry ? entry[2] : null;
+  }
+
   let cssDone = false;
   function injectCss(){
     if(cssDone) return; cssDone = true;
@@ -82,8 +96,9 @@ const Desenho = (()=>{
 .dw-cand.best{border-color:var(--accent);background:var(--accent);color:#fff}
 .dw-tools{display:flex;gap:6px;margin-top:8px}
 .dw-tool{flex:none;width:44px;height:46px;border-radius:12px;border:1px solid var(--border);background:var(--card);font-size:17px;color:var(--sub)}
-.dw-tools .btn{flex:1;padding:0;height:46px;font-size:14px}
+.dw-tools .btn{flex:1;padding:5px 10px;height:46px;font-size:14px}
 .dw-tool:active{transform:scale(.96)}
+.dw-tool.on{border-color:var(--accent);color:var(--accent)}
 .dw-credit{text-align:center;font-size:10px;color:var(--sub);margin-top:12px}
 .dw-credit a{color:inherit}`;
     document.head.appendChild(st);
@@ -94,7 +109,7 @@ const Desenho = (()=>{
   function mount(el, {answers, onDone}){
     injectCss();
     answers = [...new Set(answers.filter(Boolean))];
-    let written = "", marks = [], strokes = [], current = null, cands = [], pick = null, timer = null;
+    let written = "", marks = [], strokes = [], current = null, cands = [], pick = null, timer = null, hintOn = false;
     el.innerHTML = `<div class="dw">
       <div class="dw-written" aria-live="polite"></div>
       <div class="dw-pad"><canvas aria-label="Área para desenhar a letra"></canvas><div class="dw-hint">Desenhe uma letra de cada vez</div></div>
@@ -103,6 +118,7 @@ const Desenho = (()=>{
         <button type="button" class="dw-tool" data-act="undo" title="Desfazer traço" aria-label="Desfazer traço">↶</button>
         <button type="button" class="dw-tool" data-act="clear" title="Limpar" aria-label="Limpar desenho">🗑</button>
         <button type="button" class="dw-tool" data-act="back" title="Apagar letra" aria-label="Apagar última letra">⌫</button>
+        <button type="button" class="dw-tool" data-act="hint" title="Mostrar dica" aria-label="Mostrar letra esperada esmaecida">💡</button>
         <button type="button" class="btn next" data-act="giveup">Não sei</button>
         <button type="button" class="btn yes" data-act="check">Conferir</button>
       </div>
@@ -122,6 +138,16 @@ const Desenho = (()=>{
     }
     function redraw(){
       g.clearRect(0, 0, size, size);
+      const hintChar = hintOn ? expected(answers, written) : null;
+      if(hintChar){
+        g.save();
+        g.globalAlpha = .22;
+        g.fillStyle = getComputedStyle(el).getPropertyValue("--text").trim() || "#222";
+        g.font = Math.round(size * .55) + "px sans-serif";
+        g.textAlign = "center"; g.textBaseline = "middle";
+        g.fillText(hintChar, size / 2, size / 2);
+        g.restore();
+      }
       g.lineCap = "round"; g.lineJoin = "round"; g.lineWidth = Math.max(5, size / 36);
       g.strokeStyle = getComputedStyle(el).getPropertyValue("--text").trim() || "#222";
       for(const s of strokes.concat(current ? [current] : [])){
@@ -130,7 +156,7 @@ const Desenho = (()=>{
         for(const [x, y] of s.slice(1)) g.lineTo(x, y);
         g.stroke();
       }
-      hint.style.display = strokes.length || current ? "none" : "";
+      hint.style.display = strokes.length || current || hintChar ? "none" : "";
     }
     function renderWritten(){
       writtenEl.innerHTML = [...written].map((c, i)=> `<span class="dw-char${marks[i] ? "" : " bad"}">${c}</span>`).join("") + `<span class="dw-caret"></span>`;
@@ -149,6 +175,8 @@ const Desenho = (()=>{
     }
     function accept(char, fits, finish = true){
       clearTimeout(timer);
+      hintOn = false;
+      el.querySelector('[data-act="hint"]')?.classList.remove("on");
       written += char; marks.push(fits);
       strokes = []; cands = []; pick = null;
       redraw(); renderWritten(); renderCands();
@@ -179,7 +207,9 @@ const Desenho = (()=>{
     canvas.addEventListener("pointercancel", end);
 
     el.querySelector(".dw-tools").addEventListener("click", (e)=>{
-      const act = e.target.closest("[data-act]")?.dataset.act;
+      const btn = e.target.closest("[data-act]");
+      const act = btn?.dataset.act;
+      if(act === "hint"){ hintOn = !hintOn; btn.classList.toggle("on", hintOn); redraw(); return; }
       clearTimeout(timer);
       if(act === "undo"){ strokes.pop(); redraw(); update(); }
       if(act === "clear"){ strokes = []; redraw(); update(); }
@@ -207,5 +237,100 @@ const Desenho = (()=>{
     return ctl;
   }
 
-  return {load, mount, recognize, choose};
+  // Anima o traçado de referência de um caractere (ordem certa) num canvas próprio.
+  // Usado pela aba Kanji como demonstração de "como se escreve". Retorna null se não
+  // houver padrão de reconhecimento pra esse caractere (ex.: 嬉 眩 綺 賑).
+  function playDemo(canvas, char){
+    const strokes = strokesFor(char);
+    if(!strokes) return null;
+    const g = canvas.getContext("2d");
+    // Encaixa no retângulo real dos traços (não é sempre 0–256: a あ do exemplo vai
+    // de -4.6 a 220, por ex.) com uma margem, pra nunca cortar nas bordas do canvas.
+    const PAD = .8;
+    const pts0 = strokes.flat();
+    const minX = Math.min(...pts0.map((p)=> p[0])), maxX = Math.max(...pts0.map((p)=> p[0]));
+    const minY = Math.min(...pts0.map((p)=> p[1])), maxY = Math.max(...pts0.map((p)=> p[1]));
+    const span = Math.max(maxX - minX, maxY - minY, 1);
+    let size = 0, scale = 0, offX = 0, offY = 0, raf = null, timer = null, cancelled = false;
+
+    function resize(){
+      size = canvas.parentElement.clientWidth;
+      scale = (size * PAD) / span;
+      offX = (size - (maxX - minX) * scale) / 2 - minX * scale;
+      offY = (size - (maxY - minY) * scale) / 2 - minY * scale;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(size * dpr); canvas.height = Math.round(size * dpr);
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    const toXY = ([x, y])=> [x * scale + offX, y * scale + offY];
+    const strokeColor = ()=> getComputedStyle(canvas).getPropertyValue("--text").trim() || "#222";
+    const numColor = ()=> getComputedStyle(canvas).getPropertyValue("--accent").trim() || "#6b47ea";
+    const bgColor = ()=> getComputedStyle(canvas).getPropertyValue("--card").trim() || "#fff";
+
+    // Número do traço afastado do início do traço (senão fica colado/sobre a tinta),
+    // com um fundo atrás pra ler mesmo em cima de traços já desenhados.
+    function drawNum(n, x, y){
+      const r = size * .034;
+      g.save();
+      g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2);
+      g.fillStyle = bgColor(); g.fill();
+      g.fillStyle = numColor();
+      g.textAlign = "center"; g.textBaseline = "middle";
+      g.fillText(String(n), x, y);
+      g.restore();
+    }
+    // Alterna o lado (esquerda/direita) por traço: dois traços que começam bem
+    // perto um do outro (comum em radicais) acabam com os números afastados
+    // em vez de empilhados um em cima do outro.
+    const numPos = ([x, y], i)=> [x + (i % 2 === 0 ? -1 : 1) * size * .05, y - size * .045];
+
+    // Desenha completos os traços [0, upTo) — base por cima da qual o traço atual anima.
+    function drawDone(upTo){
+      g.clearRect(0, 0, size, size);
+      g.lineCap = "round"; g.lineJoin = "round"; g.lineWidth = Math.max(5, size / 36);
+      g.strokeStyle = strokeColor();
+      g.font = Math.round(size * .045) + "px sans-serif";
+      for(let i = 0; i < upTo; i++){
+        const s = strokes[i].map(toXY);
+        g.beginPath(); g.moveTo(s[0][0], s[0][1]);
+        for(const [x, y] of s.slice(1)) g.lineTo(x, y);
+        g.stroke();
+        drawNum(i + 1, ...numPos(s[0], i));
+      }
+    }
+    function animateStroke(i, cb){
+      const pts = strokes[i].map(toXY);
+      const DUR = 420, start = performance.now();
+      (function frame(now){
+        if(cancelled) return;
+        const t = Math.min(1, (now - start) / DUR);
+        const upto = Math.max(1, Math.round(t * (pts.length - 1)) + 1);
+        drawDone(i);
+        g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
+        for(const [x, y] of pts.slice(1, upto)) g.lineTo(x, y);
+        g.stroke();
+        drawNum(i + 1, ...numPos(pts[0], i));
+        if(t < 1) raf = requestAnimationFrame(frame); else cb();
+      })(start);
+    }
+    function run(){
+      cancelled = false;
+      let i = 0;
+      (function step(){
+        if(cancelled) return;
+        if(i >= strokes.length){ drawDone(strokes.length); return; }
+        animateStroke(i, ()=>{ i++; timer = setTimeout(step, 430); });
+      })();
+    }
+    function onResize(){ resize(); drawDone(strokes.length); }
+    resize(); run();
+    window.addEventListener("resize", onResize);
+    return {
+      replay(){ cancelled = true; clearTimeout(timer); if(raf) cancelAnimationFrame(raf); run(); },
+      destroy(){ cancelled = true; clearTimeout(timer); if(raf) cancelAnimationFrame(raf); window.removeEventListener("resize", onResize); },
+    };
+  }
+
+  injectCss();
+  return {load, mount, recognize, choose, strokesFor, playDemo};
 })();

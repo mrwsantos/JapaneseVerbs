@@ -64,6 +64,10 @@ const Config = (()=>{
     pop.className = "cfg-pop"; pop.id = "cfgPop";
     pop.setAttribute("role", "dialog"); pop.setAttribute("aria-label", "Configurações");
     const hasBackup = typeof Backup !== "undefined";
+    // Só aparece em páginas que já carregaram os dados dos dois apps (hoje:
+    // Desenhar e Jogo) — Estudadas.words() precisa de VERBS_RAW e ADJ_RAW.
+    const hasWordList = typeof Estudadas !== "undefined" && typeof Estudadas.exportList === "function"
+      && typeof VERBS_RAW !== "undefined" && typeof ADJ_RAW !== "undefined";
     pop.innerHTML = `<div class="cfg-row"><h3>Tema</h3>
       <div class="cfg-pill" role="radiogroup" aria-label="Tema">
         <span class="cfg-thumb" aria-hidden="true"></span>
@@ -73,7 +77,9 @@ const Config = (()=>{
       ${hasBackup ? `<h3>Progresso</h3>
       <button type="button" class="cfg-btn" id="cfgExport"><span class="cfg-i">⬇</span><span>Baixar progresso<small>um arquivo com tudo do app</small></span></button>
       <button type="button" class="cfg-btn" id="cfgImport"><span class="cfg-i">⬆</span><span>Importar progresso<small>substitui o progresso deste aparelho</small></span></button>
-      <input type="file" id="cfgFile" accept="application/json,.json" style="display:none">` : ""}`;
+      <input type="file" id="cfgFile" accept="application/json,.json" style="display:none">` : ""}
+      ${hasWordList ? `<h3>Exportar</h3>
+      <button type="button" class="cfg-btn" id="cfgWordList"><span class="cfg-i">📝</span><span>Baixar lista de palavras<small>kanji, kana e significado — pra colar numa IA</small></span></button>` : ""}`;
     document.body.appendChild(pop);
 
     const sync = ()=>{
@@ -89,6 +95,7 @@ const Config = (()=>{
       pop.querySelector("#cfgImport").onclick = ()=> file.click();
       file.onchange = ()=>{ const f = file.files[0]; file.value = ""; close(); Backup.importFile(f); };
     }
+    if(hasWordList) pop.querySelector("#cfgWordList").onclick = ()=>{ close(); Estudadas.exportList(); };
 
     const place = ()=>{
       const r = btn.getBoundingClientRect();

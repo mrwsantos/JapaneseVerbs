@@ -159,13 +159,13 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
       <p>Treino extra com as palavras em Praticando ou Aprendido. Aparece a frase <b>em português</b> já conjugada (ex.: "não comeu", "não era grande") e você escreve em japonês: o romaji <b>vira hiragana enquanto você digita</b> (também vale kana ou kanji). São <b>decks de 10</b>: errou, a palavra volta no fim do deck até acertar, e no fim de cada deck aparece a <b>estatística dos erros</b> com uma sugestão do que treinar. Acertou: sobe um nível. Errou: desce um, mas nunca abaixo de Praticando.</p>
 
       <h3>✍️ Desenhar</h3>
-      <p>Página própria (botão na tela inicial). Aparece o português e você <b>desenha a palavra em japonês</b> com o dedo, uma letra por vez (kanji ou kana). O app reconhece cada letra e completa sozinho; se ele errar, toque em <b>Eu escrevi certo</b>. Usa as palavras que você está praticando ou já aprendeu e <b>não mexe no seu progresso</b> dos Cards. Funciona offline.</p>
+      <p>Página própria (botão na tela inicial), com 2 abas. Em <b>Livre</b>, aparece o português e você <b>desenha a palavra em japonês</b> com o dedo, uma letra por vez (kanji ou kana); o app reconhece cada letra e completa sozinho, e o botão <b>💡 Dica</b> esmaece a letra esperada no canvas só quando você pede. Em <b>Kanji</b>, uma lista (como o Todos de Verbos/Adjetivos, com filtro Todos/Praticando/Dominados e botão 🔊 de pronúncia) mostra cada kanji das palavras estudadas com suas tentativas/acertos — 20 acertos e 85% de aproveitamento deixam o kanji <b>Dominado</b> (destacado em dourado); o botão <b>Praticar</b> abre uma demonstração animada do traçado e depois o treino, até <b>5 acertos seguidos</b> — nas 2 últimas tentativas o kanji some e só fica a tradução, pra testar se você lembra de cabeça. Se o reconhecimento errar, toque em <b>Eu escrevi certo</b>. Usa as palavras que você está praticando ou já aprendeu e <b>não mexe no seu progresso</b> dos Cards. Funciona offline.</p>
 
       <h3>💬 Frases (verbos e adjetivos)</h3>
       <p>A frase de exemplo aparece com uma <b>lacuna</b> e a tradução embaixo; complete com a palavra <b>já conjugada</b> (formal/informal, passado, negativo — as etiquetas dizem qual). Começa em hiragana (o botão <b>Ver em kanji</b> troca), são 3 frases por palavra, e você escolhe entre 4 alternativas ou, nos Ajustes, digite. Nos verbos, são necessários <b>2 acertos</b> em Frases para ficar Aprendido.</p>
 
       <h3>🎮 Jogo de Pares</h3>
-      <p>Português de um lado, japonês do outro. Começa com <b>10 segundos</b> e cada par certo dá <b>+2s</b> e traz palavras novas. Usa só os verbos e adjetivos que você está praticando ou já aprendeu, e não mexe no seu progresso. Tem som de acerto, erro e tic-tac nos últimos 3 segundos (🔊/🔇 no topo). Com <b>10 acertos seguidos</b> entra o <b>🔥 modo HARD</b> e você ganha <b>+4s</b> extras: some o kana e fica só o kanji; errou, volta ao normal.</p>
+      <p><b>Começar</b>/<b>Jogar de novo</b> mostra 3s de "Prepare-se…" antes do tabuleiro aparecer (pra não dar de espiar as palavras antes do relógio rodar). Português de um lado, japonês do outro. Começa com <b>10 segundos</b> e cada par certo dá <b>+2s</b> e traz palavras novas. Usa só os verbos e adjetivos que você está praticando ou já aprendeu, e não mexe no seu progresso. Tem som de acerto, erro e tic-tac nos últimos 3 segundos (🔊/🔇 no topo). Com <b>10 acertos seguidos</b> entra o <b>🔥 modo HARD</b> e você ganha <b>+5s</b> extras: some o kana e fica só o kanji; errou, volta ao normal. Depois disso, a cada <b>+10</b> na sequência ganha mais <b>+3s</b>.</p>
 
       <h3>🔒 Jogo e Desenhar</h3>
       <p>Liberam quando você tiver pelo menos <b>3 palavras</b> em Praticando ou Aprendido (verbos e adjetivos somados).</p>
@@ -179,6 +179,8 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:48px 16px 32px;disp
   </details>
 </main>
 <script src="estudadas.js"></script>
+<script src="verbos/data.js"></script>
+<script src="adjetivos/data.js"></script>
 <script src="backup.js"></script>
 <script src="config.js"></script>
 <script>

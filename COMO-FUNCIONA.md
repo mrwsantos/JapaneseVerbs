@@ -35,9 +35,16 @@ icons/, fonts/
   **Baixar progresso** (na engrenagem ⚙️) para ter uma cópia. É **um arquivo só**
   (`backup.js`) com todas as chaves do app (`jp-*`, `jpverbs-*`, `jpadj-*`):
   progresso de verbos e adjetivos, histórico das estatísticas, estatística da
-  Escrita, decks em andamento, recorde do jogo e preferências.
+  Escrita e da aba Kanji do Desenhar, decks em andamento, recorde do jogo e
+  preferências.
   **Importar progresso** substitui tudo e recarrega o app; também
   aceita os backups antigos de um modo só (só troca o progresso daquele modo).
+- **Baixar lista de palavras** (mesma engrenagem ⚙️, só aparece em páginas que
+  já carregam os dois `data.js`, hoje tela inicial e Desenhar): baixa um JSON
+  solto com `word`/`kana`/`romaji`/`meaning`/`nivel`/`status`
+  (**Praticando**/**Aprendido**) de cada palavra que você estuda — pensado pra
+  colar num prompt de IA (ex.: pedir frases de exemplo), não pra restaurar
+  progresso (`Estudadas.exportList()` em `estudadas.js`).
 
 ## Níveis e intervalos
 
@@ -200,15 +207,22 @@ inicial os botões mostram 🔒 e quantas faltam (ex.: 1/3). A regra fica em
 
 Página própria (botão na tela inicial), separada dos apps de verbos e
 adjetivos: usa as palavras (verbos e adjetivos) que você já está **praticando**
-ou **aprendeu**, em ordem aleatória, e **não mexe no progresso** do SRS. O placar
-(acertos e sequência) vale só para a sessão.
+ou **aprendeu**, e **não mexe no progresso** do SRS. O placar (acertos e
+sequência) vale só para a sessão. Tem 2 abas (lembra a última aberta):
 
-- Aparece o significado em português e você **desenha a palavra em japonês,
-  uma letra por vez**, na área quadriculada. Vale kanji (話す) ou só kana (はなす).
+### Aba Livre
+
+Em ordem aleatória, aparece o significado em português e você **desenha a
+palavra em japonês, uma letra por vez**, na área quadriculada. Vale kanji
+(話す) ou só kana (はなす).
+
 - A cada traço o app mostra as letras mais parecidas. Quando reconhece a letra
   esperada e você para de desenhar, ela **entra sozinha**; também dá para tocar
   numa das sugestões.
-- ↶ desfaz o último traço, 🗑 limpa o desenho, ⌫ apaga a última letra.
+- ↶ desfaz o último traço, 🗑 limpa o desenho, ⌫ apaga a última letra, 💡
+  **Dica** esmaece a letra esperada no canvas pra traçar por cima — só aparece
+  se você pedir, e precisa pedir de novo a cada letra nova (não fica ligada
+  sozinha, pra não virar cópia).
 - Completou a palavra certa → acerto automático. **Conferir** encerra com o que
   foi escrito; **Não sei** mostra a resposta.
 - Se o reconhecimento errar, toque em **✓ Eu escrevi certo** (conta como acerto
@@ -218,6 +232,43 @@ ou **aprendeu**, em ordem aleatória, e **não mexe no progresso** do SRS. O pla
 - Kanji sem padrão de reconhecimento (嬉 眩 綺 賑): escreva essas palavras em kana.
 - Ao adicionar palavras com kanji novos, rode `tools/gerar-padroes.mjs` (instruções
   no próprio arquivo).
+
+### Aba Kanji
+
+Lista de cada kanji que aparece nas palavras estudadas (ordenada pelo `freq`
+mais comum primeiro; kanji sem padrão de reconhecimento ficam de fora),
+parecida com a lista **Todos** de Verbos/Adjetivos: cada linha mostra o
+kanji, a palavra inteira de onde ele vem (com kana e tradução), um botão
+**🔊** pra ouvir a pronúncia (mesma lógica de `tts.js`: só aparece com voz
+japonesa instalada) e quantas tentativas/acertos você já teve nele (ou "ainda
+não praticado"). Busca (kanji, kana ou significado) e filtro
+**Todos / Praticando / Dominados** no topo da lista (ordenação por
+frequência/último treino/% de acerto/tentativas/acertos existe no código,
+comentada por enquanto — `renderKanjiList` em `desenho/desenho.html`).
+Botão **Praticar** abre o treino daquele kanji específico; **← Lista** volta
+sem perder o que já foi treinado.
+
+- **Dominado** (fica destacado em dourado 🏆 na lista): pelo menos **20
+  acertos** nesse kanji **e** pelo menos **85% de aproveitamento**
+  (acertos/tentativas). Some do filtro Praticando e entra só no Dominados.
+- **Praticando** (pro filtro): já tem pelo menos 1 tentativa, mas ainda não
+  bateu os critérios de Dominado.
+
+No treino:
+
+- Uma **demonstração animada** mostra os traços na ordem certa, numerados
+  (reaproveita os mesmos padrões do reconhecimento em
+  `lib/kanjicanvas/padroes.js` — nenhum dado novo). **▶ Ver de novo** repete.
+- **✍️ Praticar** começa a escrita: desenha o mesmo kanji repetidas vezes (a
+  mesma área da aba Livre, com a Dica 💡 também disponível) até **5 acertos
+  seguidos**, com um teto de **10 tentativas** pra não travar num kanji
+  difícil. **👁** reabre a demonstração sem perder a tentativa.
+- Nas **2 últimas tentativas antes da meta**, o kanji some do prompt e só
+  fica a tradução em português — força lembrar a forma de cabeça em vez de
+  só copiar o que está na tela (e some o 👁 junto, pra não entregar a
+  resposta).
+- Cada tentativa (certa ou errada) fica salva — é o número que aparece na
+  lista depois. Volta pra lista sozinho ao bater a meta.
 
 ## Modo Frases (verbos e adjetivos)
 
@@ -257,6 +308,10 @@ a tradução em português embaixo (com a parte que muda destacada).
 Página própria (botão na tela inicial). Português de um lado, japonês do
 outro, 5 pares por vez:
 
+- **Começar** ou **Jogar de novo** primeiro mostra 3 segundos de "Prepare-se…"
+  (contagem 3-2-1, com tic-tac) — o tabuleiro nem vai pra tela nesse tempo,
+  pra não dar pra espiar as palavras antes do relógio começar a rodar de
+  verdade.
 - Começa com **10 segundos**; cada par certo dá **+2s** e as casas usadas
   recebem palavras novas.
 - Só entram verbos e adjetivos que você já está **praticando** ou **aprendeu**
@@ -265,8 +320,12 @@ outro, 5 pares por vez:
   juntas, para o par nunca ficar ambíguo.
 - Errar não tira tempo, mas o relógio continua correndo. O recorde fica salvo.
 - **🔥 Modo HARD**: com **10 acertos seguidos** aparece "Acertou 10!", você ganha
-  **+4s** extras (além dos +2s do par), a tela fica vermelha/escura e o kana some (fica só o kanji). Errou, volta ao normal e a
-  contagem recomeça. O contador 🔥 x/10 fica embaixo dos pontos.
+  **+5s** extras (além dos +2s do par), a tela fica vermelha/escura e o kana
+  some (fica só o kanji). Errou, volta ao normal e a contagem recomeça. O
+  contador 🔥 x/10 fica embaixo dos pontos.
+- **🚀 Bônus de sequência**: depois do HARD, a cada **+10** na sequência (20,
+  30, 40...) ainda rende **+3s** extras — mantém valendo a pena continuar
+  acertando em vez de parar depois do HARD.
 - Sons de acerto, erro, fim e recorde, e tic-tac nos últimos 3 segundos
   (cada vez mais rápido). O botão 🔊/🔇 no topo liga e desliga.
 - O jogo não mexe no seu progresso do SRS.
