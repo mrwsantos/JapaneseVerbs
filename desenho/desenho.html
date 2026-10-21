@@ -511,7 +511,7 @@ function renderDrillPhase(view){
       <div class="face-sub">${hide ? 'Lembre o kanji e desenhe' : 'Desenhe este kanji'}</div></div>
     <div id="kanjiDraw"></div>`;
   attachHeaderBack();
-  kDrawCtl = Desenho.mount(document.getElementById('kanjiDraw'), {answers: [kActive.char], onDone: onKanjiDone, demoChar: hide ? null : kActive.char});
+  kDrawCtl = Desenho.mount(document.getElementById('kanjiDraw'), {answers: [kActive.char], onDone: onKanjiDone, hideCands: true, demoChar: hide ? null : kActive.char});
 }
 function renderResultPhase(view){
   const willFinish = kDoneWithEntry();
