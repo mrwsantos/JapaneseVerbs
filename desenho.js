@@ -111,7 +111,7 @@ const Desenho = (()=>{
   // onDone(acertou, escrito) é chamado quando completa uma resposta ou ao conferir.
   // hideCands: esconde a fileira de candidatos reconhecidos (reconhecimento e o
   // resto da interação continuam normais, só o atalho de tocar num candidato some).
-  // demoChar: se vier, mostra um botão 👁 fixo no canto do próprio canvas que
+  // demoChar: se vier, mostra um botão ▶ fixo no canto do próprio canvas que
   // toca a demonstração do traçado (playDemo) ali mesmo, por cima do desenho
   // atual, e depois volta pro que a pessoa já tinha desenhado.
   function mount(el, {answers, onDone, hideCands = false, demoChar = null}){
@@ -123,7 +123,7 @@ const Desenho = (()=>{
       <div class="dw-pad">
         <canvas aria-label="Área para desenhar a letra"></canvas>
         <div class="dw-hint">Desenhe uma letra de cada vez</div>
-        ${demoChar ? '<button type="button" class="dw-peek" data-act="peek" title="Ver como se desenha" aria-label="Ver como se desenha">👁</button>' : ''}
+        ${demoChar ? '<button type="button" class="dw-peek" data-act="peek" title="Ver como se desenha" aria-label="Ver como se desenha">▶</button>' : ''}
       </div>
       <div class="dw-cands"${hideCands ? ' style="display:none"' : ''}></div>
       <div class="dw-tools">
@@ -240,7 +240,7 @@ const Desenho = (()=>{
       accept(ch.char, ch.fits);
     });
 
-    // Botão 👁 dentro do canvas: toca a demonstração ali mesmo (por cima do
+    // Botão ▶ dentro do canvas: toca a demonstração ali mesmo (por cima do
     // que já foi desenhado) e, ao terminar, restaura o desenho atual.
     const peekBtn = el.querySelector(".dw-peek");
     let peekCtl = null, peekRestoreTimer = null;
@@ -298,7 +298,7 @@ const Desenho = (()=>{
   }
 
   // Anima o traçado de referência de um caractere (ordem certa) num canvas próprio.
-  // Usado pela aba Kanji como demonstração de "como se escreve" (e pelo botão 👁
+  // Usado pela aba Kanji como demonstração de "como se escreve" (e pelo botão ▶
   // dentro do próprio canvas de desenho — ver mount()). onDone(opcional) é chamado
   // toda vez que a animação chega ao fim (não quando é cancelada por destroy()).
   // Retorna null se não houver padrão de reconhecimento pra esse caractere (ex.: 嬉 眩 綺 賑).

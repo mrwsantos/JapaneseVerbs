@@ -262,10 +262,11 @@ No treino:
 - **✍️ Praticar** começa a escrita: desenha o mesmo kanji repetidas vezes (a
   mesma área da aba Livre, com a Dica 💡 também disponível) até **5 acertos
   seguidos**, com um teto de **10 tentativas** pra não travar num kanji
-  difícil. **👁** reabre a demonstração sem perder a tentativa.
+  difícil. **▶** (no canto do próprio canvas) reabre a demonstração sem
+  perder a tentativa.
 - Nas **2 últimas tentativas antes da meta**, o kanji some do prompt e só
   fica a tradução em português — força lembrar a forma de cabeça em vez de
-  só copiar o que está na tela (e some o 👁 junto, pra não entregar a
+  só copiar o que está na tela (e some o ▶ junto, pra não entregar a
   resposta).
 - Cada tentativa (certa ou errada) fica salva — é o número que aparece na
   lista depois. Volta pra lista sozinho ao bater a meta.
