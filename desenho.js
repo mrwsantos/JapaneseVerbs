@@ -99,6 +99,9 @@ const Desenho = (()=>{
 .dw-tools .btn{flex:1;padding:5px 10px;height:46px;font-size:14px}
 .dw-tool:active{transform:scale(.96)}
 .dw-tool.on{border-color:var(--accent);color:var(--accent)}
+.dw-peek{position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--sub);display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:var(--shadow);z-index:2}
+.dw-peek:active{transform:scale(.92)}
+.dw-peek:disabled{opacity:.5}
 .dw-credit{text-align:center;font-size:10px;color:var(--sub);margin-top:12px}
 .dw-credit a{color:inherit}`;
     document.head.appendChild(st);
@@ -106,17 +109,31 @@ const Desenho = (()=>{
 
   // Monta a área de desenho. answers: respostas aceitas (ex.: ["食べる","たべる"]).
   // onDone(acertou, escrito) é chamado quando completa uma resposta ou ao conferir.
-  function mount(el, {answers, onDone}){
+  // hideCands: esconde a fileira de candidatos reconhecidos (reconhecimento e o
+  // resto da interação continuam normais, só o atalho de tocar num candidato some).
+  // demoChar: se vier, mostra um botão 👁 fixo no canto do próprio canvas que
+  // toca a demonstração do traçado (playDemo) ali mesmo, por cima do desenho
+  // atual, e depois volta pro que a pessoa já tinha desenhado.
+  function mount(el, {answers, onDone, hideCands = false, demoChar = null}){
     injectCss();
     answers = [...new Set(answers.filter(Boolean))];
     let written = "", marks = [], strokes = [], current = null, cands = [], pick = null, timer = null, hintOn = false;
     el.innerHTML = `<div class="dw">
       <div class="dw-written" aria-live="polite"></div>
-      <div class="dw-pad"><canvas aria-label="Área para desenhar a letra"></canvas><div class="dw-hint">Desenhe uma letra de cada vez</div></div>
-      <div class="dw-cands"></div>
+      <div class="dw-pad">
+        <canvas aria-label="Área para desenhar a letra"></canvas>
+        <div class="dw-hint">Desenhe uma letra de cada vez</div>
+        ${demoChar ? '<button type="button" class="dw-peek" data-act="peek" title="Ver como se desenha" aria-label="Ver como se desenha">👁</button>' : ''}
+      </div>
+      <div class="dw-cands"${hideCands ? ' style="display:none"' : ''}></div>
       <div class="dw-tools">
         <button type="button" class="dw-tool" data-act="undo" title="Desfazer traço" aria-label="Desfazer traço">↶</button>
+        <!-- Botão "Limpar" (apaga todos os traços da letra atual) comentado por
+        enquanto, em todo o app — a lógica (data-act="clear" no listener de
+        .dw-tools, logo abaixo) continua ativa, só o botão sumiu da UI; pra
+        reabilitar, volta a linha abaixo pro template.
         <button type="button" class="dw-tool" data-act="clear" title="Limpar" aria-label="Limpar desenho">🗑</button>
+        -->
         <button type="button" class="dw-tool" data-act="back" title="Apagar letra" aria-label="Apagar última letra">⌫</button>
         <button type="button" class="dw-tool" data-act="hint" title="Mostrar dica" aria-label="Mostrar letra esperada esmaecida">💡</button>
         <button type="button" class="btn next" data-act="giveup">Não sei</button>
@@ -223,6 +240,26 @@ const Desenho = (()=>{
       accept(ch.char, ch.fits);
     });
 
+    // Botão 👁 dentro do canvas: toca a demonstração ali mesmo (por cima do
+    // que já foi desenhado) e, ao terminar, restaura o desenho atual.
+    const peekBtn = el.querySelector(".dw-peek");
+    let peekCtl = null, peekRestoreTimer = null;
+    if(peekBtn) peekBtn.addEventListener("click", ()=>{
+      if(peekCtl) return;
+      clearTimeout(timer);
+      canvas.style.pointerEvents = "none";
+      peekBtn.disabled = true;
+      hint.style.display = "none";
+      peekCtl = playDemo(canvas, demoChar, {onDone(){
+        peekRestoreTimer = setTimeout(()=>{
+          if(peekCtl){ peekCtl.destroy(); peekCtl = null; }
+          canvas.style.pointerEvents = "";
+          peekBtn.disabled = false;
+          resize();
+        }, 550);
+      }});
+    });
+
     resize(); renderWritten();
     window.addEventListener("resize", resize);
     const ctl = {
@@ -231,16 +268,41 @@ const Desenho = (()=>{
       // Botão "Conferir": encerra com o que já foi escrito.
       check(){ clearTimeout(timer); if(pick && strokes.length) accept(pick.char, pick.fits, false); onDone(answers.includes(written), written); },
       get written(){ return written; },
-      destroy(){ clearTimeout(timer); window.removeEventListener("resize", resize); },
+      destroy(){
+        clearTimeout(timer); clearTimeout(peekRestoreTimer);
+        if(peekCtl) peekCtl.destroy();
+        window.removeEventListener("resize", resize);
+      },
       _test: {recognize: (s)=> recognize(s, size), choose: (c)=> choose(c, answers, written), accept},
     };
     return ctl;
   }
 
+  // Traça pts como curva suave (quadrática pelos pontos médios) em vez de segmentos
+  // retos — os padrões de traço têm poucos pontos, e ligá-los reto deixa a letra
+  // com cara de quebrada/torta. Com 1-2 pontos não há o que suavizar.
+  function strokePath(g, pts){
+    g.beginPath();
+    g.moveTo(pts[0][0], pts[0][1]);
+    if(pts.length < 3){
+      for(const [x, y] of pts.slice(1)) g.lineTo(x, y);
+    } else {
+      for(let i = 1; i < pts.length - 1; i++){
+        const mx = (pts[i][0] + pts[i + 1][0]) / 2, my = (pts[i][1] + pts[i + 1][1]) / 2;
+        g.quadraticCurveTo(pts[i][0], pts[i][1], mx, my);
+      }
+      const last = pts[pts.length - 1];
+      g.lineTo(last[0], last[1]);
+    }
+    g.stroke();
+  }
+
   // Anima o traçado de referência de um caractere (ordem certa) num canvas próprio.
-  // Usado pela aba Kanji como demonstração de "como se escreve". Retorna null se não
-  // houver padrão de reconhecimento pra esse caractere (ex.: 嬉 眩 綺 賑).
-  function playDemo(canvas, char){
+  // Usado pela aba Kanji como demonstração de "como se escreve" (e pelo botão 👁
+  // dentro do próprio canvas de desenho — ver mount()). onDone(opcional) é chamado
+  // toda vez que a animação chega ao fim (não quando é cancelada por destroy()).
+  // Retorna null se não houver padrão de reconhecimento pra esse caractere (ex.: 嬉 眩 綺 賑).
+  function playDemo(canvas, char, {onDone} = {}){
     const strokes = strokesFor(char);
     if(!strokes) return null;
     const g = canvas.getContext("2d");
@@ -292,9 +354,7 @@ const Desenho = (()=>{
       g.font = Math.round(size * .045) + "px sans-serif";
       for(let i = 0; i < upTo; i++){
         const s = strokes[i].map(toXY);
-        g.beginPath(); g.moveTo(s[0][0], s[0][1]);
-        for(const [x, y] of s.slice(1)) g.lineTo(x, y);
-        g.stroke();
+        strokePath(g, s);
         drawNum(i + 1, ...numPos(s[0], i));
       }
     }
@@ -306,9 +366,7 @@ const Desenho = (()=>{
         const t = Math.min(1, (now - start) / DUR);
         const upto = Math.max(1, Math.round(t * (pts.length - 1)) + 1);
         drawDone(i);
-        g.beginPath(); g.moveTo(pts[0][0], pts[0][1]);
-        for(const [x, y] of pts.slice(1, upto)) g.lineTo(x, y);
-        g.stroke();
+        strokePath(g, pts.slice(0, upto));
         drawNum(i + 1, ...numPos(pts[0], i));
         if(t < 1) raf = requestAnimationFrame(frame); else cb();
       })(start);
@@ -318,7 +376,7 @@ const Desenho = (()=>{
       let i = 0;
       (function step(){
         if(cancelled) return;
-        if(i >= strokes.length){ drawDone(strokes.length); return; }
+        if(i >= strokes.length){ drawDone(strokes.length); if(onDone) onDone(); return; }
         animateStroke(i, ()=>{ i++; timer = setTimeout(step, 430); });
       })();
     }

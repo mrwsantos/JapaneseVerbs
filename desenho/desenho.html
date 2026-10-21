@@ -88,7 +88,7 @@ main{flex:1;width:100%;max-width:480px;margin:0 auto;padding:12px 16px 24px;disp
 .k-row.mastered{border-color:var(--gold);background:var(--gold-bg)}
 .k-row-char{font-size:28px;flex:none;width:40px;text-align:center}
 .k-row-info{flex:1;min-width:0}
-.k-row-word{font-size:16px;color:var(--accent)}
+.k-row-word{font-size:16px}
 .k-row-kana{color:var(--sub);font-size:16px;font-weight:400}
 .k-row-meaning{font-size:13px;color:var(--text);margin-top:1px}
 .k-row-stat{font-size:12px;color:var(--sub);margin-top:2px}
@@ -183,7 +183,7 @@ try{ tab = localStorage.getItem(TAB_KEY) || 'palavra'; }catch(e){}
 
 const MODE_DESC = {
   palavra: 'Você escreve a palavra inteira como lembra dela — kanji, kana, tanto faz — e o app reconhece sozinho.',
-  kanji: 'Aprenda a desenhar o kanji de cada palavra que você vem estudando: veja a demonstração do traçado e pratique até sair automático.',
+  kanji: 'Aprenda a desenhar o kanji de cada palavra que você vem estudando: veja a demonstração do traçado e pratique até sair automático. Em Cards, percorra todos sem escolher; na Lista, escolha um de cada vez.',
 };
 function renderShell(){
   const tabsEl = document.getElementById('tabs'), descEl = document.getElementById('modeDesc');
@@ -294,8 +294,15 @@ function kanjiMastered(char){
 let kList = null;            // [{char, freq, word, kana, meaning, words}], construída uma vez ao abrir a aba
 let kView = 'list';          // 'list' | 'practice'
 let kActive = null;          // entrada de kList em prática no momento
-let kPhase = 'demo', kAttempts = 0, kStreak = 0, kPeek = false;
+let kPhase = 'demo', kAttempts = 0, kStreak = 0;
 let kLastOk = false, kLastWritten = '', kDrawCtl = null, kDemoCtl = null;
+
+// Sub-abas dentro de "Aprender Kanji": Cards (nova, treino de traçado sem
+// deck, percorrendo todos os kanji) e Lista (fluxo de sempre: lista + treino
+// de traçado escolhendo o kanji).
+const K_TAB_KEY = "jp-desenho-kanji-subtab";
+let kTab = 'cards';
+try{ kTab = localStorage.getItem(K_TAB_KEY) || 'cards'; }catch(e){}
 
 function buildKanjiList(){
   const isKanji = (c)=> /\p{Script=Han}/u.test(c);
@@ -323,7 +330,7 @@ function kHideChar(){ return kStreak >= K_STREAK_GOAL - 2 && kStreak < K_STREAK_
 
 function startKanjiPractice(char){
   const entry = kList.find((e)=> e.char === char); if(!entry) return;
-  kActive = entry; kView = 'practice'; kPhase = 'demo'; kAttempts = 0; kStreak = 0; kPeek = false;
+  kActive = entry; kView = 'practice'; kPhase = 'demo'; kAttempts = 0; kStreak = 0;
   renderKanji();
 }
 function backToKanjiList(){
@@ -332,15 +339,20 @@ function backToKanjiList(){
   renderKanji();
 }
 
-function demoCardHtml(entry, withPeekBack){
+// Destaca, dentro da palavra, só o kanji que está sendo aprendido — o resto da
+// palavra fica na cor normal do texto (antes a palavra inteira ficava accent).
+function highlightCharHtml(word, char){
+  return [...word].map((c)=> c === char ? `<span style="color:var(--accent)">${c}</span>` : c).join('');
+}
+function demoCardHtml(entry){
   return `<div class="card" style="gap:10px">
       <div class="kanji" style="font-size:54px">${entry.char}</div>
-      <div style="font-size:36px;font-weight:400;color:var(--accent)">${entry.word}</div>
-      ${withPeekBack ? '' : `<div class="face-sub">de: ${entry.words.slice(0, 3).join(', ')}</div>`}
+      <div style="font-size:36px;font-weight:400">${highlightCharHtml(entry.word, entry.char)}</div>
+      <div class="face-sub">de: ${entry.words.slice(0, 3).join(', ')}</div>
       <div class="dw-pad" id="demoPad"><canvas aria-label="Demonstração do traçado"></canvas></div>
       <div class="dw-tools" style="margin-top:4px">
         <button type="button" class="dw-tool" id="replayDemo" title="Ver de novo" aria-label="Ver a demonstração de novo">▶</button>
-        <button type="button" class="btn yes" id="demoGo">${withPeekBack ? '✍️ Voltar a desenhar' : '✍️ Praticar'}</button>
+        <button type="button" class="btn yes" id="demoGo">✍️ Praticar</button>
       </div>
     </div>`;
 }
@@ -355,6 +367,24 @@ function practiceHeaderHtml(){
     ${kPhase === 'drill' ? `<span>Tentativa ${kAttempts + 1}/${K_MAX_ATTEMPTS}${kStreak > 0 ? ` · 🔥 ${kStreak} seguidos` : ''}</span>` : ''}</div>`;
 }
 function attachHeaderBack(){ document.getElementById('kBack').onclick = backToKanjiList; }
+
+function kSubTabsHtml(){
+  return `<div class="tab-row k-subtabs">
+    <button type="button" class="tab-btn${kTab==='cards' ? ' active' : ''}" data-ktab="cards">Cards</button>
+    <button type="button" class="tab-btn${kTab==='lista' ? ' active' : ''}" data-ktab="lista">Lista</button>
+  </div>`;
+}
+function attachKSubTabs(){
+  document.querySelectorAll('[data-ktab]').forEach((btn)=>{
+    btn.onclick = ()=>{
+      const t = btn.dataset.ktab; if(t === kTab) return;
+      destroyKanjiMounts();
+      kTab = t;
+      try{ localStorage.setItem(K_TAB_KEY, kTab); }catch(e){}
+      renderKanji();
+    };
+  });
+}
 
 function renderKanji(){
   destroyKanjiMounts();
@@ -375,11 +405,14 @@ function renderKanji(){
     view.innerHTML = `<div class="empty">Nenhum kanji pra praticar ainda — as palavras que você estuda são só em kana, ou os kanji ainda não têm reconhecimento.</div>`;
     return;
   }
-  if(kView === 'list') return renderKanjiList(view);
-  if(kPhase === 'demo') return renderDemoPhase(view, false);
-  if(kPhase === 'drill' && kPeek) return renderDemoPhase(view, true);
-  if(kPhase === 'drill') return renderDrillPhase(view);
-  renderResultPhase(view);
+  view.innerHTML = kSubTabsHtml() + '<div id="kBody"></div>';
+  attachKSubTabs();
+  const body = document.getElementById('kBody');
+  if(kTab === 'cards') return renderKanjiCardsView(body);
+  if(kView === 'list') return renderKanjiList(body);
+  if(kPhase === 'demo') return renderDemoPhase(body);
+  if(kPhase === 'drill') return renderDrillPhase(body);
+  renderResultPhase(body);
 }
 
 function kanjiRowHtml(entry){
@@ -391,7 +424,7 @@ function kanjiRowHtml(entry){
   return `<div class="k-row${mastered ? ' mastered' : ''}">
     <div class="k-row-char">${entry.char}</div>
     <div class="k-row-info">
-      <div class="k-row-word">${entry.word} <span class="k-row-kana"> · ${entry.kana}</span></div>
+      <div class="k-row-word">${highlightCharHtml(entry.word, entry.char)} <span class="k-row-kana"> · ${entry.kana}</span></div>
       <div class="k-row-meaning">${entry.meaning}</div>
       <div class="k-row-stat">${mastered ? '<span class="mastered-tag">🏆 Dominado</span> · ' : ''}${statHtml}</div>
     </div>
@@ -462,12 +495,12 @@ function renderKanjiList(view){
   // document.getElementById('kSortDir').onclick = ()=>{ kSortDir = kSortDir === 'asc' ? 'desc' : 'asc'; renderKanjiList(view); };
 }
 
-function renderDemoPhase(view, isPeek){
-  view.innerHTML = practiceHeaderHtml() + demoCardHtml(kActive, isPeek);
+function renderDemoPhase(view){
+  view.innerHTML = practiceHeaderHtml() + demoCardHtml(kActive);
   attachHeaderBack();
   mountDemo(kActive);
   document.getElementById('demoGo').onclick = ()=>{
-    if(isPeek) kPeek = false; else { kPhase = 'drill'; kAttempts = 0; kStreak = 0; }
+    kPhase = 'drill'; kAttempts = 0; kStreak = 0;
     renderKanji();
   };
 }
@@ -476,17 +509,9 @@ function renderDrillPhase(view){
   view.innerHTML = practiceHeaderHtml() + `
     <div class="card"><div class="prompt-row"><span class="${hide ? 'meaning-big' : 'kanji'}" style="${hide ? '' : 'font-size:54px'}">${hide ? kActive.words[0] : kActive.char}</span></div>
       <div class="face-sub">${hide ? 'Lembre o kanji e desenhe' : 'Desenhe este kanji'}</div></div>
-    <div id="kanjiDraw"></div>
-    ${hide ? '' : `<div style="text-align:center;margin-top:8px">
-      <button type="button" class="dw-tool" id="peekBtn" title="Ver de novo" aria-label="Ver a demonstração de novo">👁</button>
-    </div>`}`;
+    <div id="kanjiDraw"></div>`;
   attachHeaderBack();
-  kDrawCtl = Desenho.mount(document.getElementById('kanjiDraw'), {answers: [kActive.char], onDone: onKanjiDone});
-  const peekBtn = document.getElementById('peekBtn');
-  if(peekBtn) peekBtn.onclick = ()=>{
-    if(kDrawCtl){ kDrawCtl.destroy(); kDrawCtl = null; }
-    kPeek = true; renderKanji();
-  };
+  kDrawCtl = Desenho.mount(document.getElementById('kanjiDraw'), {answers: [kActive.char], onDone: onKanjiDone, demoChar: hide ? null : kActive.char});
 }
 function renderResultPhase(view){
   const willFinish = kDoneWithEntry();
@@ -524,6 +549,117 @@ function onKanjiDone(ok, written){
   kLastOk = ok; kLastWritten = written;
   kPhase = 'result';
   renderKanji();
+}
+
+// ---------------------------------------------------------------------------
+// Aba Cards (dentro de Aprender Kanji): o mesmo treino de traçado da aba
+// Lista (demonstração animada + desenhar, reaproveita demoCardHtml/mountDemo/
+// Desenho.mount e o kDrawCtl/kDemoCtl compartilhados — só um dos dois fica
+// montado por vez, então não há conflito), mas sem precisar escolher na
+// lista: percorre kList na ordem de frequência, sempre com exatamente
+// K_CARD_REPS desenhos (sem meta de sequência nem teto de tentativas). Ao
+// completar, para e espera o usuário escolher entre repetir o mesmo kanji ou
+// ir para o próximo. As tentativas continuam valendo pras estatísticas
+// globais (kStats), as mesmas que aparecem na Lista.
+const K_CARD_REPS = 5;
+let kcIdx = 0, kcPhase = 'demo', kcRep = 1, kcLastOk = false, kcLastWritten = '';
+let kcResults = []; // [{ok, hidden}] de cada tentativa do kanji atual — pro resumo da tela final
+
+function kcEntry(){ return kList && kList[kcIdx]; }
+// Nas 2 últimas tentativas, esconde o kanji (só tradução) — igual à Lista.
+function kcHideChar(){ return kcRep >= K_CARD_REPS - 1; }
+
+function kcHeaderHtml(){
+  return `<div class="score-row"><span>Kanji ${kcIdx + 1} de ${kList.length}</span>${kcPhase !== 'demo' ? `<span>Tentativa ${kcRep}/${K_CARD_REPS}</span>` : ''}</div>`;
+}
+
+function renderKanjiCardsView(view){
+  const entry = kcEntry();
+  if(!entry){ view.innerHTML = `<div class="empty">Nenhum kanji pra praticar ainda.</div>`; return; }
+  if(kcPhase === 'demo') return kcRenderDemoPhase(view);
+  if(kcPhase === 'drill') return kcRenderDrillPhase(view);
+  if(kcPhase === 'result') return kcRenderResultPhase(view);
+  kcRenderDonePhase(view);
+}
+
+function kcRenderDemoPhase(view){
+  const entry = kcEntry();
+  view.innerHTML = kcHeaderHtml() + demoCardHtml(entry);
+  mountDemo(entry);
+  document.getElementById('demoGo').onclick = ()=>{
+    kcPhase = 'drill';
+    renderKanji();
+  };
+}
+function kcRenderDrillPhase(view){
+  const entry = kcEntry();
+  const hide = kcHideChar();
+  view.innerHTML = kcHeaderHtml() + `
+    <div class="card"><div class="prompt-row"><span class="${hide ? 'meaning-big' : 'kanji'}" style="${hide ? '' : 'font-size:54px'}">${hide ? entry.words[0] : entry.char}</span></div>
+      <div class="face-sub">${hide ? 'Lembre o kanji e desenhe' : 'Desenhe este kanji'}</div></div>
+    <div id="kanjiDraw"></div>`;
+  kDrawCtl = Desenho.mount(document.getElementById('kanjiDraw'), {answers: [entry.char], onDone: kcOnDrawDone, hideCands: true, demoChar: hide ? null : entry.char});
+}
+function kcOnDrawDone(ok, written){
+  if(kDrawCtl){ kDrawCtl.destroy(); kDrawCtl = null; }
+  bumpKanjiStat(kcEntry().char, ok);
+  Sons.play('desenho', ok ? 'acerto' : 'erro');
+  kcLastOk = ok; kcLastWritten = written;
+  kcResults.push({ok, hidden: kcHideChar()});
+  kcPhase = 'result';
+  renderKanji();
+}
+function kcRenderResultPhase(view){
+  const entry = kcEntry();
+  const willFinish = kcRep >= K_CARD_REPS;
+  view.innerHTML = kcHeaderHtml() + `
+    <div class="card result">
+      <div class="kanji">${entry.char}</div>
+      <div class="answer">
+        <div class="${kcLastOk ? 'result-ok' : 'result-no'}">${kcLastOk ? '✓ Certo!' : '✗ Não foi dessa vez'}</div>
+        ${kcLastWritten ? `<div class="face-sub" style="margin-top:10px">você escreveu</div><div class="kana" style="font-size:24px;color:var(--text)">${kcLastWritten}</div>` : ''}
+      </div>
+    </div>
+    ${!kcLastOk && kcLastWritten ? `<button type="button" class="know-btn" id="kcFix">✓ Eu escrevi certo — o reconhecimento errou</button>` : ''}
+    <div class="next-row"><button type="button" class="btn next" id="kcContinue">${willFinish ? `✓ ${K_CARD_REPS}/${K_CARD_REPS} concluídas` : 'Continuar →'}</button></div>`;
+  document.getElementById('kcContinue').onclick = kcAdvance;
+  const fixBtn = document.getElementById('kcFix');
+  if(fixBtn) fixBtn.onclick = ()=>{
+    kcLastOk = true;
+    const s = kStats[entry.char]; if(s && s.attempts > 0){ s.hits++; saveKanjiStats(); }
+    if(kcResults.length) kcResults[kcResults.length - 1].ok = true;
+    Sons.play('desenho', 'acerto');
+    kcAdvance();
+  };
+}
+function kcAdvance(){
+  if(kcRep >= K_CARD_REPS) kcPhase = 'done'; else { kcRep++; kcPhase = 'drill'; }
+  renderKanji();
+}
+function kcRenderDonePhase(view){
+  const entry = kcEntry();
+  const hits = kcResults.filter((r)=> r.ok).length;
+  const hidden = kcResults.filter((r)=> r.hidden);
+  const hiddenHits = hidden.filter((r)=> r.ok).length;
+  view.innerHTML = kcHeaderHtml() + `
+    <div class="card result">
+      <div class="kanji">${entry.char}</div>
+      <div class="answer">
+        <div class="face-sub">você praticou o traçado deste kanji ${K_CARD_REPS} vezes</div>
+        <div class="face-sub" style="margin-top:4px;color:var(--text)">
+          <b style="color:var(--ok)">${hits} de ${K_CARD_REPS}</b> certa${hits === 1 ? '' : 's'}${hidden.length ? ` · <b style="color:var(--ok)">${hiddenHits} de ${hidden.length}</b> de memória (sem ver o kanji)` : ''}
+        </div>
+        <div class="kanji" style="margin-top:8px">${entry.word}</div>
+        <div class="kana">${entry.kana}</div>
+        <div class="meaning-big" style="font-size:16px">${entry.meaning}</div>
+      </div>
+    </div>
+    <div class="next-row" style="gap:10px">
+      <button type="button" class="btn next" id="kcRepeat" style="font-size:13px">🔁 Repetir esse kanji</button>
+      <button type="button" class="btn yes" id="kcNext">Próximo →</button>
+    </div>`;
+  document.getElementById('kcRepeat').onclick = ()=>{ kcRep = 1; kcResults = []; kcPhase = 'demo'; renderKanji(); };
+  document.getElementById('kcNext').onclick = ()=>{ kcIdx = (kcIdx + 1) % kList.length; kcRep = 1; kcResults = []; kcPhase = 'demo'; renderKanji(); };
 }
 
 newRound();
