@@ -228,6 +228,8 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .es-words b{float:right;color:#d9584a}
 .es-tip p{margin:4px 0;font-size:13px;line-height:1.5}
 .es-actions{margin-top:10px}
+.status-seg{margin-top:12px}
+.status-seg .seg button{padding-left:2px;padding-right:2px;font-size:12px;white-space:nowrap}
 .write-why{font-size:12px;color:var(--sub);margin-top:6px}
 .write-target{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
 .write-target .kana{padding:0;font-size:20px}
@@ -306,8 +308,6 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 <div class="tabs" role="tablist">
   <button type="button" class="tab active" role="tab" aria-selected="true" data-tab="study">Estudar</button>
   <button type="button" class="tab" role="tab" aria-selected="false" data-tab="all">Todos os verbos</button>
-  <button type="button" class="tab" role="tab" aria-selected="false" data-tab="learning">Praticando</button>
-  <button type="button" class="tab" role="tab" aria-selected="false" data-tab="learned">Aprendidos</button>
 </div>
 <div class="modes" id="modes" style="display:none" role="tablist">
   <button type="button" class="mode active" role="tab" aria-selected="true" data-mode="cards">🗂️ Cards</button>
@@ -543,7 +543,7 @@ function matchesWrittenAnswer(rawInput, targetKana, targetRomaji, targetKanji){
 let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], reviewWrongIds:[], reviewEnd:0, revealed:false, exampleFor:null, answerConjFor:null, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
   writeGroup: 'all',
-  search:'', learningSearch:'', groupExpanded:{1:false,2:false,3:false}, showGroupInfo:false, showLearningInfo:false,
+  search:'', statusFilter:'all', groupExpanded:{1:false,2:false,3:false}, showGroupInfo:false, showLearningInfo:false,
   showKanji: loadKanjiPref(), cardGroupFilter:'all', nivelFilter:'all', groupCollapsed:{1:false,2:false,3:false}};
 
 function targetKey(f){
@@ -1325,18 +1325,20 @@ function renderInner(){
       v.romaji.toLowerCase().includes(needle) || v.meaning.toLowerCase().includes(needle) ||
       v.nivel.toLowerCase().includes(needle)
     ) : VERBS;
-    const filtered = state.nivelFilter==='all' ? searched : searched.filter(v=>v.nivel===state.nivelFilter);
+    const byStatus = state.statusFilter==='all' ? searched : searched.filter(v=>getStatus(v)===state.statusFilter);
+    const filtered = state.nivelFilter==='all' ? byStatus : byStatus.filter(v=>v.nivel===state.nivelFilter);
 
     const searchHtml = `<div class="search-row">
       <div class="search-box">
         <span class="search-icon">🔍</span>
         <input type="text" class="search-input" id="searchInput" placeholder="Buscar por kanji, kana, romaji, nível ou significado" value="${escapeAttr(query)}">
       </div>
-      <button type="button" class="info-btn" aria-label="O que são os grupos de verbos" onclick="toggleGroupInfo()">ℹ️</button>
+      <button type="button" class="info-btn" aria-label="${state.statusFilter==='praticando' ? 'Quando uma palavra aparece em Praticando' : 'O que são os grupos de verbos'}" onclick="${state.statusFilter==='praticando' ? 'toggleLearningInfo()' : 'toggleGroupInfo()'}">ℹ️</button>
     </div>
+    ${statusPillsHtml(c)}
     <div class="pillrow">
-      <button type="button" class="pill ${state.nivelFilter==='all'?'active':''}" aria-pressed="${state.nivelFilter==='all'}" onclick="setNivelFilter('all')">Todos</button>
-      ${["N5","N4","N3","N2","N1"].map(n=>`<button type="button" class="pill ${state.nivelFilter===n?'active':''}" aria-pressed="${state.nivelFilter===n}" onclick="setNivelFilter('${n}')">${n}</button>`).join("")}
+      <button type="button" class="pill ${state.nivelFilter==='all'?'active':''}" aria-pressed="${state.nivelFilter==='all'}" onclick="setNivelFilter('all')">Todos os níveis</button>
+      ${["N5","N4","N3"].map(n=>`<button type="button" class="pill ${state.nivelFilter===n?'active':''}" aria-pressed="${state.nivelFilter===n}" onclick="setNivelFilter('${n}')">${n}</button>`).join("")}
     </div>`;
 
     let listHtml = "";
@@ -1344,7 +1346,7 @@ function renderInner(){
       const groupVerbs = filtered.filter(v=>v.group===g).sort(compareVerbsForDisplay);
       if(groupVerbs.length===0) return;
       const collapsed = !!state.groupCollapsed[g];
-      const expanded = !!query || state.nivelFilter!=='all' || state.groupExpanded[g];
+      const expanded = !!query || state.nivelFilter!=='all' || state.statusFilter!=='all' || state.groupExpanded[g];
       const shown = expanded ? groupVerbs : groupVerbs.slice(0,10);
       listHtml += `<button type="button" class="group-header" onclick="toggleGroupCollapse(${g})" aria-expanded="${!collapsed}">
         <span>${GROUP_NAME[g]} <span class="subtle">(${groupVerbs.length})</span></span>
@@ -1357,9 +1359,9 @@ function renderInner(){
       }
       listHtml += `</div></div>`;
     });
-    if(filtered.length===0) listHtml = `<div class="empty">Nenhum verbo encontrado.</div>`;
+    if(filtered.length===0) listHtml = `<div class="empty">${state.statusFilter!=='all' && searched.length===VERBS.length ? 'Nada aqui ainda.' : 'Nenhum verbo encontrado.'}</div>`;
 
-    main.innerHTML = searchHtml + listHtml + footerHtml + groupInfoModal();
+    main.innerHTML = searchHtml + listHtml + footerHtml + groupInfoModal() + learningInfoModal();
 
     const searchInp = document.getElementById("searchInput");
     searchInp.oninput = function(){
@@ -1370,39 +1372,6 @@ function renderInner(){
       if(inp){ inp.focus(); try{ inp.setSelectionRange(pos,pos); }catch(e){} }
     };
     return;
-  }
-
-  const learningQuery = (state.learningSearch||'').trim();
-  const learningNeedle = learningQuery.toLowerCase();
-  const baseList = (state.tab==="learning" ? VERBS.filter(v=>getStatus(v)==='praticando') : VERBS.filter(v=>getStatus(v)==='aprendido')).sort(compareVerbsForDisplay);
-  const list = (state.tab==="learning" && learningQuery)
-    ? baseList.filter(v=> v.kanji.includes(learningQuery) || v.kana.includes(learningQuery) ||
-        v.romaji.toLowerCase().includes(learningNeedle) || v.meaning.toLowerCase().includes(learningNeedle) ||
-        v.nivel.toLowerCase().includes(learningNeedle))
-    : baseList;
-  const learningHeaderHtml = state.tab==="learning"
-    ? `<div class="search-row">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" class="search-input" id="learningSearchInput" placeholder="Buscar por kanji, kana, romaji, nível ou significado" value="${escapeAttr(learningQuery)}">
-        </div>
-        <button type="button" class="info-btn" aria-label="Quando uma palavra aparece em Praticando" onclick="toggleLearningInfo()">ℹ️</button>
-      </div>`
-    : '';
-  if(list.length===0){
-    main.innerHTML = learningHeaderHtml + `<div class="empty">${state.tab==="learning" && learningQuery ? 'Nenhum verbo encontrado.' : 'Nada aqui ainda.'}</div>` + learningInfoModal();
-  } else {
-    main.innerHTML = learningHeaderHtml + list.map(renderListItem).join("") + footerHtml + learningInfoModal();
-  }
-  if(state.tab==="learning"){
-    const searchInp = document.getElementById("learningSearchInput");
-    searchInp.oninput = function(){
-      const pos = this.selectionStart;
-      state.learningSearch = this.value;
-      render();
-      const inp = document.getElementById("learningSearchInput");
-      if(inp){ inp.focus(); try{ inp.setSelectionRange(pos,pos); }catch(e){} }
-    };
   }
 }
 
@@ -1428,6 +1397,11 @@ function renderListItem(v, idx){
 }
 
 function expandGroup(g){ state.groupExpanded[g] = true; render(); }
+function setStatusFilter(s){ state.statusFilter = s; render(); }
+// Filtro de status da aba "Todos" (Praticando/Aprendidos eram abas próprias).
+function statusPillsHtml(c){
+  return `<div class="status-seg">${segHtml([['all',`Todos ${c.novo+c.praticando+c.aprendido}`],['praticando',`Praticando ${c.praticando}`],['aprendido',`Aprendidos ${c.aprendido}`]], state.statusFilter, 'setStatusFilter')}</div>`;
+}
 function setNivelFilter(n){ state.nivelFilter = n; render(); }
 function toggleGroupCollapse(g){ state.groupCollapsed[g] = !state.groupCollapsed[g]; render(); }
 

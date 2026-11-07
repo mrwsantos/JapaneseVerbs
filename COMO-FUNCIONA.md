@@ -382,8 +382,8 @@ conta como "essa semana". Progresso importado também não.
 
 ## Listas
 
-As abas **Todos**, **Praticando** e **Aprendidos** mostram as palavras com
-busca, filtro por nível JLPT (N5–N1) e os detalhes de cada palavra.
+A aba **Todos** mostra as palavras, com filtro **Praticando**/**Aprendidos** e
+busca, filtro por nível JLPT (N5–N3) e os detalhes de cada palavra.
 
 ## Créditos
 

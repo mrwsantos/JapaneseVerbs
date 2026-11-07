@@ -220,6 +220,8 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .es-words b{float:right;color:#d9584a}
 .es-tip p{margin:4px 0;font-size:13px;line-height:1.5}
 .es-actions{margin-top:10px}
+.status-seg{margin-top:12px}
+.status-seg .seg button{padding-left:2px;padding-right:2px;font-size:12px;white-space:nowrap}
 .write-why{font-size:12px;color:var(--sub);margin-top:6px}
 .write-target{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
 .write-target .kana{padding:0;font-size:20px}
@@ -298,8 +300,6 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 <div class="tabs" role="tablist">
   <button type="button" class="tab active" role="tab" aria-selected="true" data-tab="study">Estudar</button>
   <button type="button" class="tab" role="tab" aria-selected="false" data-tab="all">Todos os Adjetivos</button>
-  <button type="button" class="tab" role="tab" aria-selected="false" data-tab="learning">Praticando</button>
-  <button type="button" class="tab" role="tab" aria-selected="false" data-tab="learned">Aprendidos</button>
 </div>
 <div class="modes" id="modes" style="display:none" role="tablist">
   <button type="button" class="mode active" role="tab" aria-selected="true" data-mode="cards">🗂️ Cards</button>
@@ -521,7 +521,7 @@ function altKanaForms(kanaForm){
 let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongIds:[], reviewIds:[], reviewWrongIds:[], reviewEnd:0, revealed:false, exampleFor:null, answerConjFor:null, expanded:null, writeChecked:false, writeOk:false, testMode:false,
   writeFilter:{polite:'informal', past:false, neg:false, shuffle:false}, shuffledFilter:null,
   writeGroup: 'all',
-  search:'', learningSearch:'', groupExpanded:{i:false,na:false}, groupCollapsed:{i:false,na:false}, showInfo:false, showLearningInfo:false,
+  search:'', statusFilter:'all', groupExpanded:{i:false,na:false}, groupCollapsed:{i:false,na:false}, showInfo:false, showLearningInfo:false,
   showKanji: loadKanjiPref(), cardTypeFilter:'all', listTypeFilter:'all', nivelFilter:'all'};
 
 function targetKey(f){
@@ -1313,7 +1313,8 @@ function renderInner(){
       v.romaji.toLowerCase().includes(needle) || v.meaning.toLowerCase().includes(needle) ||
       v.nivel.toLowerCase().includes(needle)
     ) : ADJS;
-    const typeFiltered = state.listTypeFilter==='all' ? searched : searched.filter(v=>v.type===state.listTypeFilter);
+    const byStatus = state.statusFilter==='all' ? searched : searched.filter(v=>getStatus(v)===state.statusFilter);
+    const typeFiltered = state.listTypeFilter==='all' ? byStatus : byStatus.filter(v=>v.type===state.listTypeFilter);
     const filtered = state.nivelFilter==='all' ? typeFiltered : typeFiltered.filter(v=>v.nivel===state.nivelFilter);
 
     const searchHtml = `<div class="search-row">
@@ -1321,8 +1322,9 @@ function renderInner(){
         <span class="search-icon">🔍</span>
         <input type="text" class="search-input" id="searchInput" placeholder="Buscar por kanji, kana, romaji, nível ou significado" value="${escapeAttr(query)}">
       </div>
-      <button type="button" class="info-btn" aria-label="Como modificar os adjetivos" onclick="toggleInfo()">ℹ️</button>
+      <button type="button" class="info-btn" aria-label="${state.statusFilter==='praticando' ? 'Quando uma palavra aparece em Praticando' : 'Como modificar os adjetivos'}" onclick="${state.statusFilter==='praticando' ? 'toggleLearningInfo()' : 'toggleInfo()'}">ℹ️</button>
     </div>
+    ${statusPillsHtml(c)}
     <div class="pillrow">
       <button type="button" class="pill ${state.listTypeFilter==='all'?'active':''}" aria-pressed="${state.listTypeFilter==='all'}" onclick="setListTypeFilter('all')">Todos</button>
       <button type="button" class="pill ${state.listTypeFilter==='i'?'active':''}" aria-pressed="${state.listTypeFilter==='i'}" onclick="setListTypeFilter('i')">-i</button>
@@ -1339,7 +1341,7 @@ function renderInner(){
       const groupVerbs = filtered.filter(v=>v.type===t).sort(compareAdjForDisplay);
       if(groupVerbs.length===0) return;
       const collapsed = !!state.groupCollapsed[t];
-      const expanded = !!query || state.nivelFilter!=='all' || state.listTypeFilter!=='all' || state.groupExpanded[t];
+      const expanded = !!query || state.nivelFilter!=='all' || state.listTypeFilter!=='all' || state.statusFilter!=='all' || state.groupExpanded[t];
       const shown = expanded ? groupVerbs : groupVerbs.slice(0,12);
       listHtml += `<button type="button" class="group-header" onclick="toggleGroupCollapse('${t}')" aria-expanded="${!collapsed}">
         <span>${label} <span class="subtle">(${groupVerbs.length})</span></span>
@@ -1352,9 +1354,9 @@ function renderInner(){
       }
       listHtml += `</div></div>`;
     });
-    if(filtered.length===0) listHtml = `<div class="empty">Nenhum adjetivo encontrado.</div>`;
+    if(filtered.length===0) listHtml = `<div class="empty">${state.statusFilter!=='all' && searched.length===ADJS.length ? 'Nada aqui ainda.' : 'Nenhum adjetivo encontrado.'}</div>`;
 
-    main.innerHTML = searchHtml + listHtml + footerHtml + infoModal();
+    main.innerHTML = searchHtml + listHtml + footerHtml + infoModal() + learningInfoModal();
 
     const searchInp = document.getElementById("searchInput");
     searchInp.oninput = function(){
@@ -1365,39 +1367,6 @@ function renderInner(){
       if(inp){ inp.focus(); try{ inp.setSelectionRange(pos,pos); }catch(e){} }
     };
     return;
-  }
-
-  const learningQuery = (state.learningSearch||'').trim();
-  const learningNeedle = learningQuery.toLowerCase();
-  const baseList = (state.tab==="learning" ? ADJS.filter(v=>getStatus(v)==='praticando') : ADJS.filter(v=>getStatus(v)==='aprendido')).sort(compareAdjForDisplay);
-  const list = (state.tab==="learning" && learningQuery)
-    ? baseList.filter(v=> v.kanji.includes(learningQuery) || v.kana.includes(learningQuery) ||
-        v.romaji.toLowerCase().includes(learningNeedle) || v.meaning.toLowerCase().includes(learningNeedle) ||
-        v.nivel.toLowerCase().includes(learningNeedle))
-    : baseList;
-  const learningHeaderHtml = state.tab==="learning"
-    ? `<div class="search-row">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" class="search-input" id="learningSearchInput" placeholder="Buscar por kanji, kana, romaji, nível ou significado" value="${escapeAttr(learningQuery)}">
-        </div>
-        <button type="button" class="info-btn" aria-label="Quando uma palavra aparece em Praticando" onclick="toggleLearningInfo()">ℹ️</button>
-      </div>`
-    : '';
-  if(list.length===0){
-    main.innerHTML = learningHeaderHtml + `<div class="empty">${state.tab==="learning" && learningQuery ? 'Nenhum adjetivo encontrado.' : 'Nada aqui ainda.'}</div>` + learningInfoModal();
-  } else {
-    main.innerHTML = learningHeaderHtml + list.map(renderListItem).join("") + footerHtml + learningInfoModal();
-  }
-  if(state.tab==="learning"){
-    const searchInp = document.getElementById("learningSearchInput");
-    searchInp.oninput = function(){
-      const pos = this.selectionStart;
-      state.learningSearch = this.value;
-      render();
-      const inp = document.getElementById("learningSearchInput");
-      if(inp){ inp.focus(); try{ inp.setSelectionRange(pos,pos); }catch(e){} }
-    };
   }
 }
 
@@ -1424,6 +1393,11 @@ function renderListItem(v, idx){
 
 function expandGroup(t){ state.groupExpanded[t] = true; render(); }
 function setListTypeFilter(t){ state.listTypeFilter = t; render(); }
+function setStatusFilter(s){ state.statusFilter = s; render(); }
+// Filtro de status da aba "Todos" (Praticando/Aprendidos eram abas próprias).
+function statusPillsHtml(c){
+  return `<div class="status-seg">${segHtml([['all',`Todos ${c.novo+c.praticando+c.aprendido}`],['praticando',`Praticando ${c.praticando}`],['aprendido',`Aprendidos ${c.aprendido}`]], state.statusFilter, 'setStatusFilter')}</div>`;
+}
 function setNivelFilter(n){ state.nivelFilter = n; render(); }
 function toggleGroupCollapse(t){ state.groupCollapsed[t] = !state.groupCollapsed[t]; render(); }
 
