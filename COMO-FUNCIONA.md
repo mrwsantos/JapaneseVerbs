@@ -202,7 +202,9 @@ em **decks de 10** ("Deck 3/10" no topo).
 - Acertou → sobe um nível. Errou → desce um nível, mas **nunca abaixo de
   Praticando** (escrita é treino extra, não te faz "desaprender").
 
-Ao errar, o app mostra a **regra da conjugação** (`explainForm`).
+Ao errar, o app mostra a **regra da conjugação** (`explainForm`). Depois de
+responder, 🔊 fala a resposta e tocar na palavra sublinhada abre a lista de
+conjugações.
 
 Em **Formas extras**, nos Ajustes, dá para treinar a **forma て** (verbos e
 adjetivos) e a **potencial** e a **volitiva** (só verbos). São treino livre:

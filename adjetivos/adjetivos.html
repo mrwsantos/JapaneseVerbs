@@ -221,6 +221,8 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .es-tip p{margin:4px 0;font-size:13px;line-height:1.5}
 .es-actions{margin-top:10px}
 .write-why{font-size:12px;color:var(--sub);margin-top:6px}
+.write-target{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.write-target .kana{padding:0;font-size:20px}
 .write-rule{font-size:13px;line-height:1.5;margin-top:10px;padding:9px 11px;border-radius:12px;background:var(--chip);color:var(--text);text-align:left}
 /* Modo Frases: lacuna + alternativas */
 .fq-card{gap:10px}
@@ -951,6 +953,7 @@ function writeNext(correct){
     else state.queue.push(v);
   }
   state.writeGaveUp = false;
+  state.answerConjFor = null;
   // Formas extras são treino livre: não mexem no nível nem na próxima revisão.
   if(Escrita.FORM[state.writeKey].extra){
     // nada
@@ -1284,14 +1287,15 @@ function renderInner(){
             <div class="answer">
               <div class="${state.writeOk?'result-ok':'result-no'}">${state.writeOk? '✓ Certo!' : state.writeGaveUp ? '🏳️ Desistiu: ela vai para o fim do próximo deck' : '✗ Não foi dessa vez'}</div>
               ${!state.writeOk && !state.writeGaveUp ? `<div class="write-why">Você escreveu: <b lang="ja">${(state.writeInputShown||'').replace(/[<>&]/g,'') || '—'}</b>${state.writeErr && state.writeErr.type==='forma' ? ` — essa é a forma <b>${Escrita.formLabel(state.writeErr.got)}</b>` : ''}</div>` : ''}
-              <div class="kana" style="margin-top:8px;font-size:20px">${state.writeTargetKanji!==state.writeTargetKana ? state.writeTargetKanji+' · ' : ''}${state.writeTargetKana}</div>
+              <div class="write-target"><button type="button" class="kana kanji-toggle" lang="ja" aria-expanded="${state.answerConjFor===v.id}" aria-controls="writeConj" onclick="toggleAnswerConj(${v.id})">${state.writeTargetKanji!==state.writeTargetKana ? state.writeTargetKanji+' · ' : ''}${state.writeTargetKana}</button>${TTS.btnHtml(state.writeTargetKana)}</div>
               <div class="romaji">${state.writeTargetRomaji}</div>
               ${!state.writeOk ? `<div class="write-rule">💡 ${explainForm(v, state.writeKey)}</div>` : ''}
               <div class="tags" style="margin-top:6px">dicionário: ${v.kanji} (${v.kana})</div>
+              ${state.answerConjFor===v.id ? `<div class="conj" id="writeConj">${conjRowsHtml(adjConjugate(v))}</div>` : ''}
             </div>
           </div>
           <div class="actions"><button class="btn next" onclick="writeNext(${state.writeOk})">Próxima →</button></div>`;
-        document.onkeydown = (ev)=>{ if(ev.key==="Enter"){ ev.preventDefault(); writeNext(state.writeOk); } };
+        document.onkeydown = (ev)=>{ if(ev.key==="Enter" && !ev.target.closest('.kanji-toggle, .tts-btn')){ ev.preventDefault(); writeNext(state.writeOk); } };
       }
     }
     return;
