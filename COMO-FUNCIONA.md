@@ -339,9 +339,8 @@ App próprio (`substantivos/`), no mesmo formato de verbos e adjetivos, com
 progresso separado (`jpnoun-*`): Cards, Escrita, Frases e Ouvir. Na Escrita a
 resposta é a própria palavra; nas Frases a lacuna é a palavra, com alternativas
 da mesma categoria (pessoa, lugar, tempo, comida, coisa). Palavras em katakana
-ficam para depois, porque a digitação em romaji só gera hiragana. Não entram no
-Jogo nem no Desenhar (`Estudadas.words()`), mas entram na lista de palavras
-exportada e nas Estatísticas.
+ficam para depois, porque a digitação em romaji só gera hiragana. Entram no Jogo,
+no Desenhar, na lista de palavras exportada e nas Estatísticas.
 
 ## 🔗 Partículas
 

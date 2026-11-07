@@ -169,7 +169,7 @@ document.getElementById('soundBtn').onclick = ()=>{
   if(on) Sons.play('desenho', 'acerto');
 };
 
-const WORDS = Estudadas.words().map((w)=> ({...w, tag: w.src==='verbos' ? 'verbo' : w.type==='na' ? 'adjetivo -na' : 'adjetivo -i'}));
+const WORDS = Estudadas.words().map((w)=> ({...w, tag: w.src==='verbos' ? 'verbo' : w.src==='substantivos' ? 'substantivo' : w.type==='na' ? 'adjetivo -na' : 'adjetivo -i'}));
 function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
 
 const state = {queue: [], idx: 0, checked: false, ok: false, written: '', hits: 0, total: 0, streak: 0};

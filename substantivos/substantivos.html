@@ -1244,7 +1244,7 @@ function renderInner(){
     </div>
     ${statusPillsHtml(c)}
     <div class="pillrow">
-      ${[['all','Todos'], ...TYPES.map((t)=> [t, TYPE_NAME[t]])].map(([t, l])=> `<button type="button" class="pill ${state.listTypeFilter===t?'active':''}" aria-pressed="${state.listTypeFilter===t}" onclick="setListTypeFilter('${t}')">${l}</button>`).join('')}
+      ${[['all','Todas as categorias'], ...TYPES.map((t)=> [t, TYPE_NAME[t]])].map(([t, l])=> `<button type="button" class="pill ${state.listTypeFilter===t?'active':''}" aria-pressed="${state.listTypeFilter===t}" onclick="setListTypeFilter('${t}')">${l}</button>`).join('')}
     </div>
     <div class="pillrow">
       <button type="button" class="pill ${state.nivelFilter==='all'?'active':''}" aria-pressed="${state.nivelFilter==='all'}" onclick="setNivelFilter('all')">Todos os níveis</button>

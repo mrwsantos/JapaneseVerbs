@@ -75,7 +75,14 @@ main{max-width:480px;margin:0 auto;padding:4px 16px 110px;display:flex;flex-dire
 .guide-p{font-size:26px;font-weight:700;color:var(--accent);min-width:1.6em}
 .guide-name{font-size:14px;font-weight:700}
 .guide-use{font-size:13px;color:var(--sub);line-height:1.5}
-.guide-ex{font-size:15px}
+.guide-name small{display:block;font-size:11px;font-weight:400;color:var(--sub)}
+.guide-exs{display:flex;flex-direction:column;gap:10px;margin:4px 0}
+.guide-ex-box{padding-left:10px;border-left:3px solid var(--border)}
+.guide-ex{font-size:16px;line-height:1.5}
+.guide-kana{font-size:12px;color:var(--sub);margin:1px 0}
+.guide-ex mark,.guide-kana mark{background:none;color:var(--accent);font-weight:700}
+.guide-ex-box .pt{font-size:13px}
+.guide{scroll-margin-top:12px}
 .guide-acc{margin-left:auto;font-size:11px;color:var(--sub);white-space:nowrap}
 .train{align-self:flex-start;padding:6px 12px;border-radius:999px;background:var(--chip);font-size:12px;font-weight:600}
 </style>
@@ -174,14 +181,18 @@ function summaryHtml(){
     ${rows.length ? `<button type="button" class="script" onclick='trainOnly(${JSON.stringify(rows[0][0])})'>🎯 Próximo deck só com ${rows[0][0]}</button>` : ""}
   </div><button type="button" class="next" onclick="restart()">Próximo deck →</button>`;
 }
+const markP = (t)=> t.replace(/\[([^\]]+)\]/g, "<mark>$1</mark>");
 function guideHtml(){
-  return PARTICLES.map((x)=>{
+  const jump = `<div class="pills">${PARTICLES.map((x, i)=> `<button type="button" class="pill" onclick="document.getElementById('gp${i}').scrollIntoView({behavior:'smooth',block:'start'})">${x.p}</button>`).join("")}</div>`;
+  return jump + PARTICLES.map((x, i)=>{
     const s = stats[x.p];
-    return `<section class="card guide"><div class="guide-top"><span class="guide-p" lang="ja">${x.p}</span><span class="guide-name">${x.name}</span>
+    return `<section class="card guide" id="gp${i}"><div class="guide-top"><span class="guide-p" lang="ja">${x.p}</span><span class="guide-name">${x.name}<small>lê-se "${x.romaji}"</small></span>
         ${s && s.total ? `<span class="guide-acc">${Math.round(s.ok / s.total * 100)}% em ${s.total}</span>` : ""}</div>
       <div class="guide-use">${x.use}</div>
-      <div class="jp-row" style="justify-content:flex-start"><span class="guide-ex" lang="ja">${x.ex}</span>${TTS.btnHtml(x.ex)}</div>
-      <div class="pt">${x.exPt}</div>
+      <div class="guide-exs">${x.examples.map(([f, k, pt])=> `<div class="guide-ex-box">
+        <div class="jp-row" style="justify-content:flex-start"><span class="guide-ex" lang="ja">${markP(f)}</span>${TTS.btnHtml(f.replace(/[\[\]]/g, ""))}</div>
+        ${f!==k ? `<div class="guide-kana" lang="ja">${markP(k)}</div>` : ""}<div class="pt">${pt}</div></div>`).join("")}</div>
+      <div class="why">💡 ${x.tip}</div>
       <button type="button" class="train" onclick='trainOnly(${JSON.stringify(x.p)})'>Treinar ${x.p}</button></section>`;
   }).join("");
 }

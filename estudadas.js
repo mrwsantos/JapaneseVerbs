@@ -1,9 +1,9 @@
-// Palavras que a pessoa já estuda nos apps de verbos e adjetivos: nível 2+
+// Palavras que a pessoa já estuda nos apps de verbos, adjetivos e substantivos: nível 2+
 // (Praticando ou Aprendido). O Jogo de Pares e o Desenhar só LEEM o progresso
 // e ficam bloqueados até existirem MIN palavras.
 const Estudadas = (()=>{
   const MIN = 3;
-  const KEYS = {v: "jpverbs-progress-v2", a: "jpadj-progress-v1"}; // mesmas chaves dos apps
+  const KEYS = {v: "jpverbs-progress-v2", a: "jpadj-progress-v1", n: "jpnoun-progress-v1"}; // mesmas chaves dos apps
   const isStudied = (e)=> !!e && e.level >= 2;
   function load(key){ try{ return JSON.parse(localStorage.getItem(key)) || {}; }catch(e){ return {}; } }
   // Mesma regra de getStatus() de verbos.html/adjetivos.html: Aprendido pede
@@ -16,14 +16,15 @@ const Estudadas = (()=>{
 
   // Só conta (não precisa dos dados das palavras): usado na tela inicial.
   function count(){
-    return Object.values(load(KEYS.v)).filter(isStudied).length + Object.values(load(KEYS.a)).filter(isStudied).length;
+    return [KEYS.v, KEYS.a, KEYS.n].reduce((n, k)=> n + Object.values(load(k)).filter(isStudied).length, 0);
   }
-  // Lista completa; precisa de VERBS_RAW e ADJ_RAW carregados.
+  // Lista completa; precisa de VERBS_RAW, ADJ_RAW e NOUN_RAW carregados.
   function words(){
-    const pv = load(KEYS.v), pa = load(KEYS.a);
+    const pv = load(KEYS.v), pa = load(KEYS.a), pn = load(KEYS.n);
     return [
       ...VERBS_RAW.map((w, i)=> ({...w, key: "v" + i, src: "verbos", status: isStudied(pv[i]) ? statusOf(pv[i], true) : null})).filter((w, i)=> isStudied(pv[i])),
       ...ADJ_RAW.map((w, i)=> ({...w, key: "a" + i, src: "adjetivos", status: isStudied(pa[i]) ? statusOf(pa[i], false) : null})).filter((w, i)=> isStudied(pa[i])),
+      ...NOUN_RAW.map((w, i)=> ({...w, key: "n" + i, src: "substantivos", status: isStudied(pn[i]) ? statusOf(pn[i], false) : null})).filter((w, i)=> isStudied(pn[i])),
     ];
   }
   // Tela de bloqueio padrão (classes .panel/.cta/.ghost de cada página).
@@ -31,7 +32,7 @@ const Estudadas = (()=>{
     return `<div class="panel">
       <div class="big-emoji">🔒</div>
       <h2>${emoji} ${title}</h2>
-      <p>Libera quando você tiver pelo menos <strong>${MIN} palavras</strong> em <strong>Praticando</strong> ou <strong>Aprendido</strong> (verbos e adjetivos somados).</p>
+      <p>Libera quando você tiver pelo menos <strong>${MIN} palavras</strong> em <strong>Praticando</strong> ou <strong>Aprendido</strong> (verbos, adjetivos e substantivos somados).</p>
       <p class="pool">Você tem <b>${have}</b> de <b>${MIN}</b>.</p>
       <p>Estude nos Cards: cada palavra entra em Praticando depois de 2 acertos em dias diferentes, ou na hora com <strong>✓ Já sei essa</strong>.</p>
       <div style="height:14px"></div>
@@ -42,16 +43,9 @@ const Estudadas = (()=>{
   // colar em qualquer lugar (ex.: pedir frases de exemplo pra uma IA). Simples
   // JSON solto, não serve pra restaurar progresso (isso é Baixar progresso, backup.js).
   const STATUS_LABEL = {praticando: "Praticando", aprendido: "Aprendido"};
-  // Só na lista exportada: Jogo e Desenhar usam words() (os traços do Desenhar
-  // foram gerados para os kanji de verbos e adjetivos).
-  function nouns(){
-    if(typeof NOUN_RAW === "undefined") return [];
-    const pn = load("jpnoun-progress-v1");
-    return NOUN_RAW.map((w, i)=> ({...w, status: pn[i] && pn[i].level >= 4 ? "aprendido" : "praticando"})).filter((w, i)=> isStudied(pn[i]));
-  }
   function exportList(){
     try{
-      const list = [...words(), ...nouns()].map((w)=> ({word: w.kanji, kana: w.kana, romaji: w.romaji, meaning: w.meaning, nivel: w.nivel, status: STATUS_LABEL[w.status] || w.status}));
+      const list = words().map((w)=> ({word: w.kanji, kana: w.kana, romaji: w.romaji, meaning: w.meaning, nivel: w.nivel, status: STATUS_LABEL[w.status] || w.status}));
       const json = JSON.stringify(list, null, 1);
       const d = new Date(), pad = (n)=> String(n).padStart(2, "0");
       const url = URL.createObjectURL(new Blob([json], {type: "application/json"}));

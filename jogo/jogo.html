@@ -125,7 +125,7 @@ body.hard .tile .kana{opacity:0;max-height:0;margin:0}
 <script>
 // Jogo de pares: português de um lado, japonês do outro. Começa com 10s;
 // cada par certo dá +2s e as casas usadas recebem palavras novas.
-// O vocabulário vem dos verbos e adjetivos em "Praticando" ou "Aprendido".
+// O vocabulário vem dos verbos, adjetivos e substantivos em "Praticando" ou "Aprendido".
 const START_SECONDS = 10;
 const BONUS_SECONDS = 2;
 const PAIRS = 5; // pares na tela (menos, se o vocabulário for pequeno)
@@ -164,7 +164,7 @@ function saveBest(n){ try{ localStorage.setItem(BEST_KEY, String(n)); }catch(e){
 // Só palavras em Praticando/Aprendido (estudadas.js).
 function buildPool(){
   const words = Estudadas.words().map(w=>({...w, senses: sensesOf(w.meaning)}));
-  return {verbs: words.filter(w=>w.src==='verbos').length, adjs: words.filter(w=>w.src==='adjetivos').length, words};
+  return {verbs: words.filter(w=>w.src==='verbos').length, adjs: words.filter(w=>w.src==='adjetivos').length, nouns: words.filter(w=>w.src==='substantivos').length, words};
 }
 // "frio / gelado (objeto)" -> ["frio","gelado"]: duas palavras que dividem um
 // sentido nunca aparecem juntas, senão o par ficaria ambíguo.
@@ -389,7 +389,7 @@ function endGame(){
 
 function showStart(){
   game = null;
-  const {verbs, adjs, words} = buildPool();
+  const {verbs, adjs, nouns, words} = buildPool();
   if(words.length < Estudadas.MIN){
     document.getElementById('main').innerHTML = Estudadas.lockedHtml('🎮', 'Jogo de Pares', words.length);
     return;
@@ -407,7 +407,7 @@ function showStart(){
         <div class="rule"><b>🚀</b><span>Depois disso, a cada <strong>${MILESTONE_STREAK}</strong> na sequência (20, 30...) ganha mais <strong>+${MILESTONE_BONUS_SECONDS}s</strong>.</span></div>
         <div class="rule"><b>📚</b><span>Só entram palavras que você já está <strong>praticando</strong> ou <strong>aprendeu</strong>.</span></div>
       </div>
-      <p class="pool">Seu vocabulário: <b>${verbs}</b> verbos + <b>${adjs}</b> adjetivos${best ? ` · recorde <b>${best}</b>` : ''}</p>
+      <p class="pool">Seu vocabulário: <b>${verbs}</b> verbos + <b>${adjs}</b> adjetivos + <b>${nouns}</b> substantivos${best ? ` · recorde <b>${best}</b>` : ''}</p>
       <button type="button" class="cta" onclick="prepareAndStart()">Começar</button>
     </div>`;
 }

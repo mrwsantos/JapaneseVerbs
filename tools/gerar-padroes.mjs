@@ -3,7 +3,7 @@
 //
 // O KanjiCanvas original traz 2.213 kanji (6,4 MB) e nenhum kana. Aqui juntamos:
 //   - hiragana e katakana (XMLs das pastas hiragana/ e katakana/ do repositório)
-//   - só os kanji que aparecem em verbos/data.js e adjetivos/data.js
+//   - só os kanji que aparecem em verbos/data.js, adjetivos/data.js e substantivos/data.js
 // e convertemos com as mesmas funções do kanji-canvas.js usadas no navegador.
 //
 // Rode de novo sempre que adicionar palavras com kanji novos:
@@ -33,11 +33,12 @@ const KC = ctx.KanjiCanvas;
 const data = {};
 vm.runInNewContext(
   fs.readFileSync(path.join(root, "verbos/data.js"), "utf8") + ";" +
-  fs.readFileSync(path.join(root, "adjetivos/data.js"), "utf8") + ";out.v = VERBS_RAW; out.a = ADJ_RAW;",
+  fs.readFileSync(path.join(root, "adjetivos/data.js"), "utf8") + ";" +
+  fs.readFileSync(path.join(root, "substantivos/data.js"), "utf8") + ";out.v = VERBS_RAW; out.a = ADJ_RAW; out.n = NOUN_RAW;",
   {out: data});
 const isKanji = (c)=> /\p{Script=Han}/u.test(c);
 const needed = new Set();
-for(const w of [...data.v, ...data.a]) for(const c of w.kanji) if(isKanji(c)) needed.add(c);
+for(const w of [...data.v, ...data.a, ...data.n]) for(const c of w.kanji) if(isKanji(c)) needed.add(c);
 
 // Kanji: já vêm convertidos no ref-patterns.js original.
 vm.runInContext(fs.readFileSync(refPath, "utf8"), ctx);
