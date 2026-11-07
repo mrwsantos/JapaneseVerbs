@@ -64,8 +64,8 @@ const Config = (()=>{
     pop.className = "cfg-pop"; pop.id = "cfgPop";
     pop.setAttribute("role", "dialog"); pop.setAttribute("aria-label", "Configurações");
     const hasBackup = typeof Backup !== "undefined";
-    // Só aparece em páginas que já carregaram os dados dos dois apps (hoje:
-    // Desenhar e Jogo) — Estudadas.words() precisa de VERBS_RAW e ADJ_RAW.
+    // Só aparece em páginas que já carregaram os dados dos dois apps (hoje: tela
+    // inicial, Verbos, Adjetivos, Jogo e Desenhar) — Estudadas.words() precisa de VERBS_RAW e ADJ_RAW.
     const hasWordList = typeof Estudadas !== "undefined" && typeof Estudadas.exportList === "function"
       && typeof VERBS_RAW !== "undefined" && typeof ADJ_RAW !== "undefined";
     pop.innerHTML = `<div class="cfg-row"><h3>Tema</h3>

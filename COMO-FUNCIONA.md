@@ -40,7 +40,7 @@ icons/, fonts/
   **Importar progresso** substitui tudo e recarrega o app; também
   aceita os backups antigos de um modo só (só troca o progresso daquele modo).
 - **Baixar lista de palavras** (mesma engrenagem ⚙️, só aparece em páginas que
-  já carregam os dois `data.js`, hoje tela inicial e Desenhar): baixa um JSON
+  já carregam os dois `data.js`: tela inicial, Verbos, Adjetivos, Jogo e Desenhar): baixa um JSON
   solto com `word`/`kana`/`romaji`/`meaning`/`nivel`/`status`
   (**Praticando**/**Aprendido**) de cada palavra que você estuda — pensado pra
   colar num prompt de IA (ex.: pedir frases de exemplo), não pra restaurar
