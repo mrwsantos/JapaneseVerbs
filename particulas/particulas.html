@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Partículas — 助詞</title>
+<meta name="theme-color" content="#2b7fc4">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/app-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../icons/app-192.png">
+<script>
+(function(){
+  let mode = 'auto';
+  try{ mode = localStorage.getItem("jp-theme") || 'auto'; }catch(e){}
+  if(mode !== 'auto') document.documentElement.setAttribute('data-theme', mode);
+})();
+</script>
+<style>
+:root{
+  --bg:#f8f7fb; --card:#ffffff; --text:#1c1a24; --sub:#6c6879; --border:#e4e1ec; --chip:#efedf7; --accent:#2b7fc4;
+  --ok-bg:#d3ecdc; --ok-fg:#1f5c38; --ok-bd:#7cc49a; --no-bg:#f5d6d2; --no-fg:#8a2c20; --no-bd:#e09a90;
+  --shadow:0 1px 2px rgba(30,20,60,.04), 0 8px 24px rgba(30,20,60,.06);
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --border:#37334a; --chip:#2a2736; --accent:#5aa9e6; --ok-bg:#20402c; --ok-fg:#9fe6bb; --ok-bd:#3f7a56; --no-bg:#4a2621; --no-fg:#f5b8ae; --no-bd:#8a4a40; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); } }
+:root[data-theme="dark"]{ --bg:#17151f; --card:#221f2c; --text:#efeef5; --sub:#a29dae; --border:#37334a; --chip:#2a2736; --accent:#5aa9e6; --ok-bg:#20402c; --ok-fg:#9fe6bb; --ok-bd:#3f7a56; --no-bg:#4a2621; --no-fg:#f5b8ae; --no-bd:#8a4a40; --shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3); }
+*{box-sizing:border-box}
+html,body{margin:0}
+@font-face{font-family:"Roboto Mono";src:url('../fonts/RobotoMono-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:"Roboto Mono";src:url('../fonts/RobotoMono-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+body{background:var(--bg);color:var(--text);font-family:"Roboto Mono",ui-monospace,-apple-system,"Hiragino Sans",sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+header{position:relative;padding:16px 16px 12px;text-align:center;border-bottom:1px solid var(--border)}
+h1{font-size:16px;margin:0;line-height:34px}
+.home-btn{position:absolute;left:14px;top:15px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:var(--chip);color:var(--sub);text-decoration:none}
+.tabs{display:flex;gap:6px;padding:10px 16px;max-width:480px;margin:0 auto}
+.tab{flex:1;padding:9px 4px;border-radius:10px;background:var(--chip);color:var(--sub);font-size:13px;font-weight:700}
+.tab.on{background:var(--accent);color:#fff}
+main{max-width:480px;margin:0 auto;padding:4px 16px 110px;display:flex;flex-direction:column;gap:12px}
+.pills{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.pill{flex:none;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--sub);font-size:14px;font-weight:600}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.bar{height:6px;border-radius:999px;background:var(--chip);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .25s ease}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:18px;text-align:center;display:flex;flex-direction:column;gap:10px}
+.pos{font-size:12px;color:var(--sub);text-align:right}
+.jp{font-size:22px;line-height:1.5}
+.jp-row{display:flex;align-items:center;justify-content:center;gap:8px}
+.jp mark{background:none;color:var(--accent);font-weight:700}
+.blank{display:inline-block;min-width:2.2em;border-bottom:2px solid var(--accent);color:var(--accent);margin:0 3px}
+.pt{font-size:14px;color:var(--sub);line-height:1.45}
+.script{align-self:center;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--chip);font-size:12px;font-weight:600}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{position:relative;padding:16px 8px;border-radius:14px;border:1px solid var(--border);background:var(--card);font-size:22px;font-weight:700;box-shadow:var(--shadow)}
+.opt .n{position:absolute;top:5px;left:8px;font-size:10px;color:var(--sub);font-weight:400}
+.opt.ok{background:var(--ok-bg);color:var(--ok-fg);border-color:var(--ok-bd)}
+.opt.no{background:var(--no-bg);color:var(--no-fg);border-color:var(--no-bd)}
+.opt.dim{opacity:.45}
+.opt:disabled{cursor:default}
+.result{font-weight:700}
+.result.good{color:#2e9a5c}
+.result.bad{color:#d9584a}
+.why{font-size:13px;line-height:1.5;padding:10px 12px;border-radius:12px;background:var(--chip);text-align:left}
+.next{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(448px,calc(100vw - 32px));padding:15px;border-radius:14px;background:var(--accent);color:#fff;font-size:15px;font-weight:700;box-shadow:var(--shadow)}
+.tts-btn{flex:none;width:30px;height:30px;padding:0;border-radius:50%;background:var(--chip);color:var(--sub);font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center}
+.big{font-size:40px;font-weight:700}
+.muted{font-size:12px;color:var(--sub)}
+.errs{list-style:none;margin:0;padding:0;text-align:left;font-size:14px}
+.errs li{display:flex;justify-content:space-between;padding:5px 0;border-top:1px dashed var(--border)}
+.guide{text-align:left;gap:6px}
+.guide-top{display:flex;align-items:center;gap:10px}
+.guide-p{font-size:26px;font-weight:700;color:var(--accent);min-width:1.6em}
+.guide-name{font-size:14px;font-weight:700}
+.guide-use{font-size:13px;color:var(--sub);line-height:1.5}
+.guide-ex{font-size:15px}
+.guide-acc{margin-left:auto;font-size:11px;color:var(--sub);white-space:nowrap}
+.train{align-self:flex-start;padding:6px 12px;border-radius:999px;background:var(--chip);font-size:12px;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <a class="home-btn" href="../index.html?home" aria-label="Início" title="Início"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V9"/><path d="M10 20.5V15h4v5.5"/></svg></a>
+  <h1>🔗 Partículas</h1>
+  <button type="button" id="settingsBtn" style="position:absolute;right:14px;top:15px" aria-label="Configurações"></button>
+</header>
+<nav class="tabs" role="tablist">
+  <button type="button" class="tab" role="tab" data-tab="treino">Treinar</button>
+  <button type="button" class="tab" role="tab" data-tab="guia">Guia</button>
+</nav>
+<main id="main"></main>
+<script src="../sons.js"></script>
+<script src="../tts.js"></script>
+<script src="../historico.js"></script>
+<script src="../backup.js"></script>
+<script src="../config.js"></script>
+<script src="data.js"></script>
+<script>
+// Treino de partículas: decks de 10 frases com lacuna, explicação depois de cada
+// resposta e erradas voltando no fim do deck. Não tem SRS nem nível: não mexe no
+// progresso das palavras. Fica registrado em jp-particulas-stats e no histórico.
+const DECK = 10, STATS_KEY = "jp-particulas-stats", KANJI_KEY = "jp-frase-kanji";
+const ITEMS = PARTICLE_ITEMS.map(([f, k, pt, why, also], id)=>{
+  const a = f.indexOf("["), b = f.indexOf("]"), ka = k.indexOf("["), kb = k.indexOf("]");
+  return {id, p: f.slice(a+1, b), pre: f.slice(0, a), post: f.slice(b+1), preK: k.slice(0, ka), postK: k.slice(kb+1), pt, why, also: also || []};
+});
+const byP = Object.fromEntries(PARTICLES.map((x)=> [x.p, x]));
+const shuffle = (a)=>{ a = a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const load = (k, d)=>{ try{ return JSON.parse(localStorage.getItem(k)) || d; }catch(e){ return d; } };
+let stats = load(STATS_KEY, {});
+let kanji = false;
+try{ kanji = localStorage.getItem(KANJI_KEY)==='1'; }catch(e){}
+let tab = "treino", filter = "all", queue = [], idx = 0, q = null, seen = new Map();
+
+function newDeck(){
+  const pool = filter==="all" ? ITEMS : ITEMS.filter((x)=> x.p===filter);
+  queue = shuffle(pool).slice(0, DECK); idx = 0; q = null; seen = new Map();
+}
+function makeQuestion(item){
+  const wrong = [];
+  const add = (p)=>{ if(p!==item.p && !item.also.includes(p) && !wrong.includes(p)) wrong.push(p); };
+  byP[item.p].near.forEach(add);
+  shuffle(PARTICLES.map((x)=> x.p)).forEach(add);
+  q = {item, opts: shuffle([item.p, ...wrong.slice(0, 3)]), chosen: null, done: false, ok: false};
+}
+function choose(i){
+  if(!q || q.done) return;
+  q.chosen = q.opts[i]; q.done = true; q.ok = q.chosen===q.item.p;
+  const r = seen.get(q.item) || {item: q.item, errs: 0};
+  if(!q.ok){ r.errs++; queue.push(q.item); }
+  seen.set(q.item, r);
+  const s = stats[q.item.p] = stats[q.item.p] || {ok: 0, total: 0};
+  s.total++; if(q.ok) s.ok++;
+  try{ localStorage.setItem(STATS_KEY, JSON.stringify(stats)); }catch(e){}
+  Historico.log("p", "particulas", q.item.id, q.ok);
+  Sons.play("cards", q.ok ? "acerto" : "erro");
+  render();
+}
+function next(){ q = null; idx++; render(); }
+function restart(){ newDeck(); render(); window.scrollTo(0, 0); }
+function setFilter(p){ filter = p; restart(); }
+function toggleKanji(){ kanji = !kanji; try{ localStorage.setItem(KANJI_KEY, kanji ? '1' : '0'); }catch(e){} render(); }
+function trainOnly(p){ tab = "treino"; setFilter(p); }
+
+function pillsHtml(){
+  return `<div class="pills">${[["all","Todas"], ...PARTICLES.map((x)=> [x.p, x.p])].map(([v, l])=>
+    `<button type="button" class="pill ${filter===v?'on':''}" aria-pressed="${filter===v}" onclick='setFilter(${JSON.stringify(v)})'>${l}</button>`).join("")}</div>`;
+}
+function questionHtml(){
+  const it = q.item, pre = kanji ? it.pre : it.preK, post = kanji ? it.post : it.postK;
+  const done = queue.length ? Math.min(idx, queue.length) / queue.length * 100 : 0;
+  return `<div class="bar"><i style="width:${done}%"></i></div><div class="pos">${idx+1}/${queue.length}</div>
+    <div class="card">
+      <div class="jp-row"><div class="jp" lang="ja">${pre}${q.done ? `<mark>${it.p}</mark>` : `<span class="blank" aria-label="lacuna">？</span>`}${post}</div>${q.done ? TTS.btnHtml(it.preK + it.p + it.postK) : ""}</div>
+      <div class="pt">${it.pt}</div>
+      <button type="button" class="script" onclick="toggleKanji()" aria-pressed="${kanji}">${kanji ? "Ver em hiragana" : "Ver em kanji"}</button>
+      ${q.done ? `<div class="result ${q.ok?'good':'bad'}">${q.ok ? '✓ Certo!' : '✗ Não foi dessa vez'}</div><div class="why">💡 ${it.why}</div>` : ""}
+    </div>
+    <div class="opts">${q.opts.map((p, i)=>{
+      const cls = !q.done ? "" : p===it.p ? "ok" : p===q.chosen ? "no" : "dim";
+      return `<button type="button" class="opt ${cls}" lang="ja" onclick="choose(${i})" ${q.done?'disabled':''}><span class="n" aria-hidden="true">${i+1}</span>${p}</button>`;
+    }).join("")}</div>
+    ${q.done ? `<button type="button" class="next" onclick="next()">Próxima →</button>` : ""}`;
+}
+function summaryHtml(){
+  const list = [...seen.values()], first = list.filter((r)=> !r.errs).length;
+  const errs = {};
+  list.forEach((r)=>{ if(r.errs) errs[r.item.p] = (errs[r.item.p] || 0) + r.errs; });
+  const rows = Object.entries(errs).sort((a, b)=> b[1] - a[1]);
+  return `<div class="card"><div>🔗 Fim do deck</div><div class="big">${first}/${list.length}</div><div class="muted">acertos de primeira</div>
+    ${rows.length ? `<ul class="errs">${rows.map(([p, n])=> `<li><span lang="ja"><b>${p}</b> · ${byP[p].name}</span><b>${n}×</b></li>`).join("")}</ul>` : ""}
+    ${rows.length ? `<button type="button" class="script" onclick='trainOnly(${JSON.stringify(rows[0][0])})'>🎯 Próximo deck só com ${rows[0][0]}</button>` : ""}
+  </div><button type="button" class="next" onclick="restart()">Próximo deck →</button>`;
+}
+function guideHtml(){
+  return PARTICLES.map((x)=>{
+    const s = stats[x.p];
+    return `<section class="card guide"><div class="guide-top"><span class="guide-p" lang="ja">${x.p}</span><span class="guide-name">${x.name}</span>
+        ${s && s.total ? `<span class="guide-acc">${Math.round(s.ok / s.total * 100)}% em ${s.total}</span>` : ""}</div>
+      <div class="guide-use">${x.use}</div>
+      <div class="jp-row" style="justify-content:flex-start"><span class="guide-ex" lang="ja">${x.ex}</span>${TTS.btnHtml(x.ex)}</div>
+      <div class="pt">${x.exPt}</div>
+      <button type="button" class="train" onclick='trainOnly(${JSON.stringify(x.p)})'>Treinar ${x.p}</button></section>`;
+  }).join("");
+}
+function render(){
+  document.querySelectorAll(".tab").forEach((b)=>{ const on = b.dataset.tab===tab; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
+  const main = document.getElementById("main");
+  if(tab==="guia"){ main.innerHTML = guideHtml(); return; }
+  if(idx >= queue.length){ main.innerHTML = pillsHtml() + summaryHtml(); return; }
+  if(!q) makeQuestion(queue[idx]);
+  main.innerHTML = pillsHtml() + questionHtml();
+}
+document.querySelectorAll(".tab").forEach((b)=>{ b.onclick = ()=>{ tab = b.dataset.tab; render(); window.scrollTo(0, 0); }; });
+document.addEventListener("keydown", (e)=>{
+  if(tab!=="treino" || !q) return;
+  if(q.done && e.key==="Enter" && !e.target.closest("button")){ next(); return; }
+  const n = parseInt(e.key, 10);
+  if(!q.done && n>=1 && n<=q.opts.length) choose(n-1);
+});
+newDeck();
+render();
+Config.init();
+TTS.onReady(render);
+if("serviceWorker" in navigator){ window.addEventListener("load", ()=>{ navigator.serviceWorker.register("../sw.js").catch(()=>{}); }); }
+</script>
+</body>
+</html>

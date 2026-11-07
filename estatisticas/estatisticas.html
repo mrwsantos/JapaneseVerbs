@@ -68,7 +68,7 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;background:var(--accent)}
 .legend i.p{opacity:.38}
 .legend i.n{background:var(--chip);border:1px solid var(--border)}
-.verbos{--c:var(--verbos)} .adjetivos{--c:var(--adjetivos)}
+.verbos{--c:var(--verbos)} .adjetivos{--c:var(--adjetivos)} .substantivos{--c:#1f9d74}
 .split{display:flex;gap:6px;margin-bottom:6px}
 .split button{flex:1;padding:8px 4px;border-radius:12px;border:1px solid var(--border);background:none;color:var(--sub);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .split button.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -134,6 +134,7 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
 <main id="main"></main>
 <script src="../verbos/data.js"></script>
 <script src="../adjetivos/data.js"></script>
+<script src="../substantivos/data.js"></script>
 <script src="../historico.js"></script>
 <script src="../backup.js"></script>
 <script src="../config.js"></script>
@@ -145,18 +146,19 @@ document.getElementById("backBtn").onclick = (e)=>{
 
 const T = Historico.today();
 const load = (k, def)=>{ try{ return JSON.parse(localStorage.getItem(k)) || def; }catch(e){ return def; } };
-const PROG = {v: load("jpverbs-progress-v2", {}), a: load("jpadj-progress-v1", {})};
+const PROG = {v: load("jpverbs-progress-v2", {}), a: load("jpadj-progress-v1", {}), n: load("jpnoun-progress-v1", {})};
 // Registra o que já estava no progresso antes de existir histórico (não conta como "essa semana").
-Historico.sync("v", PROG.v); Historico.sync("a", PROG.a);
+Historico.sync("v", PROG.v); Historico.sync("a", PROG.a); Historico.sync("n", PROG.n);
 const H = Historico.load();
 
 const WORDS = [
   ...VERBS_RAW.map((w, i)=> ({...w, app: "v", id: i, key: "v" + i, grp: "g" + w.group})),
   ...ADJ_RAW.map((w, i)=> ({...w, app: "a", id: i, key: "a" + i, grp: w.type})),
+  ...NOUN_RAW.map((w, i)=> ({...w, app: "n", id: i, key: "n" + i, grp: w.type})),
 ];
 WORDS.forEach((w)=>{ w.e = PROG[w.app][w.id]; w.st = Historico.status(w.app, w.e); w.h = H.words[w.key] || {}; });
-const APPS = {v: "Verbos", a: "Adjetivos"};
-const CLS = {v: "verbos", a: "adjetivos"};
+const APPS = {v: "Verbos", a: "Adjetivos", n: "Substantivos"};
+const CLS = {v: "verbos", a: "adjetivos", n: "substantivos"};
 
 const pct = (a, b)=> b ? Math.round(a / b * 100) : 0;
 const esc = (s)=> String(s).replace(/[&<>"]/g, (c)=> ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -168,7 +170,7 @@ const words = (app)=> app ? WORDS.filter((w)=> w.app===app) : WORDS;
 function dayTotals(d, app, mode){
   const day = H.days[d]; if(!day) return [0, 0];
   let ok = 0, tot = 0;
-  for(const a of app ? [app] : ["v", "a"]){
+  for(const a of app ? [app] : ["v", "a", "n", "p"]){
     const m = day[a] || {};
     for(const k of mode ? [mode] : Object.keys(m)){ if(m[k]){ ok += m[k][0]; tot += m[k][1]; } }
   }
@@ -199,18 +201,18 @@ const activeDays = Object.keys(H.days).filter((d)=> dayTotals(d)[1] > 0).length;
 const TO_LEARN = 12;
 const histDays = Math.max(1, Math.min(14, T - H.start + 1));
 function rate(app){ return count(words(app), (w)=> inRange(w.h.s, T - histDays + 1, T)) / histDays; }
-const RATE = {v: rate("v"), a: rate("a")};
-const observed = histDays >= 3 && (RATE.v + RATE.a) > 0;
+const RATE = {v: rate("v"), a: rate("a"), n: rate("n")};
+const observed = histDays >= 3 && (RATE.v + RATE.a + RATE.n) > 0;
 const PLAN = 10; // novas por dia sugeridas quando ainda não há ritmo medido
 let assumed = false; // eta() usou o ritmo suposto em vez do real
 function eta(list){
   assumed = false;
   const left = list.filter((w)=> w.st !== "aprendido");
   if(!left.length) return 0;
-  const unstarted = {v: 0, a: 0};
+  const unstarted = {v: 0, a: 0, n: 0};
   left.forEach((w)=>{ if(w.h.s === undefined && !(w.e && (w.e.level >= 1 || w.e.due > 0))) unstarted[w.app]++; });
   let days = 0;
-  for(const app of ["v", "a"]){
+  for(const app of ["v", "a", "n"]){
     if(!unstarted[app]) continue;
     // Sem ritmo medido (ou sem estudar esse app ainda): supõe metade do plano por app.
     let r = observed ? RATE[app] : 0;
@@ -257,7 +259,7 @@ function hopeBox(){
   else if(learned) head = `Você já domina <b>${learned} palavras</b> e está praticando outras ${studying - learned}. Cada revisão conta.`;
   else head = `Você está praticando <b>${studying} palavras</b>. Mais alguns dias de revisão e elas viram Aprendidas.`;
   const how = observed
-    ? `No seu ritmo atual (≈ ${(RATE.v + RATE.a).toFixed(1).replace(".", ",")} palavras novas por dia, sem pular as revisões):`
+    ? `No seu ritmo atual (≈ ${(RATE.v + RATE.a + RATE.n).toFixed(1).replace(".", ",")} palavras novas por dia, sem pular as revisões):`
     : `Estudando ${PLAN} palavras novas por dia e fazendo as revisões:`;
   return `<section class="box hope"><h2>🌱 Continue assim</h2><p>${head}</p>
     ${projs ? `<p style="margin-top:12px">${how}</p>${projs}` : ""}
@@ -300,13 +302,15 @@ function overviewBox(){
   const groups = {
     v: [["g1", "Grupo 1", "Godan"], ["g2", "Grupo 2", "Ichidan"], ["g3", "Grupo 3", "Irregular / する"]],
     a: [["i", "Adjetivos -i", ""], ["na", "Adjetivos -na", ""]],
+    n: [["pessoa", "Pessoas", ""], ["lugar", "Lugares", ""], ["tempo", "Tempo", ""], ["comida", "Comida", ""], ["coisa", "Coisas", ""]],
   };
   let html = `<section class="box"><h2>🗂️ Geral</h2>
     ${statusRow("Tudo", `${WORDS.length} palavras`, WORDS)}
     ${statusRow("Verbos", `${words("v").length} palavras`, words("v"), "verbos")}
     ${statusRow("Adjetivos", `${words("a").length} palavras`, words("a"), "adjetivos")}
+    ${statusRow("Substantivos", `${words("n").length} palavras`, words("n"), "substantivos")}
     ${LEGEND}</section>`;
-  for(const app of ["v", "a"]){
+  for(const app of ["v", "a", "n"]){
     const rows = groups[app].map(([g, l, s])=> statusRow(l, s, words(app).filter((w)=> w.grp === g), CLS[app])).join("");
     const counts = {n: count(words(app), (w)=> w.st === "novo"), p: count(words(app), (w)=> w.st === "praticando"), a: count(words(app), (w)=> w.st === "aprendido")};
     let extra = "";
@@ -314,7 +318,7 @@ function overviewBox(){
       const waiting = count(words("v"), (w)=> w.e && w.e.level >= 4 && (w.e.fraseHits || 0) < 2);
       if(waiting) extra = `<p class="muted">💬 ${waiting} ${waiting === 1 ? "verbo já tem" : "verbos já têm"} nível de Aprendido e só ${waiting === 1 ? "espera" : "esperam"} 2 acertos no modo Frases.</p>`;
     }
-    html += `<section class="box ${CLS[app]}" style="--accent:var(--c)"><h2>${app === "v" ? "動詞 Verbos" : "形容詞 Adjetivos"}</h2>
+    html += `<section class="box ${CLS[app]}" style="--accent:var(--c)"><h2>${{v: "動詞 Verbos", a: "形容詞 Adjetivos", n: "名詞 Substantivos"}[app]}</h2>
       <p class="muted" style="margin:-6px 0 4px">${counts.a} aprendidos · ${counts.p} praticando · ${counts.n} novos</p>
       ${rows}${extra}</section>`;
   }
@@ -335,7 +339,7 @@ function jlptBox(){
 
 function modesBox(){
   return `<section class="box"><h2>🧩 Por modo<span class="sub">acerto nos últimos 30 dias</span></h2>
-    <div class="split" id="modeSplit"><button class="on" data-app="">Tudo</button><button data-app="v">Verbos</button><button data-app="a">Adjetivos</button></div>
+    <div class="split" id="modeSplit"><button class="on" data-app="">Tudo</button><button data-app="v">Verbos</button><button data-app="a">Adj.</button><button data-app="n">Subst.</button></div>
     <div class="modes" id="modeCells">${modeCells("")}</div>
     ${writeBox()}</section>`;
 }
@@ -495,7 +499,7 @@ function render(){
 // Células do "Por modo" (filtro Tudo/Verbos/Adjetivos).
 function modeCells(app){
   const from = T - 29;
-  return [["cards", "🗂️", "Cards"], ["frases", "💬", "Frases"], ["escrita", "✏️", "Escrita"], ["ouvir", "🎧", "Ouvir"]].map(([m, e, l])=>{
+  return [["cards", "🗂️", "Cards"], ["frases", "💬", "Frases"], ["escrita", "✏️", "Escrita"], ["ouvir", "🎧", "Ouvir"], ["particulas", "🔗", "Partículas"]].map(([m, e, l])=>{
     const [ok, tot] = rangeTotals(from, T, app, m), [, atot] = allTotals(app, m);
     return `<div class="mode"><div class="e">${e}</div><b>${tot ? pct(ok, tot) + "%" : "—"}</b><span>${l}<br>${tot} resp. em 30 dias${atot !== tot ? `<br>${atot} no total` : ""}</span></div>`;
   }).join("");

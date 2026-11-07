@@ -163,6 +163,7 @@ const Escrita = (()=>{
     ta:{f:0,p:1,n:0}, mashita:{f:1,p:1,n:0}, nakatta:{f:0,p:1,n:1}, masendeshita:{f:1,p:1,n:1},
     // Formas extras: treino livre, acertar ou errar não muda o nível da palavra.
     te:{extra:"Forma て"}, pot:{extra:"Potencial"}, vol:{extra:"Volitiva"},
+    word:{extra:"Palavra"}, // substantivos: a resposta é a própria palavra
   };
   const formLabel = (k)=>{ const F = FORM[k]; if(F.extra) return F.extra; return `${F.f?"Formal":"Informal"} · ${F.p?"passado":"presente"} · ${F.n?"negativo":"afirmativo"}`; };
   let A = null;

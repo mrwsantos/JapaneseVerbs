@@ -11,6 +11,8 @@ index.html              tela inicial (abre direto o último modo usado)
 manifest.json, sw.js    PWA: instalação e funcionamento offline
 verbos/verbos.html      app de verbos      (dados em verbos/data.js)
 adjetivos/adjetivos.html app de adjetivos  (dados em adjetivos/data.js)
+substantivos/substantivos.html app de substantivos (dados em substantivos/data.js)
+particulas/particulas.html treino de partículas (dados em particulas/data.js)
 jogo/jogo.html          jogo de pares (usa os dados dos dois apps)
 desenho/desenho.html    treino de escrita à mão (não mexe no progresso)
 estatisticas/estatisticas.html  página de estatísticas (botão de gráfico no topo)
@@ -330,6 +332,25 @@ deck. As opções erradas nunca têm o mesmo som da certa (易しい/優しい).
 
 Não mexe no nível das palavras: só conta nas Estatísticas (`ouvir.js`). Precisa
 de voz japonesa no aparelho; sem ela, o modo explica isso em vez de abrir.
+
+## 名 Substantivos
+
+App próprio (`substantivos/`), no mesmo formato de verbos e adjetivos, com
+progresso separado (`jpnoun-*`): Cards, Escrita, Frases e Ouvir. Na Escrita a
+resposta é a própria palavra; nas Frases a lacuna é a palavra, com alternativas
+da mesma categoria (pessoa, lugar, tempo, comida, coisa). Palavras em katakana
+ficam para depois, porque a digitação em romaji só gera hiragana. Não entram no
+Jogo nem no Desenhar (`Estudadas.words()`), mas entram na lista de palavras
+exportada e nas Estatísticas.
+
+## 🔗 Partículas
+
+Página própria (`particulas/`): completa a frase com a partícula certa (は, が,
+を, に, で, へ, と, も, の, から, まで, か) e vê a explicação. Decks de 10; errou, a
+frase volta no fim do deck. A aba Guia resume cada partícula e mostra o acerto
+dela. Sem SRS: não mexe no progresso das palavras, só em `jp-particulas-stats` e
+nas Estatísticas. Frases em que duas partículas valem marcam a outra em
+`aceitas`, para ela não virar alternativa errada.
 
 ## 🎮 Jogo de Pares
 

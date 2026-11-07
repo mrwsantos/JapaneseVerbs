@@ -42,9 +42,16 @@ const Estudadas = (()=>{
   // colar em qualquer lugar (ex.: pedir frases de exemplo pra uma IA). Simples
   // JSON solto, não serve pra restaurar progresso (isso é Baixar progresso, backup.js).
   const STATUS_LABEL = {praticando: "Praticando", aprendido: "Aprendido"};
+  // Só na lista exportada: Jogo e Desenhar usam words() (os traços do Desenhar
+  // foram gerados para os kanji de verbos e adjetivos).
+  function nouns(){
+    if(typeof NOUN_RAW === "undefined") return [];
+    const pn = load("jpnoun-progress-v1");
+    return NOUN_RAW.map((w, i)=> ({...w, status: pn[i] && pn[i].level >= 4 ? "aprendido" : "praticando"})).filter((w, i)=> isStudied(pn[i]));
+  }
   function exportList(){
     try{
-      const list = words().map((w)=> ({word: w.kanji, kana: w.kana, romaji: w.romaji, meaning: w.meaning, nivel: w.nivel, status: STATUS_LABEL[w.status] || w.status}));
+      const list = [...words(), ...nouns()].map((w)=> ({word: w.kanji, kana: w.kana, romaji: w.romaji, meaning: w.meaning, nivel: w.nivel, status: STATUS_LABEL[w.status] || w.status}));
       const json = JSON.stringify(list, null, 1);
       const d = new Date(), pad = (n)=> String(n).padStart(2, "0");
       const url = URL.createObjectURL(new Blob([json], {type: "application/json"}));

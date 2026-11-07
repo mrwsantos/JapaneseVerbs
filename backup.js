@@ -5,7 +5,7 @@
 // configurações (engrenagem no topo, ver config.js).
 // Também aceita os backups antigos de um modo só ({app:"verbos", progress}).
 const Backup = (()=>{
-  const PREFIXES = ["jp-", "jpverbs-", "jpadj-"]; // todas as chaves do app começam assim
+  const PREFIXES = ["jp-", "jpverbs-", "jpadj-", "jpnoun-"]; // todas as chaves do app começam assim
   const OLD = { // backups antigos, um por modo
     verbos: {key: "jpverbs-progress-v2", seed: "jpverbs-seeded-v3", app: "v", name: "verbos"},
     adjetivos: {key: "jpadj-progress-v1", seed: "jpadj-seeded-v1", app: "a", name: "adjetivos"},

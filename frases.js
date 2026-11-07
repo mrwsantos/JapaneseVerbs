@@ -185,10 +185,10 @@ const Frases = (()=>{
   function settingsHtml(segHtml){
     return `<div class="setting"><div class="setting-label">Resposta</div>${segHtml([["opcoes","Alternativas"],["digitar","Digitar"]], input, "Frases.setInput")}
         <div class="setting-note">${input==="opcoes" ? "Escolha entre 4 opções (teclas 1–4)." : "Escreva a palavra conjugada: romaji, kana ou kanji."}</div></div>
-      <div class="setting"><div class="setting-label">Conjugação</div>${segHtml([["variada","🎲 Variada"],["basica","Só presente"]], forms, "Frases.setForms")}
-        <div class="setting-note">${forms==="variada" ? "Formal/informal, passado e negativo sorteados em cada frase." : "Só a forma do dicionário e a formal (ます/です)."}</div></div>`;
+      ${A.noForms ? "" : `<div class="setting"><div class="setting-label">Conjugação</div>${segHtml([["variada","🎲 Variada"],["basica","Só presente"]], forms, "Frases.setForms")}
+        <div class="setting-note">${forms==="variada" ? "Formal/informal, passado e negativo sorteados em cada frase." : "Só a forma do dicionário e a formal (ます/です)."}</div></div>`}`;
   }
-  function summary(){ return (input==="opcoes" ? "Alternativas" : "Digitar") + (forms==="basica" ? " · presente" : ""); }
+  function summary(){ return (input==="opcoes" ? "Alternativas" : "Digitar") + (forms==="basica" && !A.noForms ? " · presente" : ""); }
 
   return {
     FORM, KEYS, PRESENT, FUTURE, ptVerb,
