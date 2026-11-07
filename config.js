@@ -28,6 +28,8 @@ const Config = (()=>{
 .cfg-btn small{display:block;font-size:11px;font-weight:400;color:var(--sub);margin-top:1px}
 .settings-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;border:none;cursor:pointer;border-radius:11px;background:var(--chip);color:var(--sub)}
 .settings-btn svg{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.settings-btn.needs-backup::after{content:"";position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#e8543f;box-shadow:0 0 0 2px var(--chip)}
+.cfg-btn small.cfg-warn{color:#d9584a;font-weight:700}
 .settings-btn[aria-expanded="true"]{background:var(--accent,#6b47ea);color:#fff}
 .settings-btn[aria-expanded="true"] svg{transform:rotate(60deg)}
 @media (prefers-reduced-motion: reduce){ .cfg-pop,.cfg-pill .cfg-thumb,.cfg-pill label svg,.settings-btn svg{transition:none} }`;
@@ -75,14 +77,25 @@ const Config = (()=>{
         <input type="radio" name="cfgTheme" id="cfgDark" value="dark"><label for="cfgDark" title="Escuro" aria-label="Escuro"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.8 6.8 0 0 0 10.7 10.7z"/></svg></label>
       </div></div>
       ${hasBackup ? `<h3>Progresso</h3>
-      <button type="button" class="cfg-btn" id="cfgExport"><span class="cfg-i">⬇</span><span>Baixar progresso<small>um arquivo com tudo do app</small></span></button>
+      <button type="button" class="cfg-btn" id="cfgExport"><span class="cfg-i">⬇</span><span>Baixar progresso<small id="cfgBackupInfo"></small></span></button>
       <button type="button" class="cfg-btn" id="cfgImport"><span class="cfg-i">⬆</span><span>Importar progresso<small>substitui o progresso deste aparelho</small></span></button>
       <input type="file" id="cfgFile" accept="application/json,.json" style="display:none">` : ""}
       ${hasWordList ? `<h3>Exportar</h3>
       <button type="button" class="cfg-btn" id="cfgWordList"><span class="cfg-i">📝</span><span>Baixar lista de palavras<small>kanji, kana e significado — pra colar numa IA</small></span></button>` : ""}`;
     document.body.appendChild(pop);
 
+    // Lembrete de backup: bolinha na engrenagem e aviso no botão de baixar.
+    const backupInfo = ()=>{
+      if(!hasBackup) return;
+      const {days, remind} = Backup.status(), info = pop.querySelector("#cfgBackupInfo");
+      info.textContent = days === null ? "⚠️ você ainda não fez backup"
+        : days === 0 ? "último backup: hoje"
+        : `${remind ? "⚠️ " : ""}último backup há ${days} ${days === 1 ? "dia" : "dias"}`;
+      info.classList.toggle("cfg-warn", remind);
+      btn.classList.toggle("needs-backup", remind);
+    };
     const sync = ()=>{
+      backupInfo();
       const t = current();
       pop.querySelector("#cfgLight").checked = t === "light";
       pop.querySelector("#cfgDark").checked = t === "dark";
@@ -91,7 +104,7 @@ const Config = (()=>{
     pop.querySelectorAll('input[name="cfgTheme"]').forEach((r)=> r.onchange = ()=> setTheme(r.value));
     if(hasBackup){
       const file = pop.querySelector("#cfgFile");
-      pop.querySelector("#cfgExport").onclick = ()=>{ close(); Backup.exportAll(); };
+      pop.querySelector("#cfgExport").onclick = ()=>{ close(); Backup.exportAll(); backupInfo(); };
       pop.querySelector("#cfgImport").onclick = ()=> file.click();
       file.onchange = ()=>{ const f = file.files[0]; file.value = ""; close(); Backup.importFile(f); };
     }

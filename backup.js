@@ -10,12 +10,15 @@ const Backup = (()=>{
     verbos: {key: "jpverbs-progress-v2", seed: "jpverbs-seeded-v3", app: "v", name: "verbos"},
     adjetivos: {key: "jpadj-progress-v1", seed: "jpadj-seeded-v1", app: "a", name: "adjetivos"},
   };
+  const LAST_KEY = "jp-last-backup"; // quando baixou o último backup (ms)
+  const REMIND_DAYS = 7;
   const own = (k)=> PREFIXES.some((p)=> k.startsWith(p));
   const ownKeys = ()=> Object.keys(localStorage).filter(own);
   const isObj = (o)=> typeof o === "object" && o !== null && !Array.isArray(o);
 
   function exportAll(){
     try{
+      localStorage.setItem(LAST_KEY, String(Date.now()));
       const data = {};
       ownKeys().forEach((k)=>{ data[k] = localStorage.getItem(k); });
       const d = new Date(), pad = (n)=> String(n).padStart(2, "0");
@@ -59,5 +62,12 @@ const Backup = (()=>{
     r.onload = ()=> apply(r.result);
     r.readAsText(file);
   }
-  return {exportAll, importFile, apply};
+  // Dias desde o último backup (null = nunca fez) e se já é hora de avisar.
+  function status(){
+    let ts = 0;
+    try{ ts = parseInt(localStorage.getItem(LAST_KEY), 10) || 0; }catch(e){}
+    const days = ts ? Math.floor((Date.now() - ts) / 86400000) : null;
+    return {days, remind: days === null || days >= REMIND_DAYS};
+  }
+  return {exportAll, importFile, apply, status};
 })();

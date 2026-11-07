@@ -229,6 +229,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .es-tip p{margin:4px 0;font-size:13px;line-height:1.5}
 .es-actions{margin-top:10px}
 .write-why{font-size:12px;color:var(--sub);margin-top:6px}
+.write-rule{font-size:13px;line-height:1.5;margin-top:10px;padding:9px 11px;border-radius:12px;background:var(--chip);color:var(--text);text-align:left}
 /* Modo Frases: lacuna + alternativas */
 .fq-card{gap:10px}
 .fq-note{font-size:12px;color:var(--sub);text-align:center;line-height:1.45;margin:2px 4px 10px}
@@ -310,6 +311,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
   <button type="button" class="mode active" role="tab" aria-selected="true" data-mode="cards">🗂️ Cards</button>
   <button type="button" class="mode" role="tab" aria-selected="false" data-mode="escrita">✏️ Escrita</button>
   <button type="button" class="mode" role="tab" aria-selected="false" data-mode="frases">💬 Frases</button>
+  <button type="button" class="mode" role="tab" aria-selected="false" data-mode="ouvir">🎧 Ouvir</button>
 </div>
 <script src="../sons.js"></script>
 <script src="../tts.js"></script>
@@ -318,6 +320,7 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 <script src="../config.js"></script>
 <script src="../frases.js"></script>
 <script src="../escrita.js"></script>
+<script src="../ouvir.js"></script>
 <script src="../estudadas.js"></script>
 <script src="data.js"></script>
 <script src="../adjetivos/data.js"></script>
@@ -374,7 +377,7 @@ if(!localStorage.getItem(SEED_FLAG)){
 }
 Historico.sync("v", progress);
 function getEntry(id){ if(!progress[id]) progress[id] = {level:0, due:0, fraseHits:0}; if(progress[id].fraseHits===undefined) progress[id].fraseHits=0; return progress[id]; }
-function today(){ return Math.floor(Date.now()/86400000); }
+function today(){ return Historico.today(); }
 function getStatus(v){
   const e = progress[v.id];
   if(!e || e.level<2) return 'novo';
@@ -389,7 +392,7 @@ const GODAN_MAP = {
  'ぶ':{nai:'ば',i:'び',te:'んで',ta:'んだ'}, 'む':{nai:'ま',i:'み',te:'んで',ta:'んだ'},
  'る':{nai:'ら',i:'り',te:'って',ta:'った'}
 };
-function conjugate(v){
+function baseForms(v){
   const k = v.kana;
   if(v.group===1){
     const stem = k.slice(0,-1), last = k.slice(-1), m = GODAN_MAP[last];
@@ -417,6 +420,41 @@ function conjugate(v){
     te:prefix+"して", ta:prefix+"した", mashita:prefix+"しました", nakatta:prefix+"しなかった", masendeshita:prefix+"しませんでした" };
 }
 
+const GODAN_EO = {'う':['え','お'],'く':['け','こ'],'ぐ':['げ','ご'],'す':['せ','そ'],'つ':['て','と'],'ぬ':['ね','の'],'ぶ':['べ','ぼ'],'む':['め','も'],'る':['れ','ろ']};
+// Verbos sem potencial/volitiva naturais (não dependem da vontade, ou já são "poder").
+const NO_POT_VOL = ['ある','いる','できる','分かる','知る','死ぬ','晴れる','降る','疲れる','生まれる','始まる','終わる','なる'];
+function conjugate(v){
+  const c = baseForms(v);
+  if(NO_POT_VOL.includes(v.kanji)) return c;
+  const k = v.kana, stem = k.slice(0,-1);
+  if(v.group===1){ const [e, o] = GODAN_EO[k.slice(-1)]; c.pot = stem+e+"る"; c.vol = stem+o+"う"; }
+  else if(v.group===2){ c.pot = stem+"られる"; c.vol = stem+"よう"; }
+  else if(k==="くる"){ c.pot = "こられる"; c.vol = "こよう"; }
+  else { const p = k.slice(0,-2); c.pot = p+"できる"; c.vol = p+"しよう"; }
+  return c;
+}
+// Regra da conjugação, mostrada na Escrita quando erra.
+function explainForm(v, key){
+  const k = v.kana, ans = conjugate(v)[key];
+  const tail = {masu:'ます', masen:'ません', mashita:'ました', masendeshita:'ませんでした', nai:'ない', nakatta:'なかった', te:'て', ta:'た', pot:'られる', vol:'よう'}[key];
+  if(key==='dict') return `É a forma do dicionário: ${k}, sem mudar nada.`;
+  if(v.group===1){
+    const last = k.slice(-1), m = GODAN_MAP[last], [e, o] = GODAN_EO[last];
+    if(k==='ある' && (key==='nai' || key==='nakatta')) return `ある é exceção: o negativo é só ${ans} (não existe あらない).`;
+    if(k==='いく' && (key==='te' || key==='ta')) return `行く é exceção do Grupo 1: く vira ${key==='te' ? 'って' : 'った'} (não ${key==='te' ? 'いて' : 'いた'}) → ${ans}.`;
+    const rule = {masu:`${m.i}ます`, masen:`${m.i}ません`, mashita:`${m.i}ました`, masendeshita:`${m.i}ませんでした`, nai:`${m.nai}ない`, nakatta:`${m.nai}なかった`, te:m.te, ta:m.ta, pot:`${e}る`, vol:`${o}う`}[key];
+    return `${v.kanji} é Grupo 1: ${last} vira ${rule} → ${ans}.`;
+  }
+  if(v.group===2) return `${v.kanji} é Grupo 2: tira o る e põe ${tail} → ${ans}.`;
+  if(k==='くる') return `来る é irregular: muda a leitura (き em ます/て/た, こ em ない/られる/よう) → ${ans}.`;
+  const end = ans.slice(k.length-2);
+  return `${v.kanji} é irregular: する vira ${end} → ${ans}.`;
+}
+function ptExtra(v, key){
+  const inf = v.meaning.split(' / ')[0].replace(/\s*\(.*?\)/g, '');
+  return key==='pot' ? `consigo ${inf}` : key==='vol' ? `vamos ${inf}` : `forma て de "${inf}"`;
+}
+function writeKeyFor(v, f){ const k = targetKey(f); return conjugate(v)[k] ? k : 'te'; }
 
 function conjSpeakHtml(text){
   return TTS.available() ? `<span class="conj-speak" data-tts="${escapeAttr(text)}">${text}</span>` : `<span>${text}</span>`;
@@ -430,7 +468,9 @@ function conjRowsHtml(c){
     <div class="conj-row"><span class="lbl">Passado informal</span>${conjSpeakHtml(c.ta)}</div>
     <div class="conj-row"><span class="lbl">Passado formal</span>${conjSpeakHtml(c.mashita)}</div>
     <div class="conj-row"><span class="lbl">Passado neg. informal</span>${conjSpeakHtml(c.nakatta)}</div>
-    <div class="conj-row"><span class="lbl">Passado neg. formal</span>${conjSpeakHtml(c.masendeshita)}</div>`;
+    <div class="conj-row"><span class="lbl">Passado neg. formal</span>${conjSpeakHtml(c.masendeshita)}</div>${c.pot ? `
+    <div class="conj-row"><span class="lbl">Potencial</span>${conjSpeakHtml(c.pot)}</div>
+    <div class="conj-row"><span class="lbl">Volitiva</span>${conjSpeakHtml(c.vol)}</div>` : ''}`;
 }
 
 function ptForm(v, past, neg){
@@ -505,6 +545,7 @@ let state = {tab:"study", mode:"cards", queue:[], idx:0, deckIds:[], deckWrongId
   showKanji: loadKanjiPref(), cardGroupFilter:'all', nivelFilter:'all', groupCollapsed:{1:false,2:false,3:false}};
 
 function targetKey(f){
+  if(f.extra) return f.extra;
   if(f.polite==='informal'){
     if(!f.past && !f.neg) return 'dict';
     if(!f.past && f.neg) return 'nai';
@@ -521,6 +562,12 @@ function randomFilter(){
 }
 function toggleFilter(kind){
   const f = state.writeFilter;
+  if(Escrita.FORM[kind] && Escrita.FORM[kind].extra){
+    f.extra = f.extra===kind ? null : kind;
+    f.shuffle = false; state.shuffledFilter = null;
+    render(); return;
+  }
+  f.extra = null;
 
   if(kind==='formal'){
     f.polite = 'formal';
@@ -655,6 +702,13 @@ function buildQueue(){
     state.reviewIds = [];
     state.reviewWrongIds = [];
     state.reviewEnd = 0;
+  } else if(state.mode==="ouvir"){
+    state.queue = Ouvir.deck();
+    state.deckIds = [];
+    state.deckWrongIds = [];
+    state.reviewIds = [];
+    state.reviewWrongIds = [];
+    state.reviewEnd = 0;
   } else {
     state.queue = VERBS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }).sort(()=>Math.random()-0.5);
     state.deckIds = [];
@@ -695,23 +749,34 @@ function trainWriteGroup(key){ setWriteGroup(parseWriteGroup(String(key).replace
 // "Próximo deck só com essa forma": fixa as formas da Escrita na que mais errou.
 function trainWriteForm(key){
   const F = Escrita.FORM[key];
-  state.writeFilter = {polite: F.f ? 'formal' : 'informal', past: !!F.p, neg: !!F.n, shuffle: false};
+  state.writeFilter = {polite: F.f ? 'formal' : 'informal', past: !!F.p, neg: !!F.n, shuffle: false, extra: F.extra ? key : null};
   nextWriteDeck();
 }
 state.writeGroup = loadWriteGroup();
+Ouvir.setup({
+  app: "v",
+  words: VERBS,
+  pool: ()=> VERBS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }),
+  studied: (w)=> { const e = progress[w.id]; return !!e && e.level >= 2; },
+  requeue: (v)=> state.queue.push(v),
+  next(){ state.idx++; render(); },
+  render: ()=> render(),
+  restart(){ buildQueue(); render(); },
+});
 Escrita.setup({
   words: VERBS,
   statsKey: "jpverbs-write-stats",
   forms(v){
     const c = conjugate(v), out = {};
     for(const k of Object.keys(Escrita.FORM)){
+      if(!c[k]) continue;
       const kanas = [c[k]];
       out[k] = [...kanas, ...kanas.map((x)=> kanjiFormFor(v, x))];
     }
     return out;
   },
   groupOf: (v)=> ({key: 'g' + v.group, label: GROUP_NAME[v.group]}),
-  hint: (k)=> ({dict:'〜う / 〜る', masu:'〜ます', nai:'〜ない', masen:'〜ません', ta:'〜た / 〜だ', mashita:'〜ました', nakatta:'〜なかった', masendeshita:'〜ませんでした'})[k],
+  hint: (k)=> ({dict:'〜う / 〜る', masu:'〜ます', nai:'〜ない', masen:'〜ません', ta:'〜た / 〜だ', mashita:'〜ました', nakatta:'〜なかった', masendeshita:'〜ませんでした', te:'〜て / 〜で', pot:'〜える / 〜られる', vol:'〜おう / 〜よう'})[k],
 });
 
 // ===== Modo Frases (lógica comum em ../frases.js) =====
@@ -748,7 +813,7 @@ Frases.setup({
 // Posição da carta atual dentro do lote (ex.: "Card 2/10") ou das revisões
 // da rodada (ex.: "Revendo 1/13"); null fora do modo Cards.
 function deckPosition(){
-  if(state.mode==='escrita') return state.idx < state.queue.length ? {label:'', pos: state.idx+1, total: state.queue.length} : null;
+  if(state.mode==='escrita' || state.mode==='ouvir') return state.idx < state.queue.length ? {label:'', pos: state.idx+1, total: state.queue.length} : null;
   if(state.mode!=='cards') return null;
   const v = state.queue[state.idx];
   if(!v) return null;
@@ -864,7 +929,7 @@ function checkWrite(giveUp){
   // Romaji que sobrou no fim (ex.: "n") vira kana antes de conferir.
   const input = giveUp ? '' : Romaji.toKana(document.getElementById("writeInput").value, true);
   const eff = state.writeFilter.shuffle ? state.shuffledFilter : state.writeFilter;
-  const key = targetKey(eff);
+  const key = writeKeyFor(v, eff);
   const targetKana = conjugate(v)[key];
   const targetRomaji = kanaToRomaji(targetKana);
   const targetKanji = kanjiFormFor(v, targetKana);
@@ -889,7 +954,10 @@ function writeNext(correct){
     else state.queue.push(v);
   }
   state.writeGaveUp = false;
-  if(correct){
+  // Formas extras são treino livre: não mexem no nível nem na próxima revisão.
+  if(Escrita.FORM[state.writeKey].extra){
+    // nada
+  } else if(correct){
     e.level = Math.min(e.level+1, INTERVALS.length-1);
     e.due = today() + INTERVALS[e.level];
   } else {
@@ -935,9 +1003,10 @@ function settingsSummary(){
     if(state.testMode) parts.push('🧪 teste');
   }
   if(state.mode==='frases') parts.push(state.showKanji ? 'Kanji' : 'Kana', Frases.summary());
+  if(state.mode==='ouvir') parts.push(Ouvir.summary());
   if(state.mode==='escrita'){
     const f = state.writeFilter;
-    parts.push(f.shuffle ? '🎲 Embaralhado' : [f.polite==='formal'?'Formal':'Informal', f.past?'Passado':'Presente', f.neg?'Negativo':''].filter(Boolean).join(' · '));
+    parts.push(f.extra ? Escrita.formLabel(f.extra) : f.shuffle ? '🎲 Embaralhado' : [f.polite==='formal'?'Formal':'Informal', f.past?'Passado':'Presente', f.neg?'Negativo':''].filter(Boolean).join(' · '));
     if(state.writeGroup!=='all'){ const g = CARD_FILTERS.find(([val])=> val===state.writeGroup); if(g) parts.push(g[1]); }
   }
   return parts.join(' · ');
@@ -961,18 +1030,23 @@ function segHtml(opts, cur, fn){
   return `<div class="seg">${opts.map(([val,label])=>`<button type="button" class="${val===cur?'active':''}" aria-pressed="${val===cur}" onclick='${fn}(${JSON.stringify(val)})'>${label}</button>`).join('')}</div>`;
 }
 function writePillsHtml(){
-  const f = state.writeFilter;
+  const f = state.writeFilter, off = f.shuffle || f.extra;
   return `<div class="pillrow">
-    <button type="button" class="pill ${f.polite==='informal'&&!f.shuffle?'active':''}" aria-pressed="${f.polite==='informal'&&!f.shuffle}" onclick="toggleFilter('informal')">Informal</button>
-    <button type="button" class="pill ${f.polite==='formal'&&!f.shuffle?'active':''}" aria-pressed="${f.polite==='formal'&&!f.shuffle}" onclick="toggleFilter('formal')">Formal</button>
-    <button type="button" class="pill ${f.past&&!f.shuffle?'active':''}" aria-pressed="${f.past&&!f.shuffle}" onclick="toggleFilter('past')">Passado</button>
-    <button type="button" class="pill ${f.neg&&!f.shuffle?'active':''}" aria-pressed="${f.neg&&!f.shuffle}" onclick="toggleFilter('neg')">Negativo</button>
-    <button type="button" class="pill ${f.shuffle?'active':''}" aria-pressed="${!!f.shuffle}" onclick="toggleFilter('shuffle')">🎲 Embaralhado</button>
+    <button type="button" class="pill ${f.polite==='informal'&&!off?'active':''}" aria-pressed="${f.polite==='informal'&&!off}" onclick="toggleFilter('informal')">Informal</button>
+    <button type="button" class="pill ${f.polite==='formal'&&!off?'active':''}" aria-pressed="${f.polite==='formal'&&!off}" onclick="toggleFilter('formal')">Formal</button>
+    <button type="button" class="pill ${f.past&&!off?'active':''}" aria-pressed="${f.past&&!off}" onclick="toggleFilter('past')">Passado</button>
+    <button type="button" class="pill ${f.neg&&!off?'active':''}" aria-pressed="${f.neg&&!off}" onclick="toggleFilter('neg')">Negativo</button>
+    <button type="button" class="pill ${f.shuffle?'active':''}" aria-pressed="${!!off}" onclick="toggleFilter('shuffle')">🎲 Embaralhado</button>
   </div>`;
+}
+function extraPillsHtml(){
+  const f = state.writeFilter;
+  return `<div class="pillrow">${[['te','Forma て'],['pot','Potencial'],['vol','Volitiva']].map(([k, l])=>
+    `<button type="button" class="pill ${f.extra===k?'active':''}" aria-pressed="${f.extra===k}" onclick="toggleFilter('${k}')">${l}</button>`).join('')}</div>`;
 }
 function setKanji(v){ if(state.showKanji!==v) toggleKanji(); }
 function sheetHtml(){
-  const title = {cards:'Ajustes · Cards', frases:'Ajustes · Frases', escrita:'Ajustes · Escrita'}[state.mode];
+  const title = {cards:'Ajustes · Cards', frases:'Ajustes · Frases', escrita:'Ajustes · Escrita', ouvir:'Ajustes · Ouvir'}[state.mode];
   let body = '';
   if(state.mode==='cards'){
     body += `<div class="setting"><div class="setting-label">Direção</div>${segHtml([['jp',DIR_LABEL.jp],['pt',DIR_LABEL.pt]], direction, 'setDirection')}
@@ -986,8 +1060,10 @@ function sheetHtml(){
     body += `<div class="setting"><div class="setting-label">Escrita das frases</div>${segHtml([[true,'Kanji'],[false,'Hiragana']], state.showKanji, 'setKanji')}</div>`;
     body += Frases.settingsHtml(segHtml);
   }
+  if(state.mode==='ouvir') body += Ouvir.settingsHtml(segHtml);
   if(state.mode==='escrita'){
     body += `<div class="setting"><div class="setting-label">Formas para praticar</div>${writePillsHtml()}</div>`;
+    body += `<div class="setting"><div class="setting-label">Formas extras</div>${extraPillsHtml()}<div class="setting-note">Treino livre: acertar ou errar estas formas não muda o nível da palavra.</div></div>`;
     body += `<div class="setting"><div class="setting-label">Grupo dos verbos</div>${segHtml(CARD_FILTERS, state.writeGroup, 'setWriteGroup')}</div>`;
   }
   return `<div class="sheet-backdrop ${state.sheetAnim?'anim':''}" onclick="closeSheet()">
@@ -1172,6 +1248,13 @@ function renderInner(){
       main.innerHTML = statsHtml + Frases.html(state.queue[state.idx]);
       Frases.bind(!!state.sheet);
 
+    } else if(state.mode==="ouvir"){
+      if(!TTS.available()){ main.innerHTML = statsHtml + `<div class="empty">🎧 Este aparelho não tem voz japonesa disponível no navegador.<br>Instale a voz japonesa nas configurações de texto para fala do sistema e reabra o app.</div>`; return; }
+      if(state.queue.length===0){ main.innerHTML = statsHtml + `<div class="empty">Nenhum verbo em "Praticando" ou "Aprendido" ainda.<br>Continue no modo Cards até o nível 2+.</div>`; return; }
+      if(state.idx >= state.queue.length){ main.innerHTML = statsHtml + Ouvir.summaryHtml(); return; }
+      main.innerHTML = statsHtml + Ouvir.html(state.queue[state.idx]);
+      Ouvir.bind(!!state.sheet);
+
     } else { // escrita
       if(state.queue.length===0){ main.innerHTML = statsHtml + (state.writeGroup!=='all'
         ? `<div class="empty">Nenhum verbo desse grupo em "Praticando" ou "Aprendido".<br>Troque o grupo nos Ajustes (⚙️).</div><button type="button" class="know-btn" onclick="setWriteGroup('all')">Ver todos</button>`
@@ -1181,13 +1264,14 @@ function renderInner(){
       const f = state.writeFilter;
       if(f.shuffle && !state.shuffledFilter) state.shuffledFilter = randomFilter();
       const eff = f.shuffle ? state.shuffledFilter : f;
-      const tagsHtml = `<div class="tags">
+      const wkey = writeKeyFor(v, eff), wextra = Escrita.FORM[wkey].extra;
+      const tagsHtml = wextra ? `<div class="tags"><span class="tagbadge time">${wextra}</span><span class="tagbadge shuffle">treino livre</span></div>` : `<div class="tags">
         <span class="tagbadge ${eff.polite==='formal'?'formal':'informal'}">${eff.polite==='formal'?'Formal':'Informal'}</span>
         <span class="tagbadge time">${eff.past?'Passado':'Presente'}</span>
         <span class="tagbadge neg">${eff.neg?'Negativo':'Afirmativo'}</span>
         ${f.shuffle?'<span class="tagbadge shuffle">🎲 aleatório</span>':''}
       </div>`;
-      const ptPhrase = ptForm(v, eff.past, eff.neg);
+      const ptPhrase = wextra ? ptExtra(v, wkey) : ptForm(v, eff.past, eff.neg);
       if(!state.writeChecked){
         main.innerHTML = statsHtml + `
           <div class="card nohand">
@@ -1214,6 +1298,7 @@ function renderInner(){
               ${!state.writeOk && !state.writeGaveUp ? `<div class="write-why">Você escreveu: <b lang="ja">${(state.writeInputShown||'').replace(/[<>&]/g,'') || '—'}</b>${state.writeErr && state.writeErr.type==='forma' ? ` — essa é a forma <b>${Escrita.formLabel(state.writeErr.got)}</b>` : ''}</div>` : ''}
               <div class="kana" style="margin-top:8px;font-size:20px">${state.writeTargetKanji!==state.writeTargetKana ? state.writeTargetKanji+' · ' : ''}${state.writeTargetKana}</div>
               <div class="romaji">${state.writeTargetRomaji}</div>
+              ${!state.writeOk ? `<div class="write-rule">💡 ${explainForm(v, state.writeKey)}</div>` : ''}
               <div class="tags" style="margin-top:6px">dicionário: ${v.kanji} (${v.kana})</div>
             </div>
           </div>

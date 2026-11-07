@@ -80,7 +80,7 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
 .chart .er{background:var(--warn);opacity:.7}
 .chart .d{font-size:9px;color:var(--sub)}
 .chart .col.today .d{color:var(--text);font-weight:700}
-.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.modes{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .mode{background:var(--chip);border-radius:14px;padding:10px 8px;text-align:center}
 .mode .e{font-size:20px}
 .mode b{display:block;font-size:18px;margin-top:2px}
@@ -341,7 +341,7 @@ function modesBox(){
 }
 // Escrita: forma mais errada (histórico de escrita.js).
 const FORM_LABEL = {dict: "Informal · presente", masu: "Formal · presente", nai: "Informal · negativo", masen: "Formal · negativo",
-  ta: "Informal · passado", mashita: "Formal · passado", nakatta: "Informal · passado negativo", masendeshita: "Formal · passado negativo"};
+  te: "Forma て", pot: "Potencial", vol: "Volitiva", ta: "Informal · passado", mashita: "Formal · passado", nakatta: "Informal · passado negativo", masendeshita: "Formal · passado negativo"};
 function weakestForm(){
   let worst = null;
   for(const [app, key] of [["v", "jpverbs-write-stats"], ["a", "jpadj-write-stats"]]){
@@ -384,7 +384,7 @@ function hardBox(){
   if(!list.length) return "";
   return `<section class="box"><h2>🧗 Palavras que mais travam</h2><div class="hard">
     ${list.map(({w})=> `<div><span class="jp" lang="ja">${esc(w.kanji)}</span><span class="pt">${esc(w.kana)} · ${esc(w.meaning)}</span><span class="tag">${APPS[w.app]}</span><span class="er">✗${w.h.err}</span></div>`).join("")}
-    </div><p class="muted">Erros somando Cards, Frases e Escrita. Elas voltam mais vezes nas revisões; vale ler a frase de exemplo no verso do card.</p></section>`;
+    </div><p class="muted">Erros somando todos os modos. Elas voltam mais vezes nas revisões; vale ler a frase de exemplo no verso do card.</p></section>`;
 }
 
 function tipsBox(){
@@ -495,7 +495,7 @@ function render(){
 // Células do "Por modo" (filtro Tudo/Verbos/Adjetivos).
 function modeCells(app){
   const from = T - 29;
-  return [["cards", "🗂️", "Cards"], ["frases", "💬", "Frases"], ["escrita", "✏️", "Escrita"]].map(([m, e, l])=>{
+  return [["cards", "🗂️", "Cards"], ["frases", "💬", "Frases"], ["escrita", "✏️", "Escrita"], ["ouvir", "🎧", "Ouvir"]].map(([m, e, l])=>{
     const [ok, tot] = rangeTotals(from, T, app, m), [, atot] = allTotals(app, m);
     return `<div class="mode"><div class="e">${e}</div><b>${tot ? pct(ok, tot) + "%" : "—"}</b><span>${l}<br>${tot} resp. em 30 dias${atot !== tot ? `<br>${atot} no total` : ""}</span></div>`;
   }).join("");

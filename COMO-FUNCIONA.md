@@ -16,6 +16,7 @@ desenho/desenho.html    treino de escrita à mão (não mexe no progresso)
 estatisticas/estatisticas.html  página de estatísticas (botão de gráfico no topo)
 historico.js            histórico de respostas e datas para as estatísticas
 backup.js               exportar/importar o app inteiro num arquivo só
+ouvir.js                modo Ouvir (verbos e adjetivos)
 config.js               botão de configurações (tema + backup) no topo das páginas
 sons.js                 sons gerados no navegador (sem arquivos de áudio)
 desenho.js              área de desenho + reconhecimento usados pela página Desenhar
@@ -32,7 +33,8 @@ icons/, fonts/
 - O app lembra o último modo aberto e o tema.
 - Todo o progresso fica salvo **no navegador do aparelho** (`localStorage`).
   Desinstalar o app ou limpar os dados do site apaga o progresso — use
-  **Baixar progresso** (na engrenagem ⚙️) para ter uma cópia. É **um arquivo só**
+  **Baixar progresso** (na engrenagem ⚙️) para ter uma cópia. Sem backup há 7
+  dias ou mais, aparece uma bolinha vermelha na engrenagem. É **um arquivo só**
   (`backup.js`) com todas as chaves do app (`jp-*`, `jpverbs-*`, `jpadj-*`):
   progresso de verbos e adjetivos, histórico das estatísticas, estatística da
   Escrita e da aba Kanji do Desenhar, decks em andamento, recorde do jogo e
@@ -63,6 +65,10 @@ volta para revisão:
 
 Uma palavra nova precisa de **2 acertos em dias diferentes** para chegar em
 Praticando (acerta hoje → nível 1, volta amanhã → acerta → nível 2).
+
+O dia do app vira às **4h da manhã**, no horário do aparelho
+(`Historico.today()`). A contagem é a mesma de antes, então as datas salvas
+continuam valendo sem conversão.
 
 ## Como estudar um card
 
@@ -196,6 +202,14 @@ em **decks de 10** ("Deck 3/10" no topo).
 - Acertou → sobe um nível. Errou → desce um nível, mas **nunca abaixo de
   Praticando** (escrita é treino extra, não te faz "desaprender").
 
+Ao errar, o app mostra a **regra da conjugação** (`explainForm`).
+
+Em **Formas extras**, nos Ajustes, dá para treinar a **forma て** (verbos e
+adjetivos) e a **potencial** e a **volitiva** (só verbos). São treino livre:
+acertar ou errar não muda o nível nem a próxima revisão. O Embaralhado não usa
+essas formas. Verbos sem potencial/volitiva naturais (`NO_POT_VOL`, ex.: ある,
+分かる) caem na forma て.
+
 ## 🔒 Jogo e Desenhar liberam com 3 palavras
 
 O Jogo de Pares e o Desenhar ficam **bloqueados até você ter pelo menos 3
@@ -303,6 +317,16 @@ a tradução em português embaixo (com a parte que muda destacada).
   Praticando).
 - A lógica comum fica em `frases.js`; cada app só informa como conjugar e
   traduzir as suas frases.
+
+## 🎧 Modo Ouvir (verbos e adjetivos)
+
+O app fala o kana de uma palavra em Praticando ou Aprendido, e você escolhe o
+significado entre 4 opções ou, nos Ajustes, escreve o que ouviu. Tem botão de
+repetir e de ouvir mais devagar. Decks de 10; errou, a palavra volta no fim do
+deck. As opções erradas nunca têm o mesmo som da certa (易しい/優しい).
+
+Não mexe no nível das palavras: só conta nas Estatísticas (`ouvir.js`). Precisa
+de voz japonesa no aparelho; sem ela, o modo explica isso em vez de abrir.
 
 ## 🎮 Jogo de Pares
 

@@ -33,12 +33,12 @@ const TTS = (()=>{
   // mais tarde, quando o navegador terminar de carregar as vozes. Útil para
   // mandar um render() de novo e o botão 🔊 aparecer sem precisar recarregar.
   function onReady(fn){ voice ? fn() : waiting.push(fn); }
-  function speak(text){
+  function speak(text, rate){
     if(!synth || !voice || !text) return;
     try{
       synth.cancel(); // corta qualquer fala em andamento antes de começar a nova
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = voice.lang; u.voice = voice; u.rate = 0.9;
+      u.lang = voice.lang; u.voice = voice; u.rate = rate || 0.9;
       synth.speak(u);
     }catch(e){}
   }

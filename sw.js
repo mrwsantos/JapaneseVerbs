@@ -1,4 +1,4 @@
-const CACHE_NAME = "jp-srs-cache-v45";
+const CACHE_NAME = "jp-srs-cache-v46";
 // Caches deste app (inclui os nomes antigos de quando verbos e adjetivos eram
 // apps separados), para limpar versões velhas sem tocar em caches de terceiros.
 const OWN_CACHE_PREFIXES = ["jp-srs-", "jpverbs-", "jpadj-"];
@@ -16,6 +16,7 @@ const APP_SHELL = [
   "./tts.js",
   "./frases.js",
   "./escrita.js",
+  "./ouvir.js",
   "./historico.js",
   "./backup.js",
   "./config.js",

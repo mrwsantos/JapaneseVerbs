@@ -11,11 +11,15 @@
 // Formato em localStorage (KEY):
 //   {start: dia, init: {v: true}, days: {dia: {v: {cards: [certas, total], ...}}},
 //    words: {"v12": {s: dia, p: dia, a: dia, ok: n, err: n}}}
-// dia = dias desde 1970 (igual ao today() dos apps); -1 = já estava assim
+// dia = Historico.today(), o mesmo today() dos apps; -1 = já estava assim
 // antes do histórico existir (não conta como "essa semana").
 const Historico = (()=>{
   const KEY = "jp-historico-v1";
-  const today = ()=> Math.floor(Date.now()/86400000);
+  // Dia de estudo: dias desde 1970 no relógio do aparelho, virando às 4h (quem
+  // estuda de madrugada continua no mesmo dia). A contagem é a mesma do antigo
+  // Date.now()/86400000 (UTC), então as datas já salvas continuam valendo.
+  const DAY_STARTS_AT = 4;
+  const today = ()=>{ const d = new Date(); return Math.floor((d.getTime() - d.getTimezoneOffset()*60000 - DAY_STARTS_AT*3600000) / 86400000); };
   // Mesmas regras do getStatus de cada app.
   function status(app, e){
     if(!e || !(e.level >= 2)) return 'novo';
