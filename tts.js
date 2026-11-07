@@ -33,6 +33,8 @@ const TTS = (()=>{
   // mais tarde, quando o navegador terminar de carregar as vozes. Útil para
   // mandar um render() de novo e o botão 🔊 aparecer sem precisar recarregar.
   function onReady(fn){ voice ? fn() : waiting.push(fn); }
+  // Palavra solta: mandar o kana (下 sozinho pode virar "shimo"). Frase inteira:
+  // mandar com kanji, o contexto ajuda a leitura e a separar partículas como は.
   function speak(text, rate){
     if(!synth || !voice || !text) return;
     try{

@@ -153,7 +153,7 @@ function questionHtml(){
   const done = queue.length ? Math.min(idx, queue.length) / queue.length * 100 : 0;
   return `<div class="bar"><i style="width:${done}%"></i></div><div class="pos">${idx+1}/${queue.length}</div>
     <div class="card">
-      <div class="jp-row"><div class="jp" lang="ja">${pre}${q.done ? `<mark>${it.p}</mark>` : `<span class="blank" aria-label="lacuna">？</span>`}${post}</div>${q.done ? TTS.btnHtml(it.preK + it.p + it.postK) : ""}</div>
+      <div class="jp-row"><div class="jp" lang="ja">${pre}${q.done ? `<mark>${it.p}</mark>` : `<span class="blank" aria-label="lacuna">？</span>`}${post}</div>${q.done ? TTS.btnHtml(it.pre + it.p + it.post) : ""}</div>
       <div class="pt">${it.pt}</div>
       <button type="button" class="script" onclick="toggleKanji()" aria-pressed="${kanji}">${kanji ? "Ver em hiragana" : "Ver em kanji"}</button>
       ${q.done ? `<div class="result ${q.ok?'good':'bad'}">${q.ok ? '✓ Certo!' : '✗ Não foi dessa vez'}</div><div class="why">💡 ${it.why}</div>` : ""}

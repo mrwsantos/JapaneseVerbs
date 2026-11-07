@@ -430,7 +430,7 @@ function kanjiRowHtml(entry){
       <div class="k-row-stat">${mastered ? '<span class="mastered-tag">🏆 Dominado</span> · ' : ''}${statHtml}</div>
     </div>
     <div class="k-row-actions">
-      ${TTS.btnHtml(entry.word, 'tts-btn-sm')}
+      ${TTS.btnHtml(entry.kana, 'tts-btn-sm')}
       <button type="button" class="k-row-btn" data-practice="${entry.char}">Praticar</button>
     </div>
   </div>`;
