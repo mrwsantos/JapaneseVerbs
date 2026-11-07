@@ -721,6 +721,7 @@ Ouvir.setup({
   words: ADJS,
   pool: ()=> ADJS.filter(v=>{ const e=progress[v.id]; return e && e.level>=2; }),
   studied: (w)=> { const e = progress[w.id]; return !!e && e.level >= 2; },
+  conjugate: adjConjugate,
   requeue: (v)=> state.queue.push(v),
   next(){ state.idx++; render(); },
   render: ()=> render(),

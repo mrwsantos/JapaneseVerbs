@@ -324,7 +324,8 @@ a tradução em português embaixo (com a parte que muda destacada).
 
 O app fala o kana de uma palavra em Praticando ou Aprendido, e você escolhe o
 significado entre 4 opções ou, nos Ajustes, escreve o que ouviu. Tem botão de
-repetir e de ouvir mais devagar. Decks de 10; errou, a palavra volta no fim do
+repetir e de ouvir mais devagar; depois de responder, 🔊 fala de novo e tocar na
+palavra sublinhada abre a lista de conjugações. Decks de 10; errou, a palavra volta no fim do
 deck. As opções erradas nunca têm o mesmo som da certa (易しい/優しい).
 
 Não mexe no nível das palavras: só conta nas Estatísticas (`ouvir.js`). Precisa

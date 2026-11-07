@@ -3,7 +3,7 @@
 // palavra volta no fim do deck. Treino livre: NÃO mexe no nível das palavras,
 // só conta nas Estatísticas. Fala o kana (o kanji pode ser lido errado pela voz).
 // Adaptador (Ouvir.setup): app "v"|"a", words, pool() palavras estudadas,
-// studied(w), render(), next(), requeue(v), restart().
+// studied(w), conjugate(v), render(), next(), requeue(v), restart().
 const Ouvir = (()=>{
   const DECK = 10;
   const INPUT_KEY = "jp-ouvir-input";
@@ -16,7 +16,8 @@ const Ouvir = (()=>{
 .ov-play{display:flex;align-items:center;justify-content:center;width:84px;height:84px;margin:6px auto 2px;border:none;border-radius:50%;background:var(--accent);color:#fff;font-size:34px;cursor:pointer;box-shadow:var(--shadow)}
 .ov-slow{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--chip);color:var(--text);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
 .ov-q{font-size:13px;color:var(--sub)}
-.ov-word{font-size:30px;font-weight:700}
+.ov-word-row{display:flex;align-items:center;justify-content:center;gap:8px}
+.ov-word{padding:0;font-size:30px;font-weight:700}
 .ov-kana{font-size:16px;color:var(--sub)}
 .ov-opts .fq-opt{font-size:14px;line-height:1.3;padding:16px 10px}`;
   function css(){
@@ -42,7 +43,7 @@ const Ouvir = (()=>{
       if(opts.length>=4) break;
       if(!opts.some((o)=> o.v.meaning===w.meaning)) opts.push({v: w, ok: false});
     }
-    q = {v, opts: shuffle(opts), chosen: -1, typed: "", done: false, ok: false, spoken: false};
+    q = {v, opts: shuffle(opts), chosen: -1, typed: "", done: false, ok: false, spoken: false, conjOpen: false};
   }
   function play(rate){ if(q) TTS.speak(q.v.kana, rate); }
   function finish(ok){
@@ -64,6 +65,7 @@ const Ouvir = (()=>{
     const v = q.v;
     finish(!!typed && (katakanaToHiragana(typed)===v.kana || typed===v.kanji));
   }
+  function toggleConj(){ if(q){ q.conjOpen = !q.conjOpen; A.render(); } }
   function next(){ q = null; A.next(); }
   function reset(){ q = null; }
 
@@ -77,10 +79,11 @@ const Ouvir = (()=>{
         <button type="button" class="ov-slow" onclick="Ouvir.play(0.55)">🐢 Mais devagar</button>`;
     } else {
       h += `<div class="fq-result"><span class="${q.ok?'result-ok':'result-no'}">${q.ok ? '✓ Certo!' : '✗ Não foi dessa vez'}</span></div>
-        <div class="ov-word" lang="ja">${v.kanji}</div>${v.kanji!==v.kana ? `<div class="ov-kana" lang="ja">${v.kana}</div>` : ""}
+        <div class="ov-word-row"><button type="button" class="ov-word kanji-toggle" lang="ja" aria-expanded="${q.conjOpen}" aria-controls="ovConj" onclick="Ouvir.toggleConj()">${v.kanji}</button>${TTS.btnHtml(v.kana)}</div>
+        ${v.kanji!==v.kana ? `<div class="ov-kana" lang="ja">${v.kana}</div>` : ""}
         <div class="romaji">${v.romaji}</div><div class="meaning">${v.meaning}</div>
-        <button type="button" class="ov-slow" onclick="Ouvir.play()">🔊 Ouvir de novo</button>
-        ${!q.ok ? `<div class="es-hint">Ela volta no fim do deck.</div>` : ""}`;
+        ${!q.ok ? `<div class="es-hint">Ela volta no fim do deck.</div>` : ""}
+        ${q.conjOpen ? `<div class="conj" id="ovConj">${conjRowsHtml(A.conjugate(v))}</div>` : ""}`;
     }
     h += `</div>`;
     if(input==="opcoes"){
@@ -108,8 +111,8 @@ const Ouvir = (()=>{
     }
     document.onkeydown = (e)=>{
       if(sheetOpen || e.target.tagName==="INPUT") return;
-      if(q && q.done && e.key==="Enter"){ e.preventDefault(); next(); return; }
-      if(e.key===" "){ e.preventDefault(); play(); return; }
+      if(q && q.done && e.key==="Enter" && !e.target.closest(".kanji-toggle, .tts-btn")){ e.preventDefault(); next(); return; }
+      if(e.key===" " && !e.target.closest("button")){ e.preventDefault(); play(); return; }
       const n = parseInt(e.key, 10);
       if(input==="opcoes" && q && !q.done && n>=1 && n<=q.opts.length) choose(n-1);
     };
@@ -136,6 +139,6 @@ const Ouvir = (()=>{
   }
   const summary = ()=> input==="opcoes" ? "Alternativas" : "Digitar";
 
-  return {DECK, setup(a){ A = a; }, deck, html, bind, choose, check, next, reset, play, summaryHtml, setInput, settingsHtml, summary,
+  return {DECK, setup(a){ A = a; }, deck, html, bind, choose, check, next, reset, play, toggleConj, summaryHtml, setInput, settingsHtml, summary,
     restart(){ A.restart(); }, _q: ()=> q};
 })();
