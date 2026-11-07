@@ -87,8 +87,8 @@ main{max-width:480px;margin:0 auto;padding:4px 16px 110px;display:flex;flex-dire
   <button type="button" id="settingsBtn" style="position:absolute;right:14px;top:15px" aria-label="Configurações"></button>
 </header>
 <nav class="tabs" role="tablist">
-  <button type="button" class="tab" role="tab" data-tab="treino">Treinar</button>
   <button type="button" class="tab" role="tab" data-tab="guia">Guia</button>
+  <button type="button" class="tab" role="tab" data-tab="treino">Treinar</button>
 </nav>
 <main id="main"></main>
 <script src="../sons.js"></script>
@@ -112,7 +112,7 @@ const load = (k, d)=>{ try{ return JSON.parse(localStorage.getItem(k)) || d; }ca
 let stats = load(STATS_KEY, {});
 let kanji = false;
 try{ kanji = localStorage.getItem(KANJI_KEY)==='1'; }catch(e){}
-let tab = "treino", filter = "all", queue = [], idx = 0, q = null, seen = new Map();
+let tab = "guia", filter = "all", queue = [], idx = 0, q = null, seen = new Map();
 
 function newDeck(){
   const pool = filter==="all" ? ITEMS : ITEMS.filter((x)=> x.p===filter);
