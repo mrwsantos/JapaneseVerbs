@@ -130,6 +130,7 @@ const START_SECONDS = 10;
 const BONUS_SECONDS = 2;
 const PAIRS = 5; // pares na tela (menos, se o vocabulário for pequeno)
 const BEST_KEY = "jp-game-best";
+const BEST_STREAK_KEY = "jp-game-best-streak";
 const HARD_STREAK = 10; // acertos seguidos para entrar no modo HARD
 const HARD_BONUS_SECONDS = 5; // tempo extra ao entrar no modo HARD (além dos +2s do par)
 const MILESTONE_STREAK = 10; // a cada N acertos seguidos depois do HARD (20, 30, 40...)
@@ -160,6 +161,8 @@ document.getElementById('soundBtn').onclick = ()=>{
 
 function loadBest(){ try{ return parseInt(localStorage.getItem(BEST_KEY),10) || 0; }catch(e){ return 0; } }
 function saveBest(n){ try{ localStorage.setItem(BEST_KEY, String(n)); }catch(e){} }
+function loadBestStreak(){ try{ return parseInt(localStorage.getItem(BEST_STREAK_KEY),10) || 0; }catch(e){ return 0; } }
+function saveBestStreak(n){ try{ localStorage.setItem(BEST_STREAK_KEY, String(n)); }catch(e){} }
 
 // Só palavras em Praticando/Aprendido (estudadas.js).
 function buildPool(){
@@ -373,14 +376,18 @@ function endGame(){
   const best = loadBest();
   const record = game.score > best;
   if(record) saveBest(game.score);
-  vibrate(80); Sons.play('jogo', record ? 'recorde' : 'fim');
+  const bestStreak = loadBestStreak();
+  const streakRecord = game.bestStreak > bestStreak;
+  if(streakRecord) saveBestStreak(game.bestStreak);
+  vibrate(80); Sons.play('jogo', (record || streakRecord) ? 'recorde' : 'fim');
   document.getElementById('main').innerHTML = `
     <div class="panel">
       <div class="big-emoji">⏰</div>
       <h2>Tempo esgotado!</h2>
       <div class="score-big">${game.score}</div>
       <p>${game.score===1 ? 'par certo' : 'pares certos'} · maior sequência <b>${game.bestStreak}</b></p>
-      ${record ? `<span class="record">🏆 Novo recorde!</span>` : `<p>Recorde: <b>${best}</b></p>`}
+      ${record ? `<span class="record">🏆 Novo recorde de pares!</span>` : `<p>Recorde de pares: <b>${best}</b></p>`}
+      ${streakRecord ? `<span class="record">🔥 Novo recorde de sequência!</span>` : `<p>Recorde de sequência: <b>${bestStreak}</b></p>`}
       <div style="height:22px"></div>
       <button type="button" class="cta" onclick="prepareAndStart()">Jogar de novo</button>
       <button type="button" class="ghost" onclick="showStart()">Voltar</button>
@@ -395,6 +402,7 @@ function showStart(){
     return;
   }
   const best = loadBest();
+  const bestStreak = loadBestStreak();
   document.getElementById('main').innerHTML = `
     <div class="panel">
       <div class="big-emoji">🎮</div>
@@ -407,7 +415,7 @@ function showStart(){
         <div class="rule"><b>🚀</b><span>Depois disso, a cada <strong>${MILESTONE_STREAK}</strong> na sequência (20, 30...) ganha mais <strong>+${MILESTONE_BONUS_SECONDS}s</strong>.</span></div>
         <div class="rule"><b>📚</b><span>Só entram palavras que você já está <strong>praticando</strong> ou <strong>aprendeu</strong>.</span></div>
       </div>
-      <p class="pool">Seu vocabulário: <b>${verbs}</b> verbos + <b>${adjs}</b> adjetivos + <b>${nouns}</b> substantivos${best ? ` · recorde <b>${best}</b>` : ''}</p>
+      <p class="pool">Seu vocabulário: <b>${verbs}</b> verbos + <b>${adjs}</b> adjetivos + <b>${nouns}</b> substantivos${best ? ` · recorde <b>${best}</b> pares` : ''}${bestStreak ? ` · sequência <b>${bestStreak}</b>` : ''}</p>
       <button type="button" class="cta" onclick="prepareAndStart()">Começar</button>
     </div>`;
 }

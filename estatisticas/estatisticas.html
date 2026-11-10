@@ -97,6 +97,28 @@ main{max-width:480px;margin:0 auto;padding:16px 16px 40px;display:flex;flex-dire
 .hard .pt{color:var(--sub);font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hard .tag{font-size:10px;padding:2px 6px;border-radius:6px;background:var(--chip);color:var(--sub)}
 .hard .er{font-size:11px;color:var(--warn);font-weight:700;white-space:nowrap}
+.mnemo-btn{display:block;width:100%;margin-top:12px;padding:12px;border-radius:14px;background:var(--accent);color:#fff;font:inherit;font-size:13px;font-weight:700;border:none;cursor:pointer}
+.mnemo-overlay{position:fixed;inset:0;z-index:200;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column;animation:fadeInUp .25s ease}
+.mnemo-head{display:flex;align-items:center;gap:10px;padding:16px 16px 10px;border-bottom:1px solid var(--border)}
+.mnemo-close{width:34px;height:34px;flex:none;border-radius:11px;background:var(--chip);color:var(--sub);border:none;font-size:16px;cursor:pointer}
+.mnemo-pos{font-size:12px;color:var(--sub);margin-left:auto}
+.mnemo-main{max-width:480px;margin:0 auto;padding:16px;width:100%;flex:1;display:flex;flex-direction:column;gap:14px}
+.mnemo-card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:20px;text-align:center}
+.mnemo-card .jp{font-size:34px;font-weight:700;line-height:1.3}
+.mnemo-card .kana{font-size:14px;color:var(--sub);margin-top:2px}
+.mnemo-card .meaning{font-size:16px;font-weight:700;margin-top:10px}
+.mnemo-card .tagrow{display:flex;justify-content:center;gap:8px;margin-top:8px}
+.mnemo-card .tag{font-size:10px;padding:3px 8px;border-radius:8px;background:var(--chip);color:var(--sub)}
+.mnemo-ex{background:var(--chip);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.55}
+.mnemo-ex .jp{font-size:16px;font-weight:600}
+.mnemo-ex .kana{font-size:11px;color:var(--sub);margin:1px 0}
+.mnemo-ex .pt{color:var(--sub);margin-top:3px}
+.mnemo-label{font-size:12px;color:var(--sub);line-height:1.5}
+.mnemo-input{width:100%;min-height:72px;padding:10px 12px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text);font:inherit;font-size:13px;line-height:1.5;resize:vertical}
+.mnemo-nav{display:flex;gap:10px}
+.mnemo-nav button{flex:1;padding:13px;border-radius:14px;font:inherit;font-size:14px;font-weight:700;border:none;cursor:pointer}
+.mnemo-nav .skip{background:var(--chip);color:var(--sub)}
+.mnemo-nav .save{background:var(--accent);color:#fff}
 .tabs{position:sticky;top:0;z-index:5;display:flex;gap:6px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);max-width:480px;margin:0 auto}
 .tab{flex:1;padding:9px 4px;border-radius:10px;border:none;background:var(--chip);color:var(--sub);font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background-color .15s ease,color .15s ease}
 .tab.on{background:var(--accent);color:#fff}
@@ -377,18 +399,98 @@ function reviewsBox(){
     <div class="forecast">${next.map(([d, n])=> `<div class="col"><b>${n || ""}</b><i style="height:${n / max * 100}%"></i>${WD[new Date(d * 86400000).getUTCDay()]}</div>`).join("")}</div></section>`;
 }
 
-function hardWords(){
+function hardWords(n){
   return WORDS.filter((w)=> (w.h.err || 0) >= 2 && w.st !== "novo" || (w.h.err || 0) >= 3)
     .map((w)=> ({w, ratio: w.h.err / ((w.h.ok || 0) + w.h.err)}))
     .filter((x)=> x.ratio >= .25)
-    .sort((a, b)=> b.ratio - a.ratio || b.w.h.err - a.w.h.err).slice(0, 6);
+    .sort((a, b)=> b.ratio - a.ratio || b.w.h.err - a.w.h.err).slice(0, n || 6);
 }
 function hardBox(){
   const list = hardWords();
   if(!list.length) return "";
+  const poolSize = hardWords(10).length;
   return `<section class="box"><h2>🧗 Palavras que mais travam</h2><div class="hard">
     ${list.map(({w})=> `<div><span class="jp" lang="ja">${esc(w.kanji)}</span><span class="pt">${esc(w.kana)} · ${esc(w.meaning)}</span><span class="tag">${APPS[w.app]}</span><span class="er">✗${w.h.err}</span></div>`).join("")}
-    </div><p class="muted">Erros somando todos os modos. Elas voltam mais vezes nas revisões; vale ler a frase de exemplo no verso do card.</p></section>`;
+    </div><p class="muted">Erros somando todos os modos. Elas voltam mais vezes nas revisões; vale ler a frase de exemplo no verso do card.</p>
+    ${poolSize >= 3 ? `<button type="button" class="mnemo-btn" onclick="openMnemo()">🧠 Treinar as ${poolSize} mais erradas</button>` : ""}</section>`;
+}
+
+// Revisão mnemônica das palavras que mais travam: sem quiz, sem nota. Mostra a
+// palavra e a frase de exemplo e dá um espaço para o usuário escrever a própria
+// associação (imagem, som parecido, lembrança), salva em jp-mnemonics e
+// reaproveitada se ele revisar a mesma palavra de novo depois.
+const MNEMO_KEY = "jp-mnemonics";
+let mnemo = null;
+function loadMnemonics(){ return load(MNEMO_KEY, {}); }
+function saveMnemonics(m){ try{ localStorage.setItem(MNEMO_KEY, JSON.stringify(m)); }catch(e){} }
+function exampleOf(w){
+  const mark = (s)=> esc(s).replace(/\[([^\]]+)\]/g, "<mark>$1</mark>");
+  if(w.app === "v") return {jp: mark((w.fraseFront || "") + w.kanji + "。"), kana: mark((w.fraseFrontKana || "") + w.kana + "。"), pt: esc(w.fraseBack)};
+  return {jp: mark(w.frase), kana: mark(w.fraseKana), pt: esc(w.frasePt).replace(/\[([^\]]+)\]/g, "<b>$1</b>")};
+}
+function openMnemo(){
+  const list = hardWords(10).map((x)=> x.w);
+  if(!list.length) return;
+  mnemo = {list, idx: 0, notes: loadMnemonics()};
+  renderMnemo();
+}
+function closeMnemo(){ mnemo = null; const el = document.getElementById("mnemoOverlay"); if(el) el.remove(); }
+function mnemoCardHtml(){
+  const w = mnemo.list[mnemo.idx], ex = exampleOf(w);
+  const saved = mnemo.notes[w.key] || "";
+  const last = mnemo.idx === mnemo.list.length - 1;
+  return `<div class="mnemo-head">
+      <button type="button" class="mnemo-close" onclick="closeMnemo()" aria-label="Fechar">✕</button>
+      <span class="mnemo-pos">${mnemo.idx + 1}/${mnemo.list.length}</span>
+    </div>
+    <div class="mnemo-main">
+      <div class="mnemo-card">
+        <div class="jp" lang="ja">${esc(w.kanji)}</div>
+        ${w.kanji !== w.kana ? `<div class="kana" lang="ja">${esc(w.kana)}</div>` : ""}
+        <div class="meaning">${esc(w.meaning)}</div>
+        <div class="tagrow"><span class="tag">${APPS[w.app]}</span><span class="tag">✗${w.h.err || 0}</span></div>
+      </div>
+      <div class="mnemo-ex">
+        <div class="jp" lang="ja">${ex.jp}</div>
+        ${ex.jp !== ex.kana ? `<div class="kana" lang="ja">${ex.kana}</div>` : ""}
+        <div class="pt">${ex.pt}</div>
+      </div>
+      <div>
+        <div class="mnemo-label">💡 Crie sua própria associação para lembrar desta palavra (uma imagem, um som parecido, uma lembrança):</div>
+        <textarea class="mnemo-input" id="mnemoInput" placeholder="Ex.: lembra de..., parece com..., imagina...">${esc(saved)}</textarea>
+      </div>
+      <div class="mnemo-nav">
+        <button type="button" class="skip" onclick="mnemoNext(false)">Pular</button>
+        <button type="button" class="save" onclick="mnemoNext(true)">${last ? "Salvar e terminar" : "Salvar e seguir"}</button>
+      </div>
+    </div>`;
+}
+function mnemoSummaryHtml(){
+  const withNotes = mnemo.list.filter((w)=> mnemo.notes[w.key]).length;
+  return `<div class="mnemo-head"><button type="button" class="mnemo-close" onclick="closeMnemo()" aria-label="Fechar">✕</button></div>
+    <div class="mnemo-main">
+      <div class="mnemo-card">
+        <div style="font-size:40px">🧠</div>
+        <h2 style="font-size:18px;margin:10px 0 4px">Revisão concluída</h2>
+        <p class="mnemo-label">Você passou por <b>${mnemo.list.length}</b> ${mnemo.list.length === 1 ? "palavra" : "palavras"} e escreveu associação para <b>${withNotes}</b> delas. Elas ficam salvas e aparecem de novo na próxima revisão.</p>
+      </div>
+      <div class="mnemo-nav"><button type="button" class="save" style="flex:1" onclick="closeMnemo()">Fechar</button></div>
+    </div>`;
+}
+function renderMnemo(){
+  let el = document.getElementById("mnemoOverlay");
+  if(!el){ el = document.createElement("div"); el.id = "mnemoOverlay"; el.className = "mnemo-overlay"; document.body.appendChild(el); }
+  el.innerHTML = mnemo.idx < mnemo.list.length ? mnemoCardHtml() : mnemoSummaryHtml();
+}
+function mnemoNext(save){
+  const w = mnemo.list[mnemo.idx];
+  if(save){
+    const val = (document.getElementById("mnemoInput").value || "").trim();
+    if(val) mnemo.notes[w.key] = val; else delete mnemo.notes[w.key];
+    saveMnemonics(mnemo.notes);
+  }
+  mnemo.idx++;
+  renderMnemo();
 }
 
 function tipsBox(){
@@ -431,8 +533,12 @@ const TABS = {
   dominio: ()=> jlptBox() + overviewBox(),
   treino: ()=>{
     const best = parseInt(localStorage.getItem("jp-game-best"), 10) || 0;
+    const bestStreak = parseInt(localStorage.getItem("jp-game-best-streak"), 10) || 0;
     return modesBox() + reviewsBox() + hardBox()
-      + (best ? `<section class="box"><h2>🎮 Jogo de Pares</h2><p class="muted" style="margin:0">Seu recorde: <b style="color:var(--text);font-size:16px">${best}</b> pares.</p></section>` : "");
+      + (best || bestStreak ? `<section class="box"><h2>🎮 Jogo de Pares</h2>
+        ${best ? `<p class="muted" style="margin:0">Seu recorde: <b style="color:var(--text);font-size:16px">${best}</b> pares.</p>` : ""}
+        ${bestStreak ? `<p class="muted" style="margin:${best ? "4px" : "0"} 0 0">Maior sequência de acertos: <b style="color:var(--text);font-size:16px">${bestStreak}</b> seguidos.</p>` : ""}
+      </section>` : "");
   },
 };
 // Topo do Resumo: 2 slides no mesmo espaço, "Continue assim" → "Dicas para melhorar".

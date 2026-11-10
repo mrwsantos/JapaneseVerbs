@@ -149,12 +149,14 @@ main{flex:1;padding:8px 16px calc(92px + env(safe-area-inset-bottom,0px) + var(-
 .badge.type-na{background:#f7e9e4;color:#a05a2a}
 .badge.nivel-N5{background:#daf3e4;color:#1f7a4c}
 .badge.nivel-N4{background:#dbe7fb;color:#2a5599}
+.badge.nivel-N3{background:#fdf0d5;color:#a06b0a}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .badge.type-i{background:#1f2c40;color:#9ab8ea} :root:not([data-theme="light"]) .badge.type-na{background:#3a2a20;color:#e8b48c}
-  :root:not([data-theme="light"]) .badge.nivel-N5{background:#1f3a2c;color:#9fe0b8} :root:not([data-theme="light"]) .badge.nivel-N4{background:#1f2c40;color:#9ab8ea}}
+  :root:not([data-theme="light"]) .badge.nivel-N5{background:#1f3a2c;color:#9fe0b8} :root:not([data-theme="light"]) .badge.nivel-N4{background:#1f2c40;color:#9ab8ea} :root:not([data-theme="light"]) .badge.nivel-N3{background:#3a2a14;color:#e8c477}}
 :root[data-theme="dark"] .badge.type-i{background:#1f2c40;color:#9ab8ea}
 :root[data-theme="dark"] .badge.type-na{background:#3a2a20;color:#e8b48c}
 :root[data-theme="dark"] .badge.nivel-N5{background:#1f3a2c;color:#9fe0b8}
 :root[data-theme="dark"] .badge.nivel-N4{background:#1f2c40;color:#9ab8ea}
+:root[data-theme="dark"] .badge.nivel-N3{background:#3a2a14;color:#e8c477}
 .badge.new{background:var(--chip);color:var(--sub)}
 .badge.learning{background:#fdf0d5;color:#a06b0a}
 .badge.learned{background:#d3ecdc;color:#1f5c38}
@@ -1250,6 +1252,7 @@ function renderInner(){
       <button type="button" class="pill ${state.nivelFilter==='all'?'active':''}" aria-pressed="${state.nivelFilter==='all'}" onclick="setNivelFilter('all')">Todos os níveis</button>
       <button type="button" class="pill ${state.nivelFilter==='N5'?'active':''}" aria-pressed="${state.nivelFilter==='N5'}" onclick="setNivelFilter('N5')">N5</button>
       <button type="button" class="pill ${state.nivelFilter==='N4'?'active':''}" aria-pressed="${state.nivelFilter==='N4'}" onclick="setNivelFilter('N4')">N4</button>
+      <button type="button" class="pill ${state.nivelFilter==='N3'?'active':''}" aria-pressed="${state.nivelFilter==='N3'}" onclick="setNivelFilter('N3')">N3</button>
     </div>`;
 
     let listHtml = "";
@@ -1317,7 +1320,7 @@ function statusPillsHtml(c){
 function setNivelFilter(n){ state.nivelFilter = n; render(); }
 function toggleGroupCollapse(t){ state.groupCollapsed[t] = !state.groupCollapsed[t]; render(); }
 
-const NIVEL_RANK = {N5:0,N4:1};
+const NIVEL_RANK = {N5:0,N4:1,N3:2};
 const STATUS_RANK = {aprendido:0,praticando:1,novo:2};
 function compareNounForDisplay(a,b){
   const nd = NIVEL_RANK[a.nivel]-NIVEL_RANK[b.nivel];

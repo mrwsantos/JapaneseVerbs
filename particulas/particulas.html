@@ -74,16 +74,20 @@ main{max-width:480px;margin:0 auto;padding:4px 16px 110px;display:flex;flex-dire
 .guide-top{display:flex;align-items:center;gap:10px}
 .guide-p{font-size:26px;font-weight:700;color:var(--accent);min-width:1.6em}
 .guide-name{font-size:14px;font-weight:700}
-.guide-use{font-size:13px;color:var(--sub);line-height:1.5}
 .guide-name small{display:block;font-size:11px;font-weight:400;color:var(--sub)}
-.guide-exs{display:flex;flex-direction:column;gap:10px;margin:4px 0}
+.guide-uses{display:flex;flex-direction:column;gap:10px;margin:4px 0}
+.guide-use-block{padding:10px 12px;border-radius:14px;background:var(--chip)}
+.guide-use-label{font-size:13px;font-weight:700;color:var(--accent)}
+.guide-use-desc{font-size:13px;color:var(--sub);line-height:1.5;margin:3px 0 8px}
+.guide-exs{display:flex;flex-direction:column;gap:10px;margin:0}
 .guide-ex-box{padding-left:10px;border-left:3px solid var(--border)}
 .guide-ex{font-size:16px;line-height:1.5}
 .guide-kana{font-size:12px;color:var(--sub);margin:1px 0}
 .guide-ex mark,.guide-kana mark{background:none;color:var(--accent);font-weight:700}
 .guide-ex-box .pt{font-size:13px}
 .guide{scroll-margin-top:12px}
-.guide-acc{margin-left:auto;font-size:11px;color:var(--sub);white-space:nowrap}
+.guide-acc{font-size:11px;color:var(--sub);white-space:nowrap}
+.guide-toggle{flex:none;width:28px;height:28px;border-radius:50%;background:var(--chip);color:var(--sub);display:flex;align-items:center;justify-content:center}
 .train{align-self:flex-start;padding:6px 12px;border-radius:999px;background:var(--chip);font-size:12px;font-weight:600}
 </style>
 </head>
@@ -108,7 +112,7 @@ main{max-width:480px;margin:0 auto;padding:4px 16px 110px;display:flex;flex-dire
 // Treino de partículas: decks de 10 frases com lacuna, explicação depois de cada
 // resposta e erradas voltando no fim do deck. Não tem SRS nem nível: não mexe no
 // progresso das palavras. Fica registrado em jp-particulas-stats e no histórico.
-const DECK = 10, STATS_KEY = "jp-particulas-stats", KANJI_KEY = "jp-frase-kanji";
+const DECK = 10, STATS_KEY = "jp-particulas-stats", KANJI_KEY = "jp-frase-kanji", GUIDE_KEY = "jp-particulas-guide-abertas";
 const ITEMS = PARTICLE_ITEMS.map(([f, k, pt, why, also], id)=>{
   const a = f.indexOf("["), b = f.indexOf("]"), ka = k.indexOf("["), kb = k.indexOf("]");
   return {id, p: f.slice(a+1, b), pre: f.slice(0, a), post: f.slice(b+1), preK: k.slice(0, ka), postK: k.slice(kb+1), pt, why, also: also || []};
@@ -117,6 +121,7 @@ const byP = Object.fromEntries(PARTICLES.map((x)=> [x.p, x]));
 const shuffle = (a)=>{ a = a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
 const load = (k, d)=>{ try{ return JSON.parse(localStorage.getItem(k)) || d; }catch(e){ return d; } };
 let stats = load(STATS_KEY, {});
+let guideOpen = load(GUIDE_KEY, {});
 let kanji = false;
 try{ kanji = localStorage.getItem(KANJI_KEY)==='1'; }catch(e){}
 let tab = "guia", filter = "all", queue = [], idx = 0, q = null, seen = new Map();
@@ -150,6 +155,8 @@ function restart(){ newDeck(); render(); window.scrollTo(0, 0); }
 function setFilter(p){ filter = p; restart(); }
 function toggleKanji(){ kanji = !kanji; try{ localStorage.setItem(KANJI_KEY, kanji ? '1' : '0'); }catch(e){} render(); }
 function trainOnly(p){ tab = "treino"; setFilter(p); }
+function toggleGuide(p){ guideOpen[p] = !guideOpen[p]; try{ localStorage.setItem(GUIDE_KEY, JSON.stringify(guideOpen)); }catch(e){} render(); }
+const chevronSvg = (open)=> `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${open ? "M6 15l6-6 6 6" : "M6 9l6 6 6-6"}"/></svg>`;
 
 function pillsHtml(){
   return `<div class="pills">${[["all","Todas"], ...PARTICLES.map((x)=> [x.p, x.p])].map(([v, l])=>
@@ -186,14 +193,23 @@ function guideHtml(){
   const jump = `<div class="pills">${PARTICLES.map((x, i)=> `<button type="button" class="pill" onclick="document.getElementById('gp${i}').scrollIntoView({behavior:'smooth',block:'start'})">${x.p}</button>`).join("")}</div>`;
   return jump + PARTICLES.map((x, i)=>{
     const s = stats[x.p];
-    return `<section class="card guide" id="gp${i}"><div class="guide-top"><span class="guide-p" lang="ja">${x.p}</span><span class="guide-name">${x.name}<small>lê-se "${x.romaji}"</small></span>
-        ${s && s.total ? `<span class="guide-acc">${Math.round(s.ok / s.total * 100)}% em ${s.total}</span>` : ""}</div>
-      <div class="guide-use">${x.use}</div>
-      <div class="guide-exs">${x.examples.map(([f, k, pt])=> `<div class="guide-ex-box">
-        <div class="jp-row" style="justify-content:flex-start"><span class="guide-ex" lang="ja">${markP(f)}</span>${TTS.btnHtml(f.replace(/[\[\]]/g, ""))}</div>
-        ${f!==k ? `<div class="guide-kana" lang="ja">${markP(k)}</div>` : ""}<div class="pt">${pt}</div></div>`).join("")}</div>
+    const open = !!guideOpen[x.p];
+    return `<section class="card guide" id="gp${i}">
+      <div class="guide-top">
+        <span class="guide-p" lang="ja">${x.p}</span><span class="guide-name">${x.name}<small>lê-se "${x.romaji}"</small></span>
+        <span style="flex:1"></span>
+        ${s && s.total ? `<span class="guide-acc">${Math.round(s.ok / s.total * 100)}% em ${s.total}</span>` : ""}
+        <button type="button" class="guide-toggle" aria-expanded="${open}" aria-label="${open ? "Minimizar" : "Expandir"}" onclick='toggleGuide(${JSON.stringify(x.p)})'>${chevronSvg(open)}</button>
+      </div>
+      ${open ? `<div class="guide-uses">${x.uses.map((u)=> `<div class="guide-use-block">
+        <div class="guide-use-label">${u.label}</div>
+        <div class="guide-use-desc">${u.desc}</div>
+        <div class="guide-exs">${u.examples.map(([f, k, pt])=> `<div class="guide-ex-box">
+          <div class="jp-row" style="justify-content:flex-start"><span class="guide-ex" lang="ja">${markP(f)}</span>${TTS.btnHtml(f.replace(/[\[\]]/g, ""))}</div>
+          ${f!==k ? `<div class="guide-kana" lang="ja">${markP(k)}</div>` : ""}<div class="pt">${pt}</div></div>`).join("")}</div></div>`).join("")}</div>
       <div class="why">💡 ${x.tip}</div>
-      <button type="button" class="train" onclick='trainOnly(${JSON.stringify(x.p)})'>Treinar ${x.p}</button></section>`;
+      <button type="button" class="train" onclick='trainOnly(${JSON.stringify(x.p)})'>Treinar ${x.p}</button>` : ""}
+    </section>`;
   }).join("");
 }
 function render(){
